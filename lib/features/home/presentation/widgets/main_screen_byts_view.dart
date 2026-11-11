@@ -480,7 +480,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     required bool isPostActive,
     required double remainingHeight,
   }) {
-    final String contentText = widget.article['content']?.toString() ?? "";
+    final String contentText = (widget.article['content']?.toString() ?? "")
+        .replaceAll(RegExp(r" {2,}"), " ");
     final bool hasContent = contentText.isNotEmpty;
 
     final bulletList = widget.article['bulletPoints'];
@@ -491,13 +492,17 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (hasContent)
-            TranslatedText(
-              contentText,
-              translate: homeProvider.isEnglishMode,
-              style: homeScreenFontStyle(
-                color: _bodyTextColor(context),
-                fontWeight: FontWeight.w600,
-                fontSize: 16.sp,
+            SizedBox(
+              width: double.infinity,
+              child: TranslatedText(
+                contentText,
+                textAlign: TextAlign.start,
+                translate: homeProvider.isEnglishMode,
+                style: homeScreenFontStyle(
+                  color: _bodyTextColor(context),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16.sp,
+                ),
               ),
             ),
           if (hasContent) height(height: 8),
@@ -546,16 +551,20 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
             RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(contentText);
 
     if (hasLinks) {
-      return RichText(
-        overflow: TextOverflow.clip,
-        text: TextSpan(
-          text: '',
-          children: _parseText(
-            context,
-            contentText,
-            widget.article['links'],
-            widget.article,
-            isPostActive: isPostActive,
+      return SizedBox(
+        width: double.infinity,
+        child: RichText(
+          textAlign: TextAlign.start,
+          overflow: TextOverflow.clip,
+          text: TextSpan(
+            text: '',
+            children: _parseText(
+              context,
+              contentText,
+              widget.article['links'],
+              widget.article,
+              isPostActive: isPostActive,
+            ),
           ),
         ),
       );
@@ -567,15 +576,19 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: remainingHeight),
-      child: TranslatedText(
-        contentText,
-        translate: homeProvider.isEnglishMode,
-        englishFontSize: 14.sp,
-        overflow: TextOverflow.ellipsis,
-        style: homeScreenFontStyle(
-          color: _bodyTextColor(context),
-          fontWeight: FontWeight.w600,
-          fontSize: 17.sp,
+      child: SizedBox(
+        width: double.infinity,
+        child: TranslatedText(
+          contentText,
+          textAlign: TextAlign.start,
+          translate: homeProvider.isEnglishMode,
+          englishFontSize: 14.sp,
+          overflow: TextOverflow.ellipsis,
+          style: homeScreenFontStyle(
+            color: _bodyTextColor(context),
+            fontWeight: FontWeight.w600,
+            fontSize: 17.sp,
+          ),
         ),
       ),
     );

@@ -63,6 +63,7 @@ import 'package:chotanews/utils/local_data.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
+  List homePostsList = [];
 
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
@@ -341,8 +342,12 @@ class HomeProvider extends ChangeNotifier {
 
             if (!cricketEnable) {
               _removeCricketWebView();
-            } else if (getAllPostList.isNotEmpty && getAllPostList.indexWhere((e) => e is Map && (e['id'] == 777701 || e['type']?.toString().toLowerCase() == 'cricketwebview')) == -1) {
-              _placeCricketWebViewAtThirdPosition();
+              if (homePostsList.isNotEmpty && getAllPostList.indexWhere((e) => isHomePostGrid(e)) == -1) {
+                _placeHomePostGridAtFirstPosition();
+              }
+            } else if (getAllPostList.isNotEmpty) {
+              _removeHomePostGrid();
+              _placeCricketWebViewAtFirstPosition();
             }
 
             notifyListeners();
@@ -578,6 +583,9 @@ class HomeProvider extends ChangeNotifier {
 
       isHomeLoading = true;
       getAllPostList = [];
+      homePostsList = [];
+      dynamicMovieReviews = [];
+      dynamicPolls = [];
       _currentPageIndex = 0;
       isBookMark = [];
       isWebView = false;
@@ -662,6 +670,7 @@ class HomeProvider extends ChangeNotifier {
             data = data.sublist(1);
           }
         }
+        homePostsList = homePosts;
         log("Extracted homePosts count: ${homePosts.length}");
       }
 
@@ -697,8 +706,8 @@ class HomeProvider extends ChangeNotifier {
         }
       }
 
-      // Filter out posts that are already present inside homePosts 3-grid card
-      if (homePosts.isNotEmpty) {
+      // Filter out posts that are already present inside homePosts 3-grid card (only if cricket is disabled and grid is shown)
+      if (!cricketEnable && homePosts.isNotEmpty) {
         final homePostIds = homePosts
             .where((e) => e is Map && e['id'] != null)
             .map((e) => e['id'].toString())
@@ -784,39 +793,21 @@ class HomeProvider extends ChangeNotifier {
         });
       }
 
-      // Prepend homePosts grid at position 0 (shown first in the feed)
-      if (homePosts.isNotEmpty && postIds == "0") {
-        getAllPostList.removeWhere((e) =>
-            e is Map &&
-            (e['id'] == -999 ||
-                e['type'] == 'HomePostGrid' ||
-                e['subType'] == 'HomePostGrid' ||
-                e['post_type'] == 'HomePostGrid'));
-        getAllPostList.insert(0, {
-          'id': -999,
-          'type': 'HomePostGrid',
-          'post_type': 'HomePostGrid',
-          'subType': 'HomePostGrid',
-          'homepost': homePosts,
-        });
-      }
-
-      // Place Cricket WebView at the 3rd position (index 2) in initial feed
+      // Handle Cricket WebView or HomePostGrid at position 0 (first in feed)
       if (postIds == "0") {
-        _extractDynamicReviewsAndPolls(data);
         if (cricketEnable) {
-          _placeCricketWebViewAtThirdPosition();
+          _removeHomePostGrid();
+          _placeCricketWebViewAtFirstPosition();
         } else {
           _removeCricketWebView();
+          if (homePosts.isNotEmpty) {
+            _placeHomePostGridAtFirstPosition();
+          }
         }
+
+        _extractDynamicReviewsAndPolls(data);
         _placeMovieReviewAtThirdPosition();
         _placePollAtFifthPosition();
-        if (dynamicPolls.isEmpty) {
-          fetchDynamicPolls();
-        }
-        if (dynamicMovieReviews.isEmpty) {
-          fetchDynamicMovieReviews();
-        }
       }
 
       TranslationService().preloadAllArticles(getAllPostList);
@@ -947,9 +938,6 @@ class HomeProvider extends ChangeNotifier {
 
       if (gathered.isNotEmpty) {
         dynamicMovieReviews = gathered;
-        if (!getAllPostList.any((e) => isMovieReviewPost(e))) {
-          _placeMovieReviewAtThirdPosition();
-        }
       }
     } catch (e, st) {
       log("Error fetching dynamic movie reviews: $e -- $st");
@@ -1012,12 +1000,31 @@ class HomeProvider extends ChangeNotifier {
             e['url'] == cricketWebUrl));
   }
 
-  void _placeCricketWebViewAtThirdPosition() {
+  void _removeHomePostGrid() {
+    getAllPostList.removeWhere((e) => isHomePostGrid(e));
+  }
+
+  void _placeHomePostGridAtFirstPosition() {
+    if (homePostsList.isEmpty || cricketEnable) return;
+    _removeHomePostGrid();
+    getAllPostList.insert(0, {
+      'id': -999,
+      'type': 'HomePostGrid',
+      'post_type': 'HomePostGrid',
+      'subType': 'HomePostGrid',
+      'homepost': homePostsList,
+    });
+  }
+
+  void _placeCricketWebViewAtFirstPosition() {
     if (!cricketEnable) {
       _removeCricketWebView();
       return;
     }
     if (getAllPostList.isEmpty) return;
+
+    // Do not show home post 3 grid if cricket is enabled
+    _removeHomePostGrid();
 
     // Check and remove any existing cricket webview post to prevent duplicates
     final existingIdx = getAllPostList.indexWhere((e) =>
@@ -1045,32 +1052,19 @@ class HomeProvider extends ChangeNotifier {
       };
     }
 
-    final targetIdx = getAllPostList.length >= 2 ? 2 : getAllPostList.length;
-    getAllPostList.insert(targetIdx, cricketItem);
+    getAllPostList.insert(0, cricketItem);
   }
 
   void _placeMovieReviewAtThirdPosition() {
     if (getAllPostList.isEmpty) return;
-    dynamic reviewItem;
-    final existingReviewIdx = getAllPostList.indexWhere((e) =>
-        e is Map &&
-        (e['type']?.toString().toLowerCase() == 'reviews' ||
-            e['type']?.toString().toLowerCase() == 'moviereview' ||
-            e['subType']?.toString().toLowerCase() == 'reviews' ||
-            e['subType']?.toString().toLowerCase() == 'moviereview' ||
-            e['post_type']?.toString().toLowerCase() == 'reviews' ||
-            e['post_type']?.toString().toLowerCase() == 'moviereview'));
+    final existingReviewIdx = getAllPostList.indexWhere((e) => isMovieReviewPost(e));
 
+    // Only reposition if movie review is already present in allpost response
     if (existingReviewIdx != -1) {
-      reviewItem = getAllPostList.removeAt(existingReviewIdx);
-    } else if (dynamicMovieReviews.isNotEmpty) {
-      reviewItem = Map<String, dynamic>.from(dynamicMovieReviews.first);
-    } else {
-      return;
+      final reviewItem = getAllPostList.removeAt(existingReviewIdx);
+      final targetIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
+      getAllPostList.insert(targetIdx, reviewItem);
     }
-
-    final targetIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
-    getAllPostList.insert(targetIdx, reviewItem);
   }
 
   static const List<Map<String, dynamic>> defaultPolls = [];
@@ -1148,9 +1142,6 @@ class HomeProvider extends ChangeNotifier {
 
       if (gathered.isNotEmpty) {
         dynamicPolls = gathered;
-        if (!getAllPostList.any((e) => isPollPost(e))) {
-          _placePollAtFifthPosition();
-        }
       }
     } catch (e, st) {
       log("Error fetching dynamic polls: $e -- $st");
@@ -1200,19 +1191,14 @@ class HomeProvider extends ChangeNotifier {
 
   void _placePollAtFifthPosition() {
     if (getAllPostList.isEmpty) return;
-    dynamic pollItem;
     final existingPollIdx = getAllPostList.indexWhere((e) => isPollPost(e));
 
+    // Only reposition if poll is already present in allpost response
     if (existingPollIdx != -1) {
-      pollItem = getAllPostList.removeAt(existingPollIdx);
-    } else if (dynamicPolls.isNotEmpty) {
-      pollItem = Map<String, dynamic>.from(dynamicPolls.first);
-    } else {
-      return;
+      final pollItem = getAllPostList.removeAt(existingPollIdx);
+      final targetIdx = getAllPostList.length >= 4 ? 4 : getAllPostList.length;
+      getAllPostList.insert(targetIdx, pollItem);
     }
-
-    final targetIdx = getAllPostList.length >= 4 ? 4 : getAllPostList.length;
-    getAllPostList.insert(targetIdx, pollItem);
   }
 
   bool isAiTagsLoading = false;

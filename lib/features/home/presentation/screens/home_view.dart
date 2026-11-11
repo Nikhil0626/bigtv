@@ -266,40 +266,49 @@ class HomeBottomNavigationBar extends StatelessWidget {
         child: SizedBox(
           height: 50,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(
-                context,
-                homeProvider,
-                index: 0,
-                iconData: Icons.search_rounded,
-                labelMl: 'തിരയുക',
-                labelTe: 'శోధన',
+              Expanded(
+                child: _buildNavItem(
+                  context,
+                  homeProvider,
+                  index: 0,
+                  iconData: Icons.search_rounded,
+                  labelMl: 'തിരയുക',
+                  labelTe: 'శోధన',
+                ),
               ),
-              _buildLiveTvNavItem(context, homeProvider),
-              _buildNavItem(
-                context,
-                homeProvider,
-                index: 1,
-                iconPath: "assets/new_app_icon/bytes.svg",
-                labelMl: 'വാർത്തകൾ',
-                labelTe: 'వార్తలు',
+              Expanded(
+                child: _buildLiveTvNavItem(context, homeProvider),
               ),
-              _buildNavItem(
-                context,
-                homeProvider,
-                index: 2,
-                iconPath: "assets/new_app_icon/reel.svg",
-                labelMl: 'ബിഗ് ടിവി ഡെയ്‌ലി',
-                labelTe: 'బిగ్‌టీవీ డైలీ',
+              Expanded(
+                child: _buildNavItem(
+                  context,
+                  homeProvider,
+                  index: 1,
+                  iconPath: "assets/new_app_icon/bytes.svg",
+                  labelMl: 'വാർത്തകൾ',
+                  labelTe: 'వార్తలు',
+                ),
               ),
-              _buildNavItem(
-                context,
-                homeProvider,
-                index: 3,
-                iconPath: "assets/new_app_icon/menu.svg",
-                labelMl: 'കൂടുതൽ',
-                labelTe: 'మరిన్ని',
+              Expanded(
+                child: _buildNavItem(
+                  context,
+                  homeProvider,
+                  index: 2,
+                  iconPath: "assets/new_app_icon/reel.svg",
+                  labelMl: 'ബിഗ് ടിവി ഡെയിലി',
+                  labelTe: 'బిగ్‌టీవీ డైలీ',
+                ),
+              ),
+              Expanded(
+                child: _buildNavItem(
+                  context,
+                  homeProvider,
+                  index: 3,
+                  iconPath: "assets/new_app_icon/menu.svg",
+                  labelMl: 'കൂടുതൽ',
+                  labelTe: 'మరిన్ని',
+                ),
               ),
             ],
           ),
@@ -360,7 +369,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
       },
       child: Container(
         height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 2),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -384,11 +393,16 @@ class HomeBottomNavigationBar extends StatelessWidget {
                     ),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: itemColor,
-                fontSize: 11,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: itemColor,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -436,7 +450,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
       },
       child: Container(
         height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 2),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -455,11 +469,16 @@ class HomeBottomNavigationBar extends StatelessWidget {
                     size: 20,
                   ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: itemColor,
-                fontSize: 11,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: itemColor,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],

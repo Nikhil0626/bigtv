@@ -328,9 +328,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
         final String title =
             (article['title'] ?? pollData['title'] ?? '').toString();
 
-        final String category =
-            (article['category'] ?? article['categoryName'] ?? '').toString();
-
         final String dateStr =
             (article['created_at'] ?? article['date'] ?? '').toString();
 
@@ -509,37 +506,11 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           SizedBox(height: 12.h),
                         ],
 
-                        // Category Pill + Share Buttons Row
+                        // Share Buttons Row
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            if (category.isNotEmpty)
-                              Flexible(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 14.w,
-                                    vertical: 3.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColorTokens.cinemaRed,
-                                    borderRadius: BorderRadius.circular(16.r),
-                                  ),
-                                  child: Text(
-                                    category,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11.5.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            else
-                              const Spacer(),
-                            SizedBox(width: 8.w),
                             ContentShareButtons(
                               whatsAppButtonKey: const Key(
                                 'poll_whatsapp_share_button',

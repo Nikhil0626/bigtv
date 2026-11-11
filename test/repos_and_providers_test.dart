@@ -17,7 +17,7 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({
       'userId': 'usr_999',
-      'app_version': '6.0.3+3052',
+      'app_version': '6.0.4+3053',
       'loginType': 'login',
     });
   });
@@ -206,7 +206,7 @@ void main() {
       expect(provider.selectedFeedbackList, isEmpty);
 
       await provider.getLoginDetails();
-      expect(provider.appVersion, equals('6.0.3+3052'));
+      expect(provider.appVersion, equals('6.0.4+3053'));
       expect(provider.isNotificationsEnabled, isTrue);
     });
 

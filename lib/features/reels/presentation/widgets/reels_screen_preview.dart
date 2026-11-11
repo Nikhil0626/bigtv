@@ -1,6 +1,6 @@
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'dart:async';
-import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/features/home/presentation/widgets/infocus_bar_widget.dart';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -389,7 +389,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorTokens.primaryRed,
+      backgroundColor: InFocusBarWidget.barBackgroundColor,
       body: Consumer<ReelsProviders>(
         builder: (_, reelsProviders, __) {
           final reelsList = reelsProviders.getAllReelsList;
@@ -942,7 +942,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
             valueListenable: widget.videoController!,
             builder: (context, videoValue, _) {
               return Container(
-                color: AppColorTokens.primaryRed,
+                color: InFocusBarWidget.barBackgroundColor,
                 width: double.infinity,
                 height: double.infinity,
                 alignment: Alignment.center,
@@ -980,7 +980,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
             valueListenable: widget.youtubeController!,
             builder: (context, ytValue, _) {
               return Container(
-                color: AppColorTokens.primaryRed,
+                color: InFocusBarWidget.barBackgroundColor,
                 width: double.infinity,
                 height: double.infinity,
                 alignment: Alignment.center,
@@ -1007,7 +1007,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
                             bufferIndicator: const Align(
                               alignment: Alignment.bottomCenter,
                               child: LinearProgressIndicator(
-                                color: AppColorTokens.primaryRed,
+                                color: Colors.white,
                                 backgroundColor: Colors.transparent,
                               ),
                             ),
@@ -1028,7 +1028,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
     // 3. Instant Thumbnail Cover (Fills screen with BoxFit.contain)
     if (widget.reelCard.thumbnailUrl.isNotEmpty) {
       return Container(
-        color: AppColorTokens.primaryRed,
+        color: InFocusBarWidget.barBackgroundColor,
         width: double.infinity,
         height: double.infinity,
         alignment: Alignment.center,
@@ -1038,8 +1038,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
             CachedNetworkImage(
               imageUrl: widget.reelCard.thumbnailUrl,
               fit: BoxFit.contain,
-              placeholder: (_, __) => Container(color: AppColorTokens.primaryRed),
-              errorWidget: (_, __, ___) => Container(color: AppColorTokens.primaryRed),
+              placeholder: (_, __) => Container(color: InFocusBarWidget.barBackgroundColor),
+              errorWidget: (_, __, ___) => Container(color: InFocusBarWidget.barBackgroundColor),
             ),
             _buildPlayPauseOverlay(false),
           ],
@@ -1047,7 +1047,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
       );
     }
 
-    return Container(color: AppColorTokens.primaryRed);
+    return Container(color: InFocusBarWidget.barBackgroundColor);
   }
 
   @override

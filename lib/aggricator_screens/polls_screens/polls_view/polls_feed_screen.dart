@@ -368,9 +368,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                 final title = (item['title'] ?? 'Poll').toString();
                 final imageUrl =
                     _getImageUrl(item['image_url'] ?? item['imageUrl']);
-                final category =
-                    (item['category'] ?? item['categoryName'] ?? 'రాజకీయాలు')
-                        .toString();
 
                 return GestureDetector(
                   onTap: () {
@@ -446,29 +443,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                                 ),
                               ),
 
-                              // Category Pill
-                              Positioned(
-                                top: 8.h,
-                                left: 8.w,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 7.w,
-                                    vertical: 3.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColorTokens.cinemaRed,
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9.5.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),

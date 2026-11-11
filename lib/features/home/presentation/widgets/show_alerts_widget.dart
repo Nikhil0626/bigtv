@@ -410,60 +410,6 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Bar with white background, BigTV logo and Show Alerts text
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(
-                    color: const Color(0xFFE2E8F0),
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/images/BigTvPostLogo.png",
-                    height: 24.h,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Text(
-                      "BIG TV",
-                      style: TextStyle(
-                        color: primaryRed,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.notifications_active_outlined,
-                        size: 15.sp,
-                        color: primaryRed,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        'Show Alerts',
-                        style: TextStyle(
-                          color: const Color(0xFF0F172A),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
             // Scrollable Content Layer (Banner Graphic + Divider + Form fields & Buttons)
             Expanded(
               child: SafeArea(
