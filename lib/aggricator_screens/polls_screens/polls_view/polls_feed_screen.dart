@@ -371,9 +371,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                 final category =
                     (item['category'] ?? item['categoryName'] ?? 'రాజకీయాలు')
                         .toString();
-                final votes =
-                    (item['total_votes_display'] ?? '1.2 లక్షల మంది')
-                        .toString();
 
                 return GestureDetector(
                   onTap: () {
@@ -492,29 +489,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                                   fontWeight: FontWeight.w700,
                                   height: 1.3,
                                 ),
-                              ),
-                              SizedBox(height: 6.h),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.how_to_vote_rounded,
-                                    color: AppColorTokens.cinemaRed,
-                                    size: 13.sp,
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Expanded(
-                                    child: Text(
-                                      votes,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: const Color(0xFF9CA3AF),
-                                        fontSize: 10.5.sp,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ],
                           ),

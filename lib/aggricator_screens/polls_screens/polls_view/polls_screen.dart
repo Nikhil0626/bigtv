@@ -371,17 +371,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     ? (pollData['user_voted_option'] as num).toInt()
                     : -1));
 
-        final totalVotesVal = article['total_votes_display'] ??
-            pollData['totalVotes'] ??
-            pollData['total_votes'] ??
-            article['total_votes'];
-        final String totalVotesDisplay =
-            totalVotesVal != null && totalVotesVal.toString().isNotEmpty
-                ? (totalVotesVal.toString().contains('ఓటు')
-                    ? totalVotesVal.toString()
-                    : '$totalVotesVal మంది ఓటు వేశారు')
-                : '';
-
         return Screenshot(
           controller: _screenshotController,
           child: Container(
@@ -834,33 +823,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           );
                         }),
                         SizedBox(height: 6.h),
-
-                        // Footer Votes Row
-                        if (totalVotesDisplay.isNotEmpty) ...[
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.people_outline_rounded,
-                                color: AppColorTokens.cinemaRed,
-                                size: 16.sp,
-                              ),
-                              SizedBox(width: 6.w),
-                              Flexible(
-                                child: Text(
-                                  totalVotesDisplay,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: const Color(0xFFE5E7EB),
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.h),
-                        ],
 
                         // Post-vote confirmation or in-flight indicator
                         if (isSubmittingVote) ...[

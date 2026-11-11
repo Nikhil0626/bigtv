@@ -1365,6 +1365,81 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('లాగిన్ అవ్వండి'), findsOneWidget);
     });
+
+    testWidgets(
+        'PollScreenDesign and PollsFeedScreen grid do not display total voted count text',
+        (tester) async {
+      setPhoneViewport(tester);
+      final singleVotePoll = <String, dynamic>{
+        'id': 1099,
+        'title': 'Single Vote Poll Check',
+        'category': 'రాజకీయాలు',
+        'total_votes_display': '1 was voted',
+        'total_votes': 1,
+        'image_url': '',
+        'pollData': {
+          'totalVotes': 1,
+          'userHasVoted': false,
+          'options': [
+            {'id': 1, 'text': 'Yes', 'votes': 1, 'percentage': 100.0},
+            {'id': 2, 'text': 'No', 'votes': 0, 'percentage': 0.0},
+          ],
+        },
+      };
+
+      final pollProvider = PollProvider(
+        pollRepo: FakePollRepo(
+          resultsPayload: {
+            'totalVotes': 1,
+            'userHasVoted': false,
+            'options': [
+              {'id': 1, 'text': 'Yes', 'votes': 1, 'percentage': 100.0},
+              {'id': 2, 'text': 'No', 'votes': 0, 'percentage': 0.0},
+            ],
+          },
+        ),
+        eventTracker: (_, __) async {},
+      );
+      final homeProvider = TestHomeProvider()
+        ..stubPolls = [
+          singleVotePoll,
+          {
+            'id': 1100,
+            'title': 'Grid Poll Without Display',
+            'image_url': '',
+            'pollData': {'totalVotes': 1, 'options': []},
+          },
+        ];
+
+      await tester.pumpWidget(
+        wrapWidget(
+          homeProvider: homeProvider,
+          pollProvider: pollProvider,
+          child: const PollsFeedScreen(),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.textContaining('మంది ఓటు వేశారు'), findsNothing);
+      expect(find.textContaining('was voted'), findsNothing);
+      expect(find.byIcon(Icons.people_outline_rounded), findsNothing);
+
+      await tester.tap(find.text('Yes'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ఓటు నమోదు చేయబడింది'), findsOneWidget);
+      expect(find.textContaining('మంది ఓటు వేశారు'), findsNothing);
+      expect(find.textContaining('was voted'), findsNothing);
+      expect(find.byIcon(Icons.people_outline_rounded), findsNothing);
+
+      // Switch to grid view and verify neither total_votes_display nor fallback text appears
+      await tester.tap(find.byIcon(Icons.grid_view_rounded));
+      await tester.pump();
+      expect(find.text('1 was voted'), findsNothing);
+      expect(find.text('1.2 లక్షల మంది'), findsNothing);
+      expect(find.byIcon(Icons.how_to_vote_rounded), findsNothing);
+    });
   });
 
   group('Deep Link Routing for Movie Reviews and Polls', () {
