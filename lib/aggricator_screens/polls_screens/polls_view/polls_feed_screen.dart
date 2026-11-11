@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_screen.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/services/poll_share_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,15 +20,14 @@ class PollsFeedScreen extends StatefulWidget {
 
 class _PollsFeedScreenState extends State<PollsFeedScreen> {
   late PageController _pageController;
-  late int _currentIndex;
-  bool _isGridView = false;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+    context.read<PollProvider>().initFeedView(initialIndex: widget.initialIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<HomeProvider>().fetchDynamicPolls();
     });
   }
@@ -37,16 +39,13 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
   }
 
   String _getImageUrl(dynamic imageUrl) {
-    if (imageUrl == null || imageUrl.toString().trim().isEmpty) return "";
-    final url = imageUrl.toString();
-    if (url.startsWith('http')) return url;
-    if (url.startsWith('/')) return "https://migwp.chotanews.com$url";
-    return "https://migwp.chotanews.com/$url";
+    return PollShareHelper.resolveImageUrl(imageUrl);
   }
 
   @override
   Widget build(BuildContext context) {
     final homeProvider = context.watch<HomeProvider>();
+    final pollProvider = context.watch<PollProvider>();
     final isTelugu = homeProvider.langCode != 'ml';
     final polls = homeProvider.getAllPolls();
 
@@ -57,22 +56,32 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F0F12),
+        backgroundColor: AppColorTokens.cinematicBackground,
         body: homeProvider.isPollsLoading && polls.isEmpty
             ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFFE50914)),
+                child: CircularProgressIndicator(
+                  color: AppColorTokens.cinemaRed,
+                ),
               )
             : polls.isEmpty
                 ? _buildEmptyState(isTelugu)
-                : _isGridView
-                    ? _buildGridView(polls, isTelugu)
-                    : _buildSwipeView(polls, isTelugu),
+                : pollProvider.isGridView
+                    ? _buildGridView(polls, isTelugu, pollProvider)
+                    : _buildSwipeView(polls, isTelugu, pollProvider),
       ),
     );
   }
 
   // Full-screen swipeable feed of Poll posts
-  Widget _buildSwipeView(List<Map<String, dynamic>> polls, bool isTelugu) {
+  Widget _buildSwipeView(
+    List<Map<String, dynamic>> polls,
+    bool isTelugu,
+    PollProvider pollProvider,
+  ) {
+    final safeIndex = polls.isEmpty
+        ? 0
+        : pollProvider.currentPollIndex.clamp(0, polls.length - 1);
+
     return Stack(
       children: [
         // Vertical PageView
@@ -80,11 +89,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
           controller: _pageController,
           scrollDirection: Axis.vertical,
           itemCount: polls.length,
-          onPageChanged: (idx) {
-            setState(() {
-              _currentIndex = idx;
-            });
-          },
+          onPageChanged: pollProvider.setCurrentPollIndex,
           itemBuilder: (context, index) {
             return PollScreenDesign(
               artical: polls[index],
@@ -148,7 +153,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => Icon(
                         Icons.poll_rounded,
-                        color: const Color(0xFFE50914),
+                        color: AppColorTokens.cinemaRed,
                         size: 22.sp,
                       ),
                     ),
@@ -156,13 +161,14 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
 
                     // Red BIG TV Logo Emblem
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE50914),
+                        color: AppColorTokens.cinemaRed,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                        "BIG TV",
+                        'BIG TV',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -174,7 +180,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                     SizedBox(width: 8.w),
 
                     Text(
-                      "|",
+                      '|',
                       style: TextStyle(
                         color: Colors.white38,
                         fontSize: 15.sp,
@@ -186,7 +192,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                     // Title
                     Expanded(
                       child: Text(
-                        isTelugu ? "పోల్స్" : "വോട്ടെടുപ്പ്",
+                        isTelugu ? 'పోల్స్' : 'വോട്ടെടുപ്പ്',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 15.sp,
@@ -198,7 +204,8 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
 
                     // Page Counter Pill (e.g. "1 / 4")
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12.r),
@@ -208,7 +215,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                         ),
                       ),
                       child: Text(
-                        "${_currentIndex + 1}/${polls.length}",
+                        '${safeIndex + 1}/${polls.length}',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11.5.sp,
@@ -220,11 +227,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
 
                     // Grid View Switcher Button
                     InkWell(
-                      onTap: () {
-                        setState(() {
-                          _isGridView = true;
-                        });
-                      },
+                      onTap: () => pollProvider.setGridView(true),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         padding: EdgeInsets.all(6.w),
@@ -254,7 +257,11 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
   }
 
   // Grid View of all Polls
-  Widget _buildGridView(List<Map<String, dynamic>> polls, bool isTelugu) {
+  Widget _buildGridView(
+    List<Map<String, dynamic>> polls,
+    bool isTelugu,
+    PollProvider pollProvider,
+  ) {
     return SafeArea(
       child: Column(
         children: [
@@ -264,19 +271,15 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isGridView = false;
-                    });
-                  },
+                  onTap: () => pollProvider.setGridView(false),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E24),
+                      color: AppColorTokens.cinematicSurface,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF33333E),
+                        color: AppColorTokens.cinematicBorder,
                         width: 1,
                       ),
                     ),
@@ -293,7 +296,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTelugu ? "అన్ని పోల్స్" : "എല്ലാ വോട്ടെടുപ്പുകളും",
+                        isTelugu ? 'అన్ని పోల్స్' : 'എല്ലാ വോട്ടെടുപ്പുകളും',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16.sp,
@@ -313,16 +316,13 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
 
                 // Switch back to Feed swiper
                 InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isGridView = false;
-                    });
-                  },
+                  onTap: () => pollProvider.setGridView(false),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE50914),
+                      color: AppColorTokens.cinemaRed,
                       borderRadius: BorderRadius.circular(16.r),
                     ),
                     child: Row(
@@ -334,7 +334,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          isTelugu ? "స్వైప్ వీక్షణ" : "സ്വൈപ്പ് കാഴ്‌ച",
+                          isTelugu ? 'స్వైప్ వీక్షణ' : 'സ്വൈപ്പ് കാഴ്‌ച',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 11.5.sp,
@@ -366,15 +366,12 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
               itemBuilder: (context, index) {
                 final item = polls[index];
                 final title = (item['title'] ?? 'Poll').toString();
-                final imageUrl = _getImageUrl(item['image_url'] ?? item['imageUrl']);
-                final votes = (item['total_votes_display'] ?? '1.2 లక్షల మంది').toString();
+                final imageUrl =
+                    _getImageUrl(item['image_url'] ?? item['imageUrl']);
 
                 return GestureDetector(
                   onTap: () {
-                    setState(() {
-                      _currentIndex = index;
-                      _isGridView = false;
-                    });
+                    pollProvider.selectPollFromGrid(index);
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (_pageController.hasClients) {
                         _pageController.jumpToPage(index);
@@ -413,7 +410,7 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                                   color: const Color(0xFF1F1F27),
                                   child: const Center(
                                     child: CircularProgressIndicator(
-                                      color: Color(0xFFE50914),
+                                      color: AppColorTokens.cinemaRed,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -437,7 +434,8 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        const Color(0xFF16161C).withValues(alpha: 0.8),
+                                        const Color(0xFF16161C)
+                                            .withValues(alpha: 0.8),
                                       ],
                                       stops: const [0.6, 1.0],
                                     ),
@@ -465,29 +463,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                                   fontWeight: FontWeight.w700,
                                   height: 1.3,
                                 ),
-                              ),
-                              SizedBox(height: 6.h),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.how_to_vote_rounded,
-                                    color: const Color(0xFFE50914),
-                                    size: 13.sp,
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Expanded(
-                                    child: Text(
-                                      votes,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: const Color(0xFF9CA3AF),
-                                        fontSize: 10.5.sp,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ],
                           ),
@@ -517,8 +492,8 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
           SizedBox(height: 16.h),
           Text(
             isTelugu
-                ? "ప్రస్తుతం పోల్స్ అందుబాటులో లేవు"
-                : "നിലവിൽ വോട്ടെടുപ്പുകൾ ലഭ്യമല്ല",
+                ? 'ప్రస్తుతం పోల్స్ అందుబాటులో లేవు'
+                : 'നിലവിൽ വോട്ടെടുപ്പുകൾ ലഭ്യമല്ല',
             style: TextStyle(
               fontSize: 15.sp,
               color: Colors.white60,
@@ -529,14 +504,14 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
           ElevatedButton.icon(
             onPressed: () => Navigator.maybePop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE50914),
+              backgroundColor: AppColorTokens.cinemaRed,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
             icon: const Icon(Icons.arrow_back),
-            label: Text(isTelugu ? "వెనక్కి వెళ్ళండి" : "തിരികെ പോകുക"),
+            label: Text(isTelugu ? 'వెనక్కి వెళ్ళండి' : 'തിരികെ പോകുക'),
           ),
         ],
       ),

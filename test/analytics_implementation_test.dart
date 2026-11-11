@@ -137,6 +137,8 @@ void main() {
       expect(AnalyticsEventName.reporterFollow, equals('reporter_follow'));
       expect(AnalyticsEventName.reporterUnfollow, equals('reporter_unfollow'));
       expect(AnalyticsEventName.reporterShare, equals('reporter_share'));
+      expect(AnalyticsEventName.movieReviewShare, equals('movie_review_share'));
+      expect(AnalyticsEventName.pollShare, equals('poll_share'));
       expect(AnalyticsEventName.videoOpen, equals('video_open'));
       expect(AnalyticsEventName.videoPlay, equals('video_play'));
       expect(AnalyticsEventName.videoPause, equals('video_pause'));

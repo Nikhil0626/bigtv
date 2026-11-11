@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/services/movie_review_share_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,15 +20,14 @@ class MovieReviewsScreen extends StatefulWidget {
 
 class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
   late PageController _pageController;
-  late int _currentIndex;
-  bool _isGridView = false;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+    context.read<RatingProvider>().initFeedView(initialIndex: widget.initialIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<HomeProvider>().fetchDynamicMovieReviews();
     });
   }
@@ -37,16 +39,13 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
   }
 
   String _getImageUrl(dynamic imageUrl) {
-    if (imageUrl == null || imageUrl.toString().trim().isEmpty) return "";
-    final url = imageUrl.toString();
-    if (url.startsWith('http')) return url;
-    if (url.startsWith('/')) return "https://migwp.chotanews.com$url";
-    return "https://migwp.chotanews.com/$url";
+    return MovieReviewShareHelper.resolveImageUrl(imageUrl);
   }
 
   @override
   Widget build(BuildContext context) {
     final homeProvider = context.watch<HomeProvider>();
+    final ratingProvider = context.watch<RatingProvider>();
     final isTelugu = homeProvider.langCode != 'ml';
     final reviews = homeProvider.getAllMovieReviews();
 
@@ -57,195 +56,206 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F0F12),
+        backgroundColor: AppColorTokens.cinematicBackground,
         body: homeProvider.isMovieReviewsLoading && reviews.isEmpty
             ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFFE50914)),
+                child: CircularProgressIndicator(
+                  color: AppColorTokens.cinemaRed,
+                ),
               )
             : reviews.isEmpty
                 ? _buildEmptyState(isTelugu)
-                : _isGridView
-                    ? _buildGridView(reviews, isTelugu)
-                    : _buildSwipeView(reviews, isTelugu),
+                : ratingProvider.isGridView
+                    ? _buildGridView(reviews, isTelugu, ratingProvider)
+                    : _buildSwipeView(reviews, isTelugu, ratingProvider),
       ),
     );
   }
 
   // Full-screen swipeable feed of Movie Review posts
-  Widget _buildSwipeView(List<Map<String, dynamic>> reviews, bool isTelugu) {
-    return Stack(
+  Widget _buildSwipeView(
+    List<Map<String, dynamic>> reviews,
+    bool isTelugu,
+    RatingProvider ratingProvider,
+  ) {
+    final safeIndex = reviews.isEmpty
+        ? 0
+        : ratingProvider.currentReviewIndex.clamp(0, reviews.length - 1);
+
+    return Column(
       children: [
-        // Vertical PageView
-        PageView.builder(
-          controller: _pageController,
-          scrollDirection: Axis.vertical,
-          itemCount: reviews.length,
-          onPageChanged: (idx) {
-            setState(() {
-              _currentIndex = idx;
-            });
-          },
-          itemBuilder: (context, index) {
-            return MovieRatings(article: reviews[index]);
-          },
+        _buildSwipeHeader(
+          reviews: reviews,
+          safeIndex: safeIndex,
+          isTelugu: isTelugu,
+          ratingProvider: ratingProvider,
         ),
-
-        // Floating Top Header Overlay
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.85),
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                child: Row(
-                  children: [
-                    // Back Button
-                    InkWell(
-                      onTap: () => Navigator.maybePop(context),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.25),
-                            width: 1,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                          size: 16.sp,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10.w),
-
-                    // 3D Movie Review Logo
-                    Image.asset(
-                      'assets/images/movie_reviews_3d_icon.png',
-                      width: 26.w,
-                      height: 26.w,
-                      fit: BoxFit.contain,
-                    ),
-                    SizedBox(width: 8.w),
-
-                    // Red BIG TV Logo Emblem
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE50914),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        "BIG TV",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-
-                    Text(
-                      "|",
-                      style: TextStyle(
-                        color: Colors.white38,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-
-                    // Title
-                    Expanded(
-                      child: Text(
-                        isTelugu ? "సినిమా సమీక్షలు" : "സിനിമ റിവ്യൂകൾ",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-
-                    // Page Counter Pill (e.g. "1 / 6")
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        "${_currentIndex + 1}/${reviews.length}",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11.5.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-
-                    // Grid View Switcher Button
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _isGridView = true;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.25),
-                            width: 1,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.grid_view_rounded,
-                          color: Colors.white,
-                          size: 17.sp,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        const Divider(color: Color(0xFF24242D), height: 1),
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            itemCount: reviews.length,
+            onPageChanged: ratingProvider.setCurrentReviewIndex,
+            itemBuilder: (context, index) {
+              return MovieRatings(article: reviews[index]);
+            },
           ),
         ),
       ],
     );
   }
 
+  Widget _buildSwipeHeader({
+    required List<Map<String, dynamic>> reviews,
+    required int safeIndex,
+    required bool isTelugu,
+    required RatingProvider ratingProvider,
+  }) {
+    return Container(
+      key: const Key('movie_reviews_swipe_header'),
+      color: AppColorTokens.cinematicBackground,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+          child: Row(
+            children: [
+              // Back Button
+              InkWell(
+                onTap: () => Navigator.maybePop(context),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 16.sp,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+
+              // 3D Movie Review Logo
+              Image.asset(
+                'assets/images/movie_reviews_3d_icon.png',
+                width: 26.w,
+                height: 26.w,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.movie_filter_rounded,
+                  color: AppColorTokens.cinemaRed,
+                  size: 22.sp,
+                ),
+              ),
+              SizedBox(width: 8.w),
+
+              // Red BIG TV Logo Emblem
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: AppColorTokens.cinemaRed,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  'BIG TV',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+
+              Text(
+                '|',
+                style: TextStyle(
+                  color: Colors.white38,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+              SizedBox(width: 8.w),
+
+              // Title
+              Expanded(
+                child: Text(
+                  isTelugu ? 'సినిమా సమీక్షలు' : 'സിനിമ റിവ്യൂകൾ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              // Page Counter Pill (e.g. "1 / 6")
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${safeIndex + 1}/${reviews.length}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+
+              // Grid View Switcher Button
+              InkWell(
+                onTap: () => ratingProvider.setGridView(true),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.grid_view_rounded,
+                    color: Colors.white,
+                    size: 17.sp,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // Poster Grid View of all Movie Reviews
-  Widget _buildGridView(List<Map<String, dynamic>> reviews, bool isTelugu) {
+  Widget _buildGridView(
+    List<Map<String, dynamic>> reviews,
+    bool isTelugu,
+    RatingProvider ratingProvider,
+  ) {
     return SafeArea(
       child: Column(
         children: [
@@ -255,19 +265,15 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isGridView = false;
-                    });
-                  },
+                  onTap: () => ratingProvider.setGridView(false),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E24),
+                      color: AppColorTokens.cinematicSurface,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF33333E),
+                        color: AppColorTokens.cinematicBorder,
                         width: 1,
                       ),
                     ),
@@ -284,7 +290,9 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTelugu ? "అన్ని సినిమా సమీక్షలు" : "എല്ലാ സിനിമ റിവ്യൂകളും",
+                        isTelugu
+                            ? 'అన్ని సినిమా సమీక్షలు'
+                            : 'എല്ലാ സിനിമ റിവ്യൂകളും',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16.sp,
@@ -304,16 +312,13 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
 
                 // Switch back to Feed swiper
                 InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isGridView = false;
-                    });
-                  },
+                  onTap: () => ratingProvider.setGridView(false),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE50914),
+                      color: AppColorTokens.cinemaRed,
                       borderRadius: BorderRadius.circular(16.r),
                     ),
                     child: Row(
@@ -325,7 +330,7 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          isTelugu ? "స్వైప్ వీక్షణ" : "സ്വൈപ്പ് കാഴ്‌ച",
+                          isTelugu ? 'స్వైప్ వీక్షణ' : 'സ്വൈപ്പ് കാഴ്‌ച',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 11.5.sp,
@@ -356,13 +361,19 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
               itemCount: reviews.length,
               itemBuilder: (context, index) {
                 final item = reviews[index];
-                final title = (item['movie_name'] ?? item['title'] ?? 'Movie').toString();
-                final imageUrl = _getImageUrl(item['image_url'] ?? item['imageUrl']);
-                final genre = (item['genre'] ?? item['genreTelugu'] ?? 'యాక్షన్').toString();
-                final cert = (item['certification'] ?? item['censor_rating'] ?? 'UA').toString();
+                final title =
+                    (item['movie_name'] ?? item['title'] ?? 'Movie').toString();
+                final imageUrl =
+                    _getImageUrl(item['image_url'] ?? item['imageUrl']);
+                final genre =
+                    (item['genre'] ?? item['genreTelugu'] ?? 'యాక్షన్')
+                        .toString();
+                final cert =
+                    (item['certification'] ?? item['censor_rating'] ?? 'UA')
+                        .toString();
                 final year = (item['release_year'] ?? '2024').toString();
 
-                String ratingDisplay = "4.0/5";
+                String ratingDisplay = '4.0/5';
                 if (item['chotaMeter'] != null &&
                     item['chotaMeter'].toString().trim().isNotEmpty) {
                   ratingDisplay = item['chotaMeter'].toString().trim();
@@ -372,17 +383,15 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                 } else if (item['externalRatings'] is List &&
                     (item['externalRatings'] as List).isNotEmpty) {
                   final first = (item['externalRatings'] as List).first;
-                  ratingDisplay = first['platform_rating']?.toString() ?? "4.0/5";
+                  ratingDisplay =
+                      first['platform_rating']?.toString() ?? '4.0/5';
                 } else if (item['imdbRating'] != null) {
                   ratingDisplay = item['imdbRating'].toString();
                 }
 
                 return GestureDetector(
                   onTap: () {
-                    setState(() {
-                      _currentIndex = index;
-                      _isGridView = false;
-                    });
+                    ratingProvider.selectReviewFromGrid(index);
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (_pageController.hasClients) {
                         _pageController.jumpToPage(index);
@@ -421,7 +430,7 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                                   color: const Color(0xFF1F1F27),
                                   child: const Center(
                                     child: CircularProgressIndicator(
-                                      color: Color(0xFFE50914),
+                                      color: AppColorTokens.cinemaRed,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -445,7 +454,8 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        const Color(0xFF16161C).withValues(alpha: 0.8),
+                                        const Color(0xFF16161C)
+                                            .withValues(alpha: 0.8),
                                       ],
                                       stops: const [0.6, 1.0],
                                     ),
@@ -458,13 +468,17 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                                 top: 8.h,
                                 right: 8.w,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 7.w,
+                                    vertical: 3.h,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFE50914),
+                                    color: AppColorTokens.cinemaRed,
                                     borderRadius: BorderRadius.circular(10.r),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.5),
+                                        color:
+                                            Colors.black.withValues(alpha: 0.5),
                                         blurRadius: 4,
                                       ),
                                     ],
@@ -496,7 +510,10 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                                 top: 8.h,
                                 left: 8.w,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                    vertical: 2.h,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.black.withValues(alpha: 0.7),
                                     borderRadius: BorderRadius.circular(6.r),
@@ -538,16 +555,20 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                               SizedBox(height: 3.h),
                               Row(
                                 children: [
-                                  Text(
-                                    genre,
-                                    style: TextStyle(
-                                      color: const Color(0xFFE50914),
-                                      fontSize: 10.5.sp,
-                                      fontWeight: FontWeight.w600,
+                                  Flexible(
+                                    child: Text(
+                                      genre,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: AppColorTokens.cinemaRed,
+                                        fontSize: 10.5.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                   Text(
-                                    " • $year",
+                                    ' • $year',
                                     style: TextStyle(
                                       color: const Color(0xFF9CA3AF),
                                       fontSize: 10.5.sp,
@@ -583,8 +604,8 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
           SizedBox(height: 16.h),
           Text(
             isTelugu
-                ? "ప్రస్తుతం సినిమా సమీక్షలు అందుబాటులో లేవు"
-                : "നിലവിൽ സിനിമ റിവ്യൂകൾ ലഭ്യമല്ല",
+                ? 'ప్రస్తుతం సినిమా సమీక్షలు అందుబాటులో లేవు'
+                : 'നിലവിൽ സിനിമ റിവ്യൂകൾ ലഭ്യമല്ല',
             style: TextStyle(
               fontSize: 15.sp,
               color: Colors.white60,
@@ -595,18 +616,17 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
           ElevatedButton.icon(
             onPressed: () => Navigator.maybePop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE50914),
+              backgroundColor: AppColorTokens.cinemaRed,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
             icon: const Icon(Icons.arrow_back),
-            label: Text(isTelugu ? "వెనక్కి వెళ్ళండి" : "തിരികെ പോകുക"),
+            label: Text(isTelugu ? 'వెనక్కి వెళ్ళండి' : 'തിരികെ പോകുക'),
           ),
         ],
       ),
     );
   }
 }
-
