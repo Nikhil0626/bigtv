@@ -7,6 +7,7 @@ import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.d
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/widgets/main_screen_card.dart';
+import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/features/reels/presentation/screens/reels_view.dart';
 import 'package:chotanews/features/events/presentation/widgets/folk_night_floating_button.dart';
 import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
@@ -128,6 +129,20 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   DateTime? lastBackPressed;
   Timer? autoCloseTimer;
 
+  static void pauseActiveMedia(
+    BuildContext context, {
+    bool pauseReels = true,
+  }) {
+    try {
+      context.read<VideoProvider>().pauseVideo();
+    } catch (_) {}
+    if (pauseReels) {
+      try {
+        context.read<ReelsProviders>().pauseAllReels();
+      } catch (_) {}
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(
@@ -171,7 +186,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (index) {
                   homeProvider.onItemTapped(index);
-                  context.read<VideoProvider>().pauseVideo();
+                  pauseActiveMedia(context, pauseReels: index != 2);
                 },
                 children: [
                   // Index 0: Search
@@ -202,59 +217,8 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                       !homeProvider.isCurrentArticleBulletin &&
                       homeProvider.isBottomEnable &&
                       MediaQuery.of(context).orientation != Orientation.landscape,
-                  child: Container(
-                    color: const Color(0xFFF03B5A),
-                    child: SafeArea(
-                      top: false,
-                      child: SizedBox(
-                        height: 50,
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              // 1. Search button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 0,
-                                iconData: Icons.search_rounded,
-                                labelMl: 'തിരയുക',
-                                labelTe: 'శోధన',
-                              ),
-                              // 2. Live button
-                              _buildLiveTvNavItem(context, homeProvider),
-                              // 3. Home button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 1,
-                                iconPath: "assets/new_app_icon/bytes.svg",
-                                labelMl: 'വാർത്തകൾ',
-                                labelTe: 'వార్తలు',
-                              ),
-                              // 4. Bigtv daily button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 2,
-                                iconPath: "assets/new_app_icon/reel.svg",
-                                labelMl: 'ബിഗ് ടിവി ഡെയ്‌ലി',
-                                labelTe: 'బిగ్‌టీవీ డైలీ',
-                              ),
-                              // 5. Marrini button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 3,
-                                iconPath: "assets/new_app_icon/menu.svg",
-                                labelMl: 'കൂടുതൽ',
-                                labelTe: 'మరిన్ని',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: HomeBottomNavigationBar(homeProvider: homeProvider),
+                ),
               ),
               if (homeProvider.langCode != 'ml')
                 Positioned(
@@ -284,6 +248,65 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     },
   );
 }
+}
+
+/// Bottom navigation bar shared by [HomeView] that pauses active video and
+/// reels playback whenever the user switches tabs or launches Live TV.
+class HomeBottomNavigationBar extends StatelessWidget {
+  final HomeProvider homeProvider;
+
+  const HomeBottomNavigationBar({super.key, required this.homeProvider});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFFF03B5A),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 50,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(
+                context,
+                homeProvider,
+                index: 0,
+                iconData: Icons.search_rounded,
+                labelMl: 'തിരയുക',
+                labelTe: 'శోధన',
+              ),
+              _buildLiveTvNavItem(context, homeProvider),
+              _buildNavItem(
+                context,
+                homeProvider,
+                index: 1,
+                iconPath: "assets/new_app_icon/bytes.svg",
+                labelMl: 'വാർത്തകൾ',
+                labelTe: 'వార్తలు',
+              ),
+              _buildNavItem(
+                context,
+                homeProvider,
+                index: 2,
+                iconPath: "assets/new_app_icon/reel.svg",
+                labelMl: 'ബിഗ് ടിവി ഡെയ്‌ലി',
+                labelTe: 'బిగ్‌టీవీ డైలీ',
+              ),
+              _buildNavItem(
+                context,
+                homeProvider,
+                index: 3,
+                iconPath: "assets/new_app_icon/menu.svg",
+                labelMl: 'കൂടുതൽ',
+                labelTe: 'మరిన్ని',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildNavItem(
     BuildContext context,
@@ -299,9 +322,10 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     Color itemColor = context.colors.onPrimary;
 
     return GestureDetector(
+      key: Key('bottom_nav_tab_$index'),
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        context.read<VideoProvider>().pauseVideo();
+        _HomeViewState.pauseActiveMedia(context, pauseReels: index != 2);
         final itemNames = ['search', 'news', 'reels', 'more'];
         final itemName = index < itemNames.length ? itemNames[index] : index.toString();
         AnalyticsService.instance.track(AnalyticsEventName.bottomNavClick, properties: {
@@ -313,7 +337,10 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
           'destination': itemName,
         });
         homeProvider.isTabChange();
-        homeProvider.homePageController.jumpToPage(index);
+        if (homeProvider.homePageController.hasClients) {
+          homeProvider.homePageController.jumpToPage(index);
+        }
+        homeProvider.onItemTapped(index);
         homeProvider.pageChange(isValue: true);
 
         if (index == 0) {
@@ -375,15 +402,14 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     Color itemColor = context.colors.onPrimary;
 
     return GestureDetector(
+      key: const Key('bottom_nav_live_tv'),
       behavior: HitTestBehavior.opaque,
       onTap: () async {
         AnalyticsService.instance.track(AnalyticsEventName.bottomNavClick, properties: {
           'item_name': 'live_tv',
           'destination': 'live_tv',
         });
-        try {
-          context.read<VideoProvider>().pauseVideo();
-        } catch (_) {}
+        _HomeViewState.pauseActiveMedia(context);
         final liveData = await homeProvider.fetchLiveTvStream();
         if (!context.mounted) return;
         if (liveData != null &&

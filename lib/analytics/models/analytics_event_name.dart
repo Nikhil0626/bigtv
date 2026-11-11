@@ -110,6 +110,10 @@ abstract class AnalyticsEventName {
   static const String reporterUnfollow    = 'reporter_unfollow';
   static const String reporterShare       = 'reporter_share';
 
+  // 2.13b Movie Reviews & Polls
+  static const String movieReviewShare = 'movie_review_share';
+  static const String pollShare        = 'poll_share';
+
   // 2.14 Advertising
   static const String adRequest    = 'ad_request';
   static const String adLoaded     = 'ad_loaded';

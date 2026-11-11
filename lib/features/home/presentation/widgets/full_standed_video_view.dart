@@ -1,5 +1,6 @@
 
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -18,6 +19,9 @@ class FullStandardVideoView extends StatefulWidget {
 class FullStandardVideoViewState extends State<FullStandardVideoView> {
   ScreenshotController sc = ScreenshotController();
   YoutubePlayerController? ytController;
+  ReelsProviders? _reelsProviders;
+  bool _suppressAutoPlay = false;
+  bool _wasRouteActive = true;
 
   @override
   void initState() {
@@ -34,11 +38,60 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
         enableCaption: false,
         controlsVisibleAtStart: true,
       ),
-    );
+    )..addListener(_onPlayerStateChanged);
+  }
+
+  void _syncPauseSubscription() {
+    if (!mounted) return;
+    try {
+      final provider = context.read<ReelsProviders>();
+      if (!identical(_reelsProviders, provider)) {
+        _reelsProviders?.removePauseListener(_pauseVideo);
+        _reelsProviders = provider;
+        _reelsProviders!.addPauseListener(_pauseVideo);
+      }
+    } catch (_) {}
+  }
+
+  bool _isViewActive() {
+    if (!mounted) return false;
+    final bool routeCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+    final bool tickerEnabled = TickerMode.valuesOf(context).enabled;
+    return routeCurrent && tickerEnabled;
+  }
+
+  void _pauseVideo() {
+    _suppressAutoPlay = true;
+    try {
+      ytController?.pause();
+    } catch (_) {}
+  }
+
+  void _onPlayerStateChanged() {
+    if (!_isViewActive() && (ytController?.value.isPlaying ?? false)) {
+      try {
+        ytController?.pause();
+      } catch (_) {}
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPauseSubscription();
+    final bool isActiveNow = _isViewActive();
+    if (_wasRouteActive && !isActiveNow) {
+      _pauseVideo();
+    } else if (!_wasRouteActive && isActiveNow) {
+      _suppressAutoPlay = false;
+    }
+    _wasRouteActive = isActiveNow;
   }
 
   @override
   void dispose() {
+    _reelsProviders?.removePauseListener(_pauseVideo);
+    ytController?.removeListener(_onPlayerStateChanged);
     ytController?.dispose();
     super.dispose();
   }
@@ -71,6 +124,14 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
                 child: YoutubePlayerBuilder(
                   player: YoutubePlayer(
                     controller: ytController!,
+                    onReady: () {
+                      if (_suppressAutoPlay || !_isViewActive()) {
+                        _suppressAutoPlay = false;
+                        try {
+                          ytController?.pause();
+                        } catch (_) {}
+                      }
+                    },
                     // showVideoProgressIndicator: true,
                     bottomActions: [
                       CurrentPosition(),

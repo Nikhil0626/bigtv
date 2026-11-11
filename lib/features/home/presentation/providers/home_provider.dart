@@ -9,7 +9,9 @@ import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/contest_screen/contest_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
+import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_feed_screen.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
+import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews_screen.dart';
 import 'package:chotanews/features/home/data/repositories/home_repo.dart';
 import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_detail_screen.dart';
@@ -17,6 +19,7 @@ import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart'
 import 'package:chotanews/features/home/presentation/screens/tag_video_player_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/html_notification_dialog.dart';
+import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/services/analytics_service.dart' as legacy_analytics;
 import 'package:chotanews/analytics/analytics_service.dart';
@@ -1996,6 +1999,11 @@ class HomeProvider extends ChangeNotifier {
       }
 
       void switchTab(int index) {
+        if (index != 2 && mainNavigatorKey.currentContext != null) {
+          try {
+            mainNavigatorKey.currentContext!.read<ReelsProviders>().pauseAllReels();
+          } catch (_) {}
+        }
         selectedIndex = index;
         if (homePageController.hasClients) {
           try {
@@ -2033,6 +2041,7 @@ class HomeProvider extends ChangeNotifier {
         try {
           if (mainNavigatorKey.currentContext != null) {
             mainNavigatorKey.currentContext!.read<VideoProvider>().pauseVideo();
+            mainNavigatorKey.currentContext!.read<ReelsProviders>().pauseAllReels();
           }
         } catch (_) {}
 
@@ -2455,6 +2464,175 @@ class HomeProvider extends ChangeNotifier {
         log("Routing to Reels deep link");
         popToRoot();
         switchTab(2);
+        return;
+      }
+
+      // 5a. MOVIE REVIEWS DEEP LINK
+      // Handles:
+      // https://app.bigtv24x7.com/moviereviews?postId=1051
+      // https://app.bigtv24x7.com/moviereview?postId=1051
+      // https://app.bigtv24x7.com/reviews?postId=1051
+      // https://app.bigtv24x7.com/moviereviews
+      final bool isMovieReviewLink = path.contains('moviereview') ||
+          path.contains('movie-review') ||
+          path.contains('movie_review') ||
+          cleanPath == 'reviews' ||
+          cleanPath == 'review' ||
+          path.startsWith('/reviews') ||
+          path.startsWith('/review/') ||
+          queryParams['type']?.toLowerCase() == 'reviews' ||
+          queryParams['type']?.toLowerCase() == 'moviereview';
+
+      if (isMovieReviewLink) {
+        log("Routing to Movie Reviews deep link: $uri");
+        popToRoot();
+        switchTab(1);
+
+        String? targetReviewId = queryParams['postId'] ??
+            queryParams['post_id'] ??
+            queryParams['reviewId'] ??
+            queryParams['id'];
+
+        if ((targetReviewId == null || targetReviewId.isEmpty) &&
+            uri.pathSegments.length >= 2) {
+          final candidate = uri.pathSegments.last;
+          if (int.tryParse(candidate) != null && candidate != "0") {
+            targetReviewId = candidate;
+          }
+        }
+
+        if (targetReviewId != null &&
+            targetReviewId.isNotEmpty &&
+            targetReviewId != "0") {
+          var reviews = getAllMovieReviews();
+          int matchedIdx = reviews.indexWhere(
+            (r) => (r['id'] ?? r['post_id'])?.toString() == targetReviewId,
+          );
+
+          if (matchedIdx == -1) {
+            await fetchDynamicMovieReviews();
+            reviews = getAllMovieReviews();
+            matchedIdx = reviews.indexWhere(
+              (r) => (r['id'] ?? r['post_id'])?.toString() == targetReviewId,
+            );
+          }
+
+          if (matchedIdx != -1) {
+            mainNavigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => MovieReviewsScreen(initialIndex: matchedIdx),
+              ),
+            );
+          } else {
+            mainNavigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => IndividualPostView1(
+                  postId: targetReviewId!,
+                  isComeFrom: true,
+                ),
+              ),
+            );
+            getIndividualPost(
+              targetReviewId,
+              isAds: true,
+              isLink: isFromNotification,
+            );
+          }
+        } else {
+          mainNavigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => const MovieReviewsScreen(),
+            ),
+          );
+        }
+
+        try {
+          const MethodChannel("com.chotanews/whatsapp")
+              .invokeMethod("clearInitialIntent");
+        } catch (_) {}
+        return;
+      }
+
+      // 5b. POLLS DEEP LINK
+      // Handles:
+      // https://app.bigtv24x7.com/polls?postId=1050
+      // https://app.bigtv24x7.com/poll?postId=1050
+      // https://app.bigtv24x7.com/polls
+      final bool isPollLink = cleanPath == 'polls' ||
+          cleanPath == 'poll' ||
+          path.startsWith('/polls') ||
+          path.startsWith('/poll') ||
+          queryParams.containsKey('pollId') ||
+          queryParams['type']?.toLowerCase() == 'polls' ||
+          queryParams['type']?.toLowerCase() == 'poll';
+
+      if (isPollLink) {
+        log("Routing to Polls deep link: $uri");
+        popToRoot();
+        switchTab(1);
+
+        String? targetPollId = queryParams['pollId'] ??
+            queryParams['postId'] ??
+            queryParams['post_id'] ??
+            queryParams['id'];
+
+        if ((targetPollId == null || targetPollId.isEmpty) &&
+            uri.pathSegments.length >= 2) {
+          final candidate = uri.pathSegments.last;
+          if (int.tryParse(candidate) != null && candidate != "0") {
+            targetPollId = candidate;
+          }
+        }
+
+        if (targetPollId != null &&
+            targetPollId.isNotEmpty &&
+            targetPollId != "0") {
+          var polls = getAllPolls();
+          int matchedIdx = polls.indexWhere(
+            (p) => (p['id'] ?? p['post_id'])?.toString() == targetPollId,
+          );
+
+          if (matchedIdx == -1) {
+            await fetchDynamicPolls();
+            polls = getAllPolls();
+            matchedIdx = polls.indexWhere(
+              (p) => (p['id'] ?? p['post_id'])?.toString() == targetPollId,
+            );
+          }
+
+          if (matchedIdx != -1) {
+            mainNavigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => PollsFeedScreen(initialIndex: matchedIdx),
+              ),
+            );
+          } else {
+            mainNavigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => IndividualPostView1(
+                  postId: targetPollId!,
+                  isComeFrom: true,
+                ),
+              ),
+            );
+            getIndividualPost(
+              targetPollId,
+              isAds: true,
+              isLink: isFromNotification,
+            );
+          }
+        } else {
+          mainNavigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => const PollsFeedScreen(),
+            ),
+          );
+        }
+
+        try {
+          const MethodChannel("com.chotanews/whatsapp")
+              .invokeMethod("clearInitialIntent");
+        } catch (_) {}
         return;
       }
 

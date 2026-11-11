@@ -35,4 +35,13 @@ class AppColorTokens {
   static const Color darkIcon = Color(0xFFBDBDBD);
   
   static const Color darkPrimaryRed = Color(0xFFFF3B3B);
+
+  // --- Cinematic Surfaces (Movie Reviews & Polls) ---
+  static const Color cinematicBackground = Color(0xFF0F0F12);
+  static const Color cinematicCard = Color(0xFF16161B);
+  static const Color cinematicSurface = Color(0xFF1E1E24);
+  static const Color cinematicBorder = Color(0xFF33333E);
+  static const Color cinemaRed = Color(0xFFE50914);
+  static const Color ratingGold = Color(0xFFFBBF24);
+  static const Color movieTitleGold = Color(0xFFFFD200);
 }

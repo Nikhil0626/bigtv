@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -26,16 +27,16 @@ import 'package:chotanews/utils/date_format.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:chotanews/services/content_share_dispatcher.dart';
+import 'package:chotanews/services/translation_service.dart';
 import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:chotanews/utils/translated_text.dart';
 import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
@@ -219,75 +220,22 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
   }
 
   Future<void> _shareArticle({bool isWhatsAppOnly = true}) async {
-    try {
-      final String title = widget.article['title']?.toString() ?? "";
-      final String link = Platform.isIOS
-          ? (widget.article['linkURLIos']?.toString() ?? "")
-          : (widget.article['linkURLAndroid']?.toString() ?? "");
-      final String postUrl = widget.article['postUrl']?.toString() ?? "";
-      final String shareText =
-          "$title\n${postUrl.isNotEmpty ? '$postUrl\n' : ''}$link";
+    final String title = widget.article['title']?.toString() ?? "";
+    final String link = Platform.isIOS
+        ? (widget.article['linkURLIos']?.toString() ?? "")
+        : (widget.article['linkURLAndroid']?.toString() ?? "");
+    final String postUrl = widget.article['postUrl']?.toString() ?? "";
+    final String shareText =
+        "$title\n${postUrl.isNotEmpty ? '$postUrl\n' : ''}$link";
 
-      final imageBytes = await adsScreenshotController.capture(
-          delay: const Duration(milliseconds: 10));
-
-      final Size size = MediaQuery.of(context).size;
-      final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
-
-      if (isWhatsAppOnly) {
-        if (imageBytes != null) {
-          final directory = await getTemporaryDirectory();
-          final imagePath = await File(
-                  "${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png")
-              .create();
-          await imagePath.writeAsBytes(imageBytes);
-
-          if (Platform.isIOS) {
-            await Share.shareXFiles(
-              [XFile(imagePath.path)],
-              text: shareText,
-              sharePositionOrigin: shareOrigin,
-            );
-          } else {
-            try {
-              const platform = MethodChannel('com.chotanews/whatsapp');
-              await platform.invokeMethod('shareToWhatsApp',
-                  {'imagePath': imagePath.path, 'text': shareText});
-            } catch (e) {
-              await Share.shareXFiles(
-                [XFile(imagePath.path)],
-                text: shareText,
-                sharePositionOrigin: shareOrigin,
-              );
-            }
-          }
-        } else {
-          final url = "whatsapp://send?text=${Uri.encodeComponent(shareText)}";
-          if (await canLaunchUrl(Uri.parse(url))) {
-            await launchUrl(Uri.parse(url));
-          } else {
-            await Share.share(shareText);
-          }
-        }
-      } else {
-        if (imageBytes != null) {
-          final directory = await getTemporaryDirectory();
-          final imagePath = await File(
-                  "${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png")
-              .create();
-          await imagePath.writeAsBytes(imageBytes);
-          await Share.shareXFiles(
-            [XFile(imagePath.path)],
-            text: shareText,
-            sharePositionOrigin: shareOrigin,
-          );
-        } else {
-          await Share.share(shareText);
-        }
-      }
-    } catch (e) {
-      debugPrint("Share error: $e");
-    }
+    await ContentShareDispatcher().shareContent(
+      context: context,
+      shareText: shareText,
+      subject: title,
+      filePrefix: 'screenshot',
+      screenshotController: adsScreenshotController,
+      isWhatsAppOnly: isWhatsAppOnly,
+    );
   }
 
 
@@ -413,6 +361,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         );
 
         return GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () async {
             await bookmarksProvider.toggleBookmark(
               postId: widget.article['id'],
@@ -450,10 +399,337 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     );
   }
 
+  bool _isHomeBottomBarVisible(
+    BuildContext context,
+    HomeProvider homeProvider,
+  ) {
+    return !widget.isMainScreen &&
+        homeProvider.isBottomEnable &&
+        !homeProvider.isCurrentArticleGrid &&
+        !homeProvider.isCurrentArticleShowAlert &&
+        !homeProvider.isCurrentArticleBulletin &&
+        MediaQuery.of(context).orientation != Orientation.landscape;
+  }
+
+  Color _bodyTextColor(BuildContext context, [dynamic article]) {
+    final targetArticle = article ?? widget.article;
+    if (_isBigTvSpecial(targetArticle)) {
+      return Colors.white70;
+    }
+    if (_isBigBlackStandard(targetArticle) || _isDarkBg(targetArticle, context)) {
+      return Colors.white;
+    }
+    return AppColors.textColor.withValues(alpha: 0.8);
+  }
+
+  Future<void> _onReloadTap(HomeProvider homeProvider) async {
+    homeProvider.isReloadData();
+    if (homeProvider.isAiTagDataLoaded && homeProvider.selectedTagId != 0) {
+      await homeProvider.getAllPostsByAiId(homeProvider.selectedTagId);
+    } else {
+      await homeProvider.getAllPost(postIds: "0");
+    }
+  }
+
+  double _measureTitleSectionHeight(
+    BuildContext context, {
+    required HomeProvider homeProvider,
+    required double maxWidth,
+    required TextStyle titleStyle,
+  }) {
+    final String rawTitle = (widget.article['title'] ?? "No Title").toString();
+    final String effectiveTitle = homeProvider.isEnglishMode
+        ? (TranslationService().getCached(rawTitle) ?? rawTitle)
+        : rawTitle;
+    final TextStyle effectiveStyle = homeProvider.isEnglishMode
+        ? titleStyle.copyWith(
+            fontFamily: 'SF Pro',
+            fontFamilyFallback: const [
+              '.SF Pro Text',
+              '.SF Pro Display',
+              'SF Pro Text',
+              'SF Pro Display',
+              'Roboto',
+            ],
+            fontWeight: FontWeight.w500,
+          )
+        : titleStyle;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
+    TextStyle resolvedStyle = effectiveStyle.inherit
+        ? defaultTextStyle.style.merge(effectiveStyle)
+        : effectiveStyle;
+    if (MediaQuery.boldTextOf(context)) {
+      resolvedStyle = resolvedStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
+    final titlePainter = TextPainter(
+      text: TextSpan(text: effectiveTitle, style: resolvedStyle),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      locale: Localizations.maybeLocaleOf(context),
+      maxLines: 2,
+      ellipsis: '...',
+    )..layout(maxWidth: maxWidth);
+    final double height = titlePainter.height + 10.0 + 10.0;
+    titlePainter.dispose();
+    return height;
+  }
+
+  Widget _buildArticleBodyContent(
+    BuildContext context, {
+    required HomeProvider homeProvider,
+    required bool isPostActive,
+    required double remainingHeight,
+  }) {
+    final String contentText = widget.article['content']?.toString() ?? "";
+    final bool hasContent = contentText.isNotEmpty;
+
+    final bulletList = widget.article['bulletPoints'];
+    if (bulletList is List && bulletList.isNotEmpty) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasContent)
+            TranslatedText(
+              contentText,
+              translate: homeProvider.isEnglishMode,
+              style: homeScreenFontStyle(
+                color: _bodyTextColor(context),
+                fontWeight: FontWeight.w600,
+                fontSize: 16.sp,
+              ),
+            ),
+          if (hasContent) height(height: 8),
+          ListView(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            physics: const NeverScrollableScrollPhysics(),
+            children: bulletList.map<Widget>((item) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "● ",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: _bodyTextColor(context),
+                      height: 1,
+                    ),
+                  ),
+                  width(width: 5.sp),
+                  Expanded(
+                    child: TranslatedText(
+                      item.toString(),
+                      translate: homeProvider.isEnglishMode,
+                      strutStyle: StrutStyle(
+                        fontSize: 16.sp,
+                        height: 1,
+                      ),
+                      style: homeScreenFontStyle(
+                        color: _bodyTextColor(context),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+
+    final bool hasLinks =
+        (widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty) ||
+            RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(contentText);
+
+    if (hasLinks) {
+      return RichText(
+        overflow: TextOverflow.clip,
+        text: TextSpan(
+          text: '',
+          children: _parseText(
+            context,
+            contentText,
+            widget.article['links'],
+            widget.article,
+            isPostActive: isPostActive,
+          ),
+        ),
+      );
+    }
+
+    if (remainingHeight <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: remainingHeight),
+      child: TranslatedText(
+        contentText,
+        translate: homeProvider.isEnglishMode,
+        englishFontSize: 14.sp,
+        overflow: TextOverflow.ellipsis,
+        style: homeScreenFontStyle(
+          color: _bodyTextColor(context),
+          fontWeight: FontWeight.w600,
+          fontSize: 17.sp,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArticleFooter(
+    BuildContext context,
+    HomeProvider homeProvider,
+  ) {
+    final bool useLightForeground =
+        _isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context);
+    final Color metaColor = useLightForeground ? Colors.white70 : Colors.grey;
+    final Color reloadColor =
+        useLightForeground ? Colors.white : AppColorTokens.primaryRed;
+    final bool isLargeIconPost =
+        widget.article['type'] == "Gallery" || widget.article['type'] == "Image";
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 6.0, right: 6.0, top: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.article['isWebPost'] == true)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: InkWell(
+                        onTap: () async {
+                          if (widget.article['postUrl'] != null &&
+                              widget.article['postUrl'].toString().isNotEmpty) {
+                            await launchUrl(
+                              Uri.parse(widget.article['postUrl'].toString()),
+                            );
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: Text(
+                            "BIGTV.COM",
+                            style: fontStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: useLightForeground ? Colors.white : Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (widget.article['isStickyPost'] != 1)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.article['isReporter'] == 1) ...[
+                        Icon(Icons.person, size: 14, color: metaColor),
+                        Flexible(
+                          child: Text(
+                            ' ${widget.article['reportedBy']} | ',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: fontStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: metaColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                      Icon(Icons.access_time, size: 14, color: metaColor),
+                      Flexible(
+                        child: Text(
+                          " ${formatTimeDifference(widget.article['created']?.toString())}",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: fontStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: metaColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  const SizedBox.shrink(),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: const Key('news_card_reload_button'),
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => _onReloadTap(homeProvider),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: homeProvider.isReload
+                        ? SizedBox(
+                            height: isLargeIconPost ? 22 : 18,
+                            width: isLargeIconPost ? 22 : 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: reloadColor,
+                            ),
+                          )
+                        : Icon(
+                            Icons.refresh_rounded,
+                            size: isLargeIconPost ? 30 : 24,
+                            color: reloadColor,
+                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: const Key('news_card_whatsapp_button'),
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => _shareArticle(isWhatsAppOnly: true),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Image.asset(
+                      "assets/images/WhatsApp_icon.png",
+                      height: isLargeIconPost ? 35 : 30,
+                      width: isLargeIconPost ? 35 : 30,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final homeProvider = context.watch<HomeProvider>();
     final bool isPostActive = widget.pageController == null ||
-        context.watch<HomeProvider>().currentPageIndex == widget.index;
+        homeProvider.currentPageIndex == widget.index;
     return (widget.index + 2 >
                 context.read<HomeProvider>().getAllPostList.length &&
             context.read<HomeProvider>().isAiTagDataLoaded)
@@ -573,20 +849,26 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           : (widget.article['type'] == "Image" && widget.article['subType'] != "ImageAd")
                                               ? Stack(
                                                   children: [
-                                                    Image.network(
-                                                      _getImageUrl(
-                                                          widget.article[
-                                                              'image_url']),
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                              .size
-                                                              .width,
-                                                      height:
-                                                          MediaQuery.of(context)
-                                                              .size
-                                                              .height,
-                                                      fit: BoxFit.fill,
-                                                    ),
+                                                    if (_getImageUrl(widget.article['image_url']).isEmpty)
+                                                      Image.asset(
+                                                        "assets/images/bigtv_default_post.png",
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    else
+                                                      Image.network(
+                                                        _getImageUrl(widget.article['image_url']),
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height,
+                                                        fit: BoxFit.fill,
+                                                        errorBuilder: (_, __, ___) => Image.asset(
+                                                          "assets/images/bigtv_default_post.png",
+                                                          width: MediaQuery.of(context).size.width,
+                                                          height: MediaQuery.of(context).size.height,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
                                                     Positioned(
                                                       top: MediaQuery.of(context).padding.top + 10,
                                                       right: 14,
@@ -596,79 +878,54 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       bottom: 0,
                                                       child: Padding(
                                                         padding: EdgeInsets.only(
-                                                            bottom: MediaQuery.of(
-                                                                        context)
-                                                                    .padding
-                                                                    .bottom +
-                                                                6),
+                                                            bottom: MediaQuery.of(context).padding.bottom +
+                                                                (_isHomeBottomBarVisible(context, homeProvider) ? 56 : 6)),
                                                         child: Container(
-                                                          height: 45.sp,
-                                                          color: Colors
-                                                              .transparent,
-                                                          width: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .width,
-                                                          child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              Padding(
-                                                                padding: EdgeInsets
-                                                                    .symmetric(
-                                                                        horizontal:
-                                                                            16.0
-                                                                                .sp,
-                                                                        vertical:
-                                                                            5.sp),
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Consumer<HomeProvider>(
-                                                                      builder: (context, homeProvider, _) {
-                                                                        return BottomActions(
-                                                                          postType: widget.article['subType']?.toString() ?? "",
-                                                                          icon: "",
-                                                                          iconWidget: homeProvider.isReload
-                                                                              ? SizedBox(
-                                                                                  width: 18,
-                                                                                  height: 18,
-                                                                                  child: CircularProgressIndicator(
-                                                                                    strokeWidth: 2,
-                                                                                    color: _isBigBlackStandard(widget.article)
-                                                                                        ? Colors.white
-                                                                                        : AppColorTokens.primaryRed,
-                                                                                  ),
-                                                                                )
-                                                                              : Icon(
-                                                                                  Icons.refresh_rounded,
-                                                                                  color: _isBigBlackStandard(widget.article)
-                                                                                      ? Colors.white
-                                                                                      : Colors.grey,
-                                                                                  size: 22,
-                                                                                ),
-                                                                          label: 'Reload',
-                                                                          onTap: () async {
-                                                                            homeProvider.isReloadData();
-                                                                            if (homeProvider.isAiTagDataLoaded && homeProvider.selectedTagId != 0) {
-                                                                              await homeProvider.getAllPostsByAiId(homeProvider.selectedTagId);
-                                                                            } else {
-                                                                              await homeProvider.getAllPost(postIds: "0");
-                                                                            }
-                                                                          },
-                                                                        );
-                                                                      },
-                                                                    ),
-                                                                    const Spacer(),
-                                                                    // WhatsApp Share
-                                                                    InkWell(
-                                                                      onTap: () => _shareArticle(isWhatsAppOnly: true),
+                                                          constraints: BoxConstraints(minHeight: 48.sp),
+                                                          color: Colors.transparent,
+                                                          width: MediaQuery.of(context).size.width,
+                                                          child: Padding(
+                                                            padding: EdgeInsets.symmetric(
+                                                              horizontal: 16.0.sp,
+                                                              vertical: 4.sp,
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                BottomActions(
+                                                                  postType: widget.article['subType']?.toString() ?? "",
+                                                                  icon: "",
+                                                                  iconWidget: homeProvider.isReload
+                                                                      ? SizedBox(
+                                                                          width: 18,
+                                                                          height: 18,
+                                                                          child: CircularProgressIndicator(
+                                                                            strokeWidth: 2,
+                                                                            color: _isBigBlackStandard(widget.article)
+                                                                                ? Colors.white
+                                                                                : AppColorTokens.primaryRed,
+                                                                          ),
+                                                                        )
+                                                                      : Icon(
+                                                                          Icons.refresh_rounded,
+                                                                          color: _isBigBlackStandard(widget.article)
+                                                                              ? Colors.white
+                                                                              : Colors.grey,
+                                                                          size: 22,
+                                                                        ),
+                                                                  label: 'Reload',
+                                                                  onTap: () => _onReloadTap(homeProvider),
+                                                                ),
+                                                                const Spacer(),
+                                                                // WhatsApp Share
+                                                                Material(
+                                                                  type: MaterialType.transparency,
+                                                                  child: InkWell(
+                                                                    key: const Key('image_card_whatsapp_button'),
+                                                                    borderRadius: BorderRadius.circular(20),
+                                                                    onTap: () => _shareArticle(isWhatsAppOnly: true),
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets.all(6.0),
                                                                       child: Image.asset(
                                                                         "assets/images/WhatsApp_icon.png",
                                                                         height: 28,
@@ -676,10 +933,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         fit: BoxFit.contain,
                                                                       ),
                                                                     ),
-                                                                  ],
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ],
+                                                              ],
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -938,246 +1195,75 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 child: Container(
                                                                   width: MediaQuery.of(context).size.width,
                                                                   color: _getPostBackgroundColor(widget.article, context),
-                                                                  child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          16.0),
-                                                                    child: Column(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .start,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      /// Title only (Action Icons moved below)
-                                                                       Padding(
-                                                                         padding: const EdgeInsets.symmetric(vertical: 5.0),
-                                                                         child: TranslatedText(
-                                                                           widget.article['title'] ?? "No Title",
-                                                                           translate: context.watch<HomeProvider>().isEnglishMode,
-                                                                           style: homeScreenFontStyle(
-                                                                             color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
-                                                                                 ? Colors.white
-                                                                                 : const Color(0xFFED1C24),
-                                                                             fontSize: 18.sp,
-                                                                             fontWeight: FontWeight.w700,
-                                                                           ),
-                                                                           maxLines: 2,
-                                                                           overflow: TextOverflow.ellipsis,
-                                                                         ),
-                                                                       ),
-                                                                       height(
-                                                                           height:
-                                                                               0),
-                                                                       SizedBox(
-                                                                         height:
-                                                                             10,
-                                                                       ),
-                                                                       widget.article['subType'] ==
-                                                                               "BulletPost"
-                                                                           ? Column(
-                                                                               mainAxisAlignment: MainAxisAlignment.start,
-                                                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                                                               children: [
-                                                                                 (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
-                                                                                     ? TranslatedText(
-                                                                                         widget.article['content'].toString(),
-                                                                                         translate: context.watch<HomeProvider>().isEnglishMode,
-                                                                                         style: homeScreenFontStyle(
-                                                                                           color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor,
-                                                                                           fontWeight: FontWeight.w600,
-                                                                                           fontSize: 16.sp,
-                                                                                         ),
-                                                                                       )
-                                                                                     : const SizedBox.shrink(),
-                                                                                 if (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty) height(height: 8),
-                                                                                 ListView(
-                                                                                   shrinkWrap: true,
-                                                                                   padding: EdgeInsets.zero,
-                                                                                   physics: const NeverScrollableScrollPhysics(),
-                                                                                   children: (widget.article['bulletPoints'] as List? ?? []).map<Widget>((item) {
-                                                                                       return Row(
-                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                         children: [
-                                                                                           Text(
-                                                                                             "● ",
-                                                                                             style: TextStyle(
-                                                                                               fontSize: 14.sp,
-                                                                                               color: AppColors.textColor.withValues(alpha: 0.8),
-                                                                                               height: 1,
-                                                                                             ),
-                                                                                           ),
-                                                                                           width(width: 5.sp),
-                                                                                           Expanded(
-                                                                                             child: TranslatedText(
-                                                                                               item.toString(),
-                                                                                               translate: context.watch<HomeProvider>().isEnglishMode,
-                                                                                               strutStyle: StrutStyle(
-                                                                                                 fontSize: 16.sp,
-                                                                                                 height: 1,
-                                                                                               ),
-                                                                                               style: homeScreenFontStyle(
-                                                                                                 color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor.withValues(alpha: 0.8),
-                                                                                                 fontWeight: FontWeight.w600,
-                                                                                                 fontSize: 16.sp,
-                                                                                               ),
-                                                                                             ),
-                                                                                           ),
-                                                                                         ],
-                                                                                       );
-                                                                                     }).toList(),
-                                                                                 ),
-                                                                               ],
-                                                                             )
-                                                                           : ((widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty) ||
-                                                                                  RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(widget.article['content']?.toString() ?? ''))
-                                                                               ? RichText(
-                                                                                   text: TextSpan(
-                                                                                     text: '',
-                                                                                     children: _parseText(
-                                                                                        context, 
-                                                                                        widget.article['content']?.toString() ?? "", 
-                                                                                        widget.article['links'], 
-                                                                                        widget.article,
-                                                                                        isPostActive: isPostActive,
-                                                                                      ),
-                                                                                   ),
-                                                                                 )
-                                                                               : TranslatedText(
-                                                                                   widget.article['content']?.toString() ?? "",
-                                                                                   translate: context.watch<HomeProvider>().isEnglishMode,
-                                                                                   englishFontSize: 14.sp,
-                                                                                   style: homeScreenFontStyle(
-                                                                                     color: _isBigTvSpecial(widget.article)
-                                                                                         ? Colors.white70
-                                                                                         : (_isBigBlackStandard(widget.article)
-                                                                                             ? Colors.white
-                                                                                             : (_isDarkBg(widget.article, context) ? Colors.white : AppColors.textColor.withValues(alpha: 0.8))),
-                                                                                     fontWeight: FontWeight.w600,
-                                                                                     fontSize: 17.sp,
-                                                                                   ),
-                                                                                 ),
-                                                                       if (widget.article['type'] != 'ImageAd' && widget.article['subType'] != 'ImageAd')
-                                                                         Padding(
-                                                                           padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                                                                           child: Row(
-                                                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                               crossAxisAlignment: CrossAxisAlignment.end,
-                                                                               children: [
-                                                                                 Column(
-                                                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                   mainAxisSize: MainAxisSize.min,
-                                                                                   children: [
-                                                                                     if (widget.article['isWebPost'] == true)
-                                                                                       Padding(
-                                                                                         padding: const EdgeInsets.only(bottom: 4.0),
-                                                                                         child: InkWell(
-                                                                                           onTap: () async {
-                                                                                             if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
-                                                                                               await launchUrl(Uri.parse(widget.article['postUrl']));
-                                                                                             }
-                                                                                           },
-                                                                                           child: Text(
-                                                                                              "BIGTV.COM",
-                                                                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : Colors.red),
-                                                                                            ),
-                                                                                         ),
-                                                                                       ),
-                                                                                     if (widget.article['isStickyPost'] != 1)
-                                                                                       Row(
-                                                                                         mainAxisSize: MainAxisSize.min,
-                                                                                         children: [
-                                                                                           if (widget.article['isReporter'] == 1) Icon(Icons.person, size: 14, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
-                                                                                           if (widget.article['isReporter'] == 1)
-                                                                                             Text(
-                                                                                               ' ${widget.article['reportedBy']} | ',
-                                                                                               style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
-                                                                                             ),
-                                                                                           Icon(Icons.access_time, size: 14, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
-                                                                                           Text(
-                                                                                             " ${formatTimeDifference(widget.article['created']?.toString())}",
-                                                                                             style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
-                                                                                           ),
-                                                                                         ],
-                                                                                       )
-                                                                                     else
-                                                                                       const SizedBox.shrink(),
-                                                                                   ],
-                                                                                 ),
-                                                                                 Row(
-                                                                                   mainAxisSize: MainAxisSize.min,
-                                                                                   children: [
-                                                                                      /// Reload Icon
-                                                        Consumer<HomeProvider>(
-                                                          builder: (context, homeProvider, _) {
-                                                            final Color normalColor = (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
-                                                                ? Colors.white
-                                                                : AppColorTokens.primaryRed;
-
-                                                            return InkWell(
-                                                              onTap: () async {
-                                                                homeProvider.isReloadData();
-                                                                if (homeProvider.isAiTagDataLoaded && homeProvider.selectedTagId != 0) {
-                                                                  await homeProvider.getAllPostsByAiId(homeProvider.selectedTagId);
-                                                                } else {
-                                                                  await homeProvider.getAllPost(postIds: "0");
-                                                                }
-                                                              },
-                                                              child: Column(
-                                                                mainAxisSize: MainAxisSize.min,
-                                                                children: [
-                                                                  Row(
-                                                                    mainAxisSize: MainAxisSize.min,
-                                                                    children: [
-                                                                      homeProvider.isReload
-                                                                          ? SizedBox(
-                                                                              height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 22 : 18,
-                                                                              width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 22 : 18,
-                                                                              child: CircularProgressIndicator(
-                                                                                strokeWidth: 2,
-                                                                                color: normalColor,
-                                                                              ),
-                                                                            )
-                                                                          : Icon(
-                                                                              Icons.refresh_rounded,
-                                                                              size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 30 : 24,
-                                                                              color: normalColor,
-                                                                            ),
-                                                                    ],
+                                                                  padding: EdgeInsets.only(
+                                                                    left: 16.0,
+                                                                    right: 16.0,
+                                                                    bottom: MediaQuery.of(context).padding.bottom +
+                                                                        (_isHomeBottomBarVisible(context, homeProvider) ? 58.0 : 8.0),
                                                                   ),
-                                                                ],
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                                                    const SizedBox(width: 16),
-                                                                                    /// WhatsApp Share Icon
-                                                                                    InkWell(
-                                                                                      onTap: () => _shareArticle(isWhatsAppOnly: true),
-                                                                                      child: Column(
-                                                                                        mainAxisSize: MainAxisSize.min,
-                                                                                        children: [
-                                                                                          Image.asset(
-                                                                                            "assets/images/WhatsApp_icon.png",
-                                                                                            height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 35 : 30,
-                                                                                            width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 35 : 30,
-                                                                                            fit: BoxFit.contain,
-                                                                                          ),
-                                                                                        ],
-                                                                                      ),
+                                                                  child: Column(
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Flexible(
+                                                                        fit: FlexFit.loose,
+                                                                        child: LayoutBuilder(
+                                                                          builder: (context, bodyConstraints) {
+                                                                            if (bodyConstraints.maxHeight <= 0) {
+                                                                              return const SizedBox.shrink();
+                                                                            }
+                                                                            final TextStyle titleStyle = homeScreenFontStyle(
+                                                                              color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
+                                                                                  ? Colors.white
+                                                                                  : const Color(0xFFED1C24),
+                                                                              fontSize: 18.sp,
+                                                                              fontWeight: FontWeight.w700,
+                                                                            );
+                                                                            final double titleSectionHeight = _measureTitleSectionHeight(
+                                                                              context,
+                                                                              homeProvider: homeProvider,
+                                                                              maxWidth: bodyConstraints.maxWidth,
+                                                                              titleStyle: titleStyle,
+                                                                            );
+                                                                            final double remainingForContent = math.max(
+                                                                              0.0,
+                                                                              bodyConstraints.maxHeight - titleSectionHeight,
+                                                                            );
+                                                                            return _NonScrollingClipBox(
+                                                                              child: Column(
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  /// Title only (Action Icons moved below)
+                                                                                  Padding(
+                                                                                    padding: const EdgeInsets.symmetric(vertical: 5.0),
+                                                                                    child: TranslatedText(
+                                                                                      widget.article['title'] ?? "No Title",
+                                                                                      translate: homeProvider.isEnglishMode,
+                                                                                      style: titleStyle,
+                                                                                      maxLines: 2,
+                                                                                      overflow: TextOverflow.ellipsis,
                                                                                     ),
-                                                                                  ],
-                                                                                ),
-                                                                            ],
-                                                                          ),
+                                                                                  ),
+                                                                                  const SizedBox(height: 10),
+                                                                                  _buildArticleBodyContent(
+                                                                                    context,
+                                                                                    homeProvider: homeProvider,
+                                                                                    isPostActive: isPostActive,
+                                                                                    remainingHeight: remainingForContent,
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            );
+                                                                          },
                                                                         ),
+                                                                      ),
+                                                                      if (widget.article['type'] != 'ImageAd' && widget.article['subType'] != 'ImageAd')
+                                                                        _buildArticleFooter(context, homeProvider),
                                                                     ],
                                                                   ),
                                                                 ),
                                                               ),
-                                                            ),
                                                             ],
                                                           ],
                                                         ),
@@ -1246,11 +1332,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
       spans.add(TextSpan(
           text: nonMatch,
           style: homeScreenFontStyle(
-            color: _isBigTvSpecial(article)
-                ? Colors.white70
-                : (_isBigBlackStandard(article)
-                    ? Colors.white
-                    : (isDark ? Colors.white : AppColors.textColor.withValues(alpha: 0.8))),
+            color: _bodyTextColor(context, article),
             fontWeight: FontWeight.w600,
             fontSize: 17.sp,
           )));
@@ -1393,13 +1475,82 @@ class _HighlightTextPainter extends CustomPainter {
 
 class LandscapeFlexible extends StatelessWidget {
   final Widget child;
-  const LandscapeFlexible({Key? key, required this.child}) : super(key: key);
+  const LandscapeFlexible({super.key, required this.child});
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      fit: MediaQuery.of(context).orientation == Orientation.landscape ? FlexFit.tight : FlexFit.loose,
-      child: child,
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+      return Expanded(child: child);
+    }
+    return child;
+  }
+}
+
+/// Constrains its height to the parent's bounds without scrolling and clips any
+/// vertical overflow cleanly while allowing the child to lay out unconstrained.
+class _NonScrollingClipBox extends SingleChildRenderObjectWidget {
+  const _NonScrollingClipBox({required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderNonScrollingClipBox();
+}
+
+class _RenderNonScrollingClipBox extends RenderProxyBox {
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final child = this.child;
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final childSize = child.getDryLayout(
+      BoxConstraints(
+        minWidth: constraints.minWidth,
+        maxWidth: constraints.maxWidth,
+        minHeight: 0.0,
+        maxHeight: double.infinity,
+      ),
     );
+    return constraints.constrain(childSize);
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    child.layout(
+      BoxConstraints(
+        minWidth: constraints.minWidth,
+        maxWidth: constraints.maxWidth,
+        minHeight: 0.0,
+        maxHeight: double.infinity,
+      ),
+      parentUsesSize: true,
+    );
+    size = constraints.constrain(child.size);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final child = this.child;
+    if (child == null) {
+      layer = null;
+      return;
+    }
+    if (child.size.height > size.height || child.size.width > size.width) {
+      layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        (context, offset) => context.paintChild(child, offset),
+        oldLayer: layer as ClipRectLayer?,
+      );
+    } else {
+      layer = null;
+      context.paintChild(child, offset);
+    }
   }
 }
 

@@ -17,6 +17,30 @@ class ReelsProviders extends ChangeNotifier {
   List<String> isLikeList = [];
   bool isMuted = false;
   String? reelsLanguage;
+  final Set<VoidCallback> _pauseListeners = <VoidCallback>{};
+  int _pauseEpoch = 0;
+
+  /// Increments whenever an external navigation or tab switch pauses reels.
+  /// In-flight async preloads compare against this value to avoid auto-playing
+  /// after the user has left the reels view or opened Live TV.
+  int get pauseEpoch => _pauseEpoch;
+
+  void addPauseListener(VoidCallback listener) {
+    _pauseListeners.add(listener);
+  }
+
+  void removePauseListener(VoidCallback listener) {
+    _pauseListeners.remove(listener);
+  }
+
+  /// Immediately pauses any active reels playback across registered players.
+  void pauseAllReels() {
+    _pauseEpoch++;
+    for (final listener in List<VoidCallback>.from(_pauseListeners)) {
+      listener();
+    }
+    notifyListeners();
+  }
 
   ReelsProviders() {
     loadCachedLikedReels();

@@ -169,12 +169,14 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
           }
         }
 
-        // If it's a non-post deep link (e.g. epaper, live, events), route it
+        // If it's a non-post deep link (e.g. epaper, live, events, poll, review), route it
         if ((targetPostId == null || targetPostId.isEmpty) &&
             (uri.path.contains('epaper') ||
                 uri.path.contains('events') ||
                 uri.path.contains('live') ||
-                uri.path.contains('reel'))) {
+                uri.path.contains('reel') ||
+                uri.path.contains('poll') ||
+                uri.path.contains('review'))) {
           context.read<HomeProvider>().routeDeepLink(uri, isFromNotification: true);
           return;
         }

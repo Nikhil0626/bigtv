@@ -114,6 +114,10 @@ class CustomToast {
     return await _showToast(flush);
   }
   static dynamic _showToast(Flushbar flush) async {
-    return await flush.show(mainNavigatorKey.currentContext!);
+    final ctx = mainNavigatorKey.currentContext;
+    if (ctx == null || !ctx.mounted) {
+      return null;
+    }
+    return await flush.show(ctx);
   }
 }
