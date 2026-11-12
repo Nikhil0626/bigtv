@@ -111,7 +111,9 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
               );
             }
           },
-          child: videoProvider.isPlaying
+          child: (videoProvider.isPlaying &&
+                  videoProvider.controller != null &&
+                  videoProvider.controller!.value.isInitialized)
               ? Stack(
             alignment: Alignment.center,
             children: [
@@ -183,10 +185,12 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                       child: IconButton(
                         icon: const Icon(Icons.fullscreen, color: Colors.white),
                         onPressed: () {
+                          final ctrl = videoProvider.controller;
+                          if (ctrl == null || !ctrl.value.isInitialized) return;
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => FullscreenVideoView(
-                                controller: videoProvider.controller!,
+                                controller: ctrl,
                               ),
                             ),
                           );

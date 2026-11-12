@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/core/widgets/content_share_buttons.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
@@ -139,11 +140,10 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
     showDialog(
       context: context,
       builder: (dialogCtx) {
+        final palette = ThemedPopupPalette.of(dialogCtx);
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E2024),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.r),
-          ),
+          backgroundColor: palette.backgroundColor,
+          shape: palette.dialogShape(18.r),
           contentPadding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -152,12 +152,12 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                 width: 50.r,
                 height: 50.r,
                 decoration: BoxDecoration(
-                  color: AppColorTokens.cinemaRed.withValues(alpha: 0.15),
+                  color: palette.accentColor.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.how_to_vote_rounded,
-                  color: AppColorTokens.cinemaRed,
+                  color: palette.accentColor,
                   size: 26.sp,
                 ),
               ),
@@ -165,7 +165,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
               Text(
                 'లాగిన్ అవ్వండి',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: palette.titleColor,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -175,7 +175,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                 'ఓటు వేయడానికి మరియు ఫలితాలను చూడటానికి దయచేసి మీ మొబైల్ నంబర్‌తో లాగిన్ అవ్వండి.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: const Color(0xFF94A3B8),
+                  color: palette.bodyColor,
                   fontSize: 13.5.sp,
                   height: 1.4,
                 ),
@@ -186,9 +186,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.25),
-                        ),
+                        side: BorderSide(color: palette.borderColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -198,7 +196,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                       child: Text(
                         'రద్దు',
                         style: TextStyle(
-                          color: const Color(0xFF94A3B8),
+                          color: palette.bodyColor,
                           fontSize: 13.5.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -209,7 +207,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorTokens.cinemaRed,
+                        backgroundColor: palette.accentColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -515,9 +513,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                               whatsAppButtonKey: const Key(
                                 'poll_whatsapp_share_button',
                               ),
-                              shareButtonKey: const Key(
-                                'poll_share_button',
-                              ),
                               onShareWhatsApp: () {
                                 PollShareHelper.sharePoll(
                                   context: context,
@@ -525,15 +520,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                                   pollData: pollProvider.currentPollData,
                                   screenshotController: _screenshotController,
                                   isWhatsAppOnly: true,
-                                );
-                              },
-                              onShareMore: () {
-                                PollShareHelper.sharePoll(
-                                  context: context,
-                                  article: article,
-                                  pollData: pollProvider.currentPollData,
-                                  screenshotController: _screenshotController,
-                                  isWhatsAppOnly: false,
                                 );
                               },
                             ),

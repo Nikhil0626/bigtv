@@ -423,11 +423,23 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
   }
 
   Future<void> _onReloadTap(HomeProvider homeProvider) async {
+    if (homeProvider.isReload) return;
     homeProvider.isReloadData();
-    if (homeProvider.isAiTagDataLoaded && homeProvider.selectedTagId != 0) {
-      await homeProvider.getAllPostsByAiId(homeProvider.selectedTagId);
-    } else {
-      await homeProvider.getAllPost(postIds: "0");
+    try {
+      final dynamic tagId = homeProvider.selectedTagId;
+      final bool hasActiveAiTag = homeProvider.isAiTagDataLoaded &&
+          tagId != null &&
+          tagId != 0 &&
+          tagId.toString() != '0';
+      if (hasActiveAiTag) {
+        await homeProvider.getAllPostsByAiId(tagId);
+      } else {
+        await homeProvider.getAllPost(postIds: "0");
+      }
+    } finally {
+      if (homeProvider.isReload) {
+        homeProvider.isReloadFalse();
+      }
     }
   }
 
@@ -696,20 +708,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   onTap: () => _onReloadTap(homeProvider),
                   child: Padding(
                     padding: const EdgeInsets.all(6.0),
-                    child: homeProvider.isReload
-                        ? SizedBox(
-                            height: isLargeIconPost ? 22 : 18,
-                            width: isLargeIconPost ? 22 : 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: reloadColor,
-                            ),
-                          )
-                        : Icon(
-                            Icons.refresh_rounded,
-                            size: isLargeIconPost ? 30 : 24,
-                            color: reloadColor,
-                          ),
+                    child: Icon(
+                      Icons.refresh_rounded,
+                      size: isLargeIconPost ? 30 : 24,
+                      color: reloadColor,
+                    ),
                   ),
                 ),
               ),
@@ -908,24 +911,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 BottomActions(
                                                                   postType: widget.article['subType']?.toString() ?? "",
                                                                   icon: "",
-                                                                  iconWidget: homeProvider.isReload
-                                                                      ? SizedBox(
-                                                                          width: 18,
-                                                                          height: 18,
-                                                                          child: CircularProgressIndicator(
-                                                                            strokeWidth: 2,
-                                                                            color: _isBigBlackStandard(widget.article)
-                                                                                ? Colors.white
-                                                                                : AppColorTokens.primaryRed,
-                                                                          ),
-                                                                        )
-                                                                      : Icon(
-                                                                          Icons.refresh_rounded,
-                                                                          color: _isBigBlackStandard(widget.article)
-                                                                              ? Colors.white
-                                                                              : Colors.grey,
-                                                                          size: 22,
-                                                                        ),
+                                                                  iconWidget: Icon(
+                                                                    Icons.refresh_rounded,
+                                                                    color: _isBigBlackStandard(widget.article)
+                                                                        ? Colors.white
+                                                                        : Colors.grey,
+                                                                    size: 22,
+                                                                  ),
                                                                   label: 'Reload',
                                                                   onTap: () => _onReloadTap(homeProvider),
                                                                 ),
@@ -1030,6 +1022,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 postDetails:
                                                                     widget
                                                                         .article,
+                                                                onReload: () =>
+                                                                    _onReloadTap(
+                                                                        homeProvider),
                                                               ),
                                                               Positioned(
                                                                 top: 10,
@@ -1116,8 +1111,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     child: Image.asset(
                                                                       "assets/images/BigTvPostLogo.png",
                                                                       width: 95.w,
-                                                                      height: 32.h,
                                                                       fit: BoxFit.contain,
+                                                                      alignment: Alignment.bottomRight,
                                                                     ),
                                                                   ),
 
@@ -1491,10 +1486,13 @@ class LandscapeFlexible extends StatelessWidget {
   const LandscapeFlexible({super.key, required this.child});
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      return Expanded(child: child);
-    }
-    return child;
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    return Flexible(
+      flex: isLandscape ? 1 : 0,
+      fit: isLandscape ? FlexFit.tight : FlexFit.loose,
+      child: child,
+    );
   }
 }
 

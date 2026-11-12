@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -279,42 +280,43 @@ class ReferralProvider extends ChangeNotifier {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext contexts) {
+        final palette = ThemedPopupPalette.of(contexts);
         return PopScope(
           canPop: false, // Prevent back button
           child: Container(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              color: palette.backgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.error_outline,
-                  color: Colors.red,
+                  color: palette.accentColor,
                   size: 60,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   "Referral Program Unavailable",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red,
+                    color: palette.accentColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   "The referral program is currently not available. Please try logging in again and joining the contest.",
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: palette.bodyColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 Consumer<ReferralProvider>(
                     builder: (context,referralProvider,__) {
                       return ElevatedButton(
@@ -331,7 +333,7 @@ class ReferralProvider extends ChangeNotifier {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: palette.accentColor,
                             minimumSize: Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

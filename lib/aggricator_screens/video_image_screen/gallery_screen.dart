@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -18,13 +18,11 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../../../aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import '../../../globel_keys/app_router.dart';
 import '../../../services/image_to_pdf_helper.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 
 import '../../utils/botton_actions.dart';
-import '../events_data/event_repo.dart';
 
 
 
@@ -34,6 +32,7 @@ class FullPageCarousel extends StatefulWidget {
   final postDetails;
   final bool isHome;
   final bool? autoPlay;
+  final VoidCallback? onReload;
 
   const FullPageCarousel({
     super.key,
@@ -42,6 +41,7 @@ class FullPageCarousel extends StatefulWidget {
     required this.postDetails,
     this.isHome = false,
     this.autoPlay,
+    this.onReload,
   });
 
   @override
@@ -61,6 +61,35 @@ class FullPageCarouselState extends State<FullPageCarousel> {
       String url = image is String ? image : (image['Url'] ?? "");
       if (url.isNotEmpty) {
         precacheImage(NetworkImage(url), context);
+      }
+    }
+  }
+
+  Future<void> _handleReloadTap() async {
+    if (widget.onReload != null) {
+      widget.onReload!.call();
+      return;
+    }
+    HomeProvider? homeProvider;
+    try {
+      homeProvider = context.read<HomeProvider>();
+    } catch (_) {}
+    if (homeProvider == null || homeProvider.isReload) return;
+    homeProvider.isReloadData();
+    try {
+      final dynamic tagId = homeProvider.selectedTagId;
+      final bool hasActiveAiTag = homeProvider.isAiTagDataLoaded &&
+          tagId != null &&
+          tagId != 0 &&
+          tagId.toString() != '0';
+      if (hasActiveAiTag) {
+        await homeProvider.getAllPostsByAiId(tagId);
+      } else {
+        await homeProvider.getAllPost(postIds: "0");
+      }
+    } finally {
+      if (homeProvider.isReload) {
+        homeProvider.isReloadFalse();
       }
     }
   }
@@ -161,27 +190,28 @@ class FullPageCarouselState extends State<FullPageCarousel> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 50,
-            child: ValueListenableBuilder<int>(
-              valueListenable: _currentIndex,
-              builder: (context, currentIndex, child) {
-                return AnimatedSmoothIndicator(
-                  activeIndex: currentIndex,
-                  count: widget.imageUrls.length,
-                  effect: ExpandingDotsEffect(
-                    dotHeight: 7,
-                    dotWidth: 7,
-                    activeDotColor: Colors.cyan.withValues(alpha: .3),
-                    dotColor: Colors.grey.shade400,
-                  ),
-                  onDotClicked: (index) {
-                    _controller.jumpToPage(index);
-                  },
-                );
-              },
+          if (widget.imageUrls.isNotEmpty)
+            Positioned(
+              bottom: 50,
+              child: ValueListenableBuilder<int>(
+                valueListenable: _currentIndex,
+                builder: (context, currentIndex, child) {
+                  return AnimatedSmoothIndicator(
+                    activeIndex: currentIndex,
+                    count: widget.imageUrls.length,
+                    effect: ExpandingDotsEffect(
+                      dotHeight: 7,
+                      dotWidth: 7,
+                      activeDotColor: Colors.cyan.withValues(alpha: .3),
+                      dotColor: Colors.grey.shade400,
+                    ),
+                    onDotClicked: (index) {
+                      _controller.jumpToPage(index);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
           Positioned(
             bottom: 0,
             left: 0,
@@ -192,32 +222,24 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                 padding: EdgeInsets.symmetric(horizontal: 8.0.sp, vertical: 10.sp),
                 child: Row(
                   children: [
-                    // Like Button with Provider
-                    Consumer<SettingsProvider>(
-                      builder: (_, settingsProvider, __) {
-                        bool isLiked = settingsProvider.isLikeList.contains(widget.postDetails['id'].toString());
-                        return BottomActions(
-                          iconColor: AppColorTokens.primaryRed,
-                          iconSize: 28,
-                          postType: widget.postDetails['subType']?.toString() ?? "",
-                          icon: isLiked ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                          label: 'లైక్',
-                          isLike: isLiked,
-                          onTap: () async {
-                            log("Like");
-                            settingsProvider.isLikePost(widget.postDetails);
-                             EventRepo().addEvent({
-                              "like": !settingsProvider.isLikeList.contains(widget.postDetails['id'].toString()),
-                              "postId": widget.postDetails['id']?.toString() ?? "000",
-                              "createAt": DateTime.now().toString(),
-                               "postTitle": widget.postDetails['title'].toString()
-
-                             }, "liked_article");
-
-
-                          },
-                        );
-                      },
+                    BottomActions(
+                      key: const Key('gallery_card_reload_button'),
+                      postType: widget.postDetails['subType']?.toString() ?? "",
+                      icon: "",
+                      iconWidget: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.refresh_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      label: 'Reload',
+                      onTap: _handleReloadTap,
                     ),
 
 

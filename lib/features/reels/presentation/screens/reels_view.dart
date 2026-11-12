@@ -16,7 +16,6 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/botton_actions.dart';
 import 'package:chotanews/utils/commant_screen.dart';
 import 'package:chotanews/utils/date_format.dart';
-import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -57,16 +56,17 @@ class ReelsScreenState extends State<ReelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
-        return reelsProvider.reelsLoading
-            ? HomeShimmer()
-            : reelsProvider.getAllReelsList.isEmpty
-                ? AppNoData()
-                : ReelPreviewScreen(initialIndex: 0);
-      }),
-    );
+    return Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
+      return reelsProvider.reelsLoading
+          ? HomeShimmer()
+          : reelsProvider.getAllReelsList.isEmpty
+              ? Container(
+                  key: const Key('reels_empty_state'),
+                  color: Colors.black,
+                  child: const AppNoData(textColor: Colors.white),
+                )
+              : ReelPreviewScreen(initialIndex: 0);
+    });
   }
 }
 
@@ -162,34 +162,22 @@ class _EachReelCardState extends State<EachReelCard> {
                       child: Row(
                         children: [
                           width(width: 10),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => InAppWebViewScreen(
-                                      webUrl: "https://www.youtube.com",
-                                      title: "Videos",
-                                    ),
-                                  ));
-                            },
-                            child: SizedBox(
-                              height: 36.r,
-                              width: 36.r,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.all(Radius.circular(18.r)),
-                                child: CachedNetworkImage(
-                                  imageUrl: widget.reel.publisherImage,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    color: AppColors.borderColor.withValues(alpha: .2),
-                                  ),
-                                  errorWidget: (context, url, error) => Center(
-                                    child: Icon(
-                                      Icons.account_circle,
-                                      size: 36.r,
-                                      color: Colors.grey.shade300,
-                                    ),
+                          SizedBox(
+                            height: 36.r,
+                            width: 36.r,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.all(Radius.circular(18.r)),
+                              child: CachedNetworkImage(
+                                imageUrl: widget.reel.publisherImage,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: AppColors.borderColor.withValues(alpha: .2),
+                                ),
+                                errorWidget: (context, url, error) => Center(
+                                  child: Icon(
+                                    Icons.account_circle,
+                                    size: 36.r,
+                                    color: Colors.grey.shade300,
                                   ),
                                 ),
                               ),

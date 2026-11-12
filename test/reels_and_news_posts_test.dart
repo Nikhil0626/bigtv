@@ -12,6 +12,8 @@ import 'package:video_player/video_player.dart';
 
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
+import 'package:chotanews/core/theme/app_theme.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
 import 'package:chotanews/features/home/data/repositories/news_post_repo.dart';
@@ -21,7 +23,9 @@ import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/features/reels/data/models/reels_model.dart';
 import 'package:chotanews/features/reels/data/repositories/reels_repository.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
+import 'package:chotanews/features/reels/presentation/screens/reels_view.dart';
 import 'package:chotanews/features/reels/presentation/widgets/reels_screen_preview.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 
 class _FakeVideoPlayerController extends ValueNotifier<VideoPlayerValue>
     implements VideoPlayerController {
@@ -107,6 +111,7 @@ class _FakeVideoPlayerController extends ValueNotifier<VideoPlayerValue>
 class _TestTabHomeProvider extends HomeProvider {
   Completer<Map<String, dynamic>?>? liveTvCompleter;
   int fetchLiveTvCalls = 0;
+  int getAllPostCalls = 0;
 
   @override
   Future<Map<String, dynamic>?> fetchLiveTvStream({
@@ -123,7 +128,9 @@ class _TestTabHomeProvider extends HomeProvider {
   Future<void> getAllPost({
     String postIds = "0",
     bool isGetAllPost = false,
-  }) async {}
+  }) async {
+    getAllPostCalls++;
+  }
 
   @override
   void flipEvent(String pageName, dynamic id, dynamic val) {}
@@ -299,13 +306,18 @@ void main() {
   });
 
   group('Reels playback stops on Live TV tap and tab switches', () {
-    ReelsModel makeReel({String id = 'reel_1'}) => ReelsModel(
+    ReelsModel makeReel({
+      String id = 'reel_1',
+      String publisher = 'BIG TV',
+      String publisherImage = '',
+    }) =>
+        ReelsModel(
           id: id,
           videoUrl: 'https://cdn.example.com/videos/$id.mp4',
           thumbnailUrl: '',
           title: 'Breaking News Reel $id',
-          publisher: 'BIG TV',
-          publisherImage: '',
+          publisher: publisher,
+          publisherImage: publisherImage,
           likes: 10,
           comments: 2,
           shares: 1,
@@ -654,5 +666,266 @@ void main() {
         await tester.pumpAndSettle();
       },
     );
+
+    testWidgets(
+      'tapping News tab in bottom nav triggers getAllPost and resets to first post',
+      (tester) async {
+        final fakeController = _FakeVideoPlayerController();
+        final newsPageController = PageController(initialPage: 2);
+
+        final homeProvider = _TestTabHomeProvider()
+          ..selectedIndex = 2
+          ..homePageController = PageController(initialPage: 2)
+          ..pageController = newsPageController
+          ..getAllPostList = [
+            {'id': 1, 'title': 'First'},
+            {'id': 2, 'title': 'Second'},
+            {'id': 3, 'title': 'Third'},
+          ];
+        homeProvider.setCurrentPageIndex(2);
+        homeProvider.aiTagDataLoaded(true);
+        homeProvider.setSelectedTagId(42);
+
+        final reelsProvider = ReelsProviders()
+          ..reelsLoading = false
+          ..getAllReelsList = [makeReel()];
+
+        await tester.pumpWidget(
+          ScreenUtilInit(
+            designSize: const Size(360, 690),
+            builder: (context, _) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+                ChangeNotifierProvider<ReelsProviders>.value(value: reelsProvider),
+                ChangeNotifierProvider<VideoProvider>(
+                  create: (_) => VideoProvider(),
+                ),
+                ChangeNotifierProvider<SettingsProvider>(
+                  create: (_) => SettingsProvider(),
+                ),
+                ChangeNotifierProvider<BookmarksProvider>(
+                  create: (_) => BookmarksProvider(),
+                ),
+                ChangeNotifierProvider<AuthenticationProvider>(
+                  create: (_) => AuthenticationProvider(),
+                ),
+              ],
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Stack(
+                    children: [
+                      PageView(
+                        controller: homeProvider.homePageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          const Center(child: Text('Search Tab')),
+                          Consumer<HomeProvider>(
+                            builder: (_, hp, __) => PageView(
+                              controller: hp.pageController,
+                              children: const [
+                                Center(child: Text('News Post 1')),
+                                Center(child: Text('News Post 2')),
+                                Center(child: Text('News Post 3')),
+                              ],
+                            ),
+                          ),
+                          ReelPreviewScreen(
+                            initialIndex: 0,
+                            videoControllerBuilder: (_) => fakeController,
+                          ),
+                          const Center(child: Text('More Tab')),
+                        ],
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Consumer<HomeProvider>(
+                          builder: (context, hp, _) =>
+                              HomeBottomNavigationBar(homeProvider: hp),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('bottom_nav_tab_1')));
+        await tester.pump();
+        await tester.pump();
+
+        expect(homeProvider.selectedIndex, equals(1));
+        expect(homeProvider.getAllPostCalls, equals(1));
+        expect(homeProvider.isAiTagDataLoaded, isFalse);
+        expect(homeProvider.selectedTagId, isNull);
+        expect(homeProvider.currentPageIndex, equals(0));
+        expect(homeProvider.pageController?.page?.round(), equals(0));
+        expect(find.text('News Post 1'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping BigTV publisher logo in ReelPreviewScreen does not redirect',
+      (tester) async {
+        final fakeController = _FakeVideoPlayerController();
+        final homeProvider = _TestTabHomeProvider()
+          ..selectedIndex = 2
+          ..homePageController = PageController(initialPage: 2);
+        final reelsProvider = ReelsProviders()
+          ..reelsLoading = false
+          ..getAllReelsList = [
+            makeReel(
+              publisher: 'BIGTV',
+              publisherImage: 'https://example.com/bigtv_logo.png',
+            ),
+          ];
+
+        await tester.pumpWidget(
+          buildReelsHomeHarness(
+            homeProvider: homeProvider,
+            reelsProvider: reelsProvider,
+            videoControllerBuilder: (_) => fakeController,
+            includeBottomNav: false,
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.text('BIGTV'), findsOneWidget);
+        final logoFinder = find.byWidgetPredicate(
+          (w) =>
+              w is SizedBox &&
+              w.child is ClipRRect &&
+              (w.child as ClipRRect).child.toString().contains('CachedNetworkImage'),
+        );
+        expect(logoFinder, findsOneWidget);
+
+        await tester.tap(logoFinder);
+        await tester.pump(const Duration(milliseconds: 350));
+
+        expect(find.text('Videos'), findsNothing);
+        expect(find.text('BIGTV'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Reels video fills full screen from top down to bottom nav with BoxFit.cover',
+      (tester) async {
+        final fakeController = _FakeVideoPlayerController();
+        final homeProvider = _TestTabHomeProvider()
+          ..selectedIndex = 2
+          ..homePageController = PageController(initialPage: 2);
+        final reelsProvider = ReelsProviders()
+          ..reelsLoading = false
+          ..getAllReelsList = [makeReel()];
+
+        await tester.pumpWidget(
+          buildReelsHomeHarness(
+            homeProvider: homeProvider,
+            reelsProvider: reelsProvider,
+            videoControllerBuilder: (_) => fakeController,
+            includeBottomNav: true,
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        final Rect cardRect = tester.getRect(find.byType(ReelsCardView));
+        final Rect videoAreaRect =
+            tester.getRect(find.byKey(const Key('reel_card_gesture_area')));
+        final Rect navRect =
+            tester.getRect(find.byType(HomeBottomNavigationBar));
+
+        expect(videoAreaRect.top, equals(cardRect.top));
+        expect(videoAreaRect.top, equals(0.0));
+        expect(videoAreaRect.bottom, closeTo(navRect.top, 0.5));
+
+        final fittedBox = tester.widget<FittedBox>(
+          find.descendant(
+            of: find.byKey(const Key('reel_card_gesture_area')),
+            matching: find.byType(FittedBox),
+          ),
+        );
+        expect(fittedBox.fit, equals(BoxFit.cover));
+      },
+    );
+
+    testWidgets(
+      'ReelsScreen empty state shows white No data Found on black background in light and dark mode',
+      (tester) async {
+        for (final theme in [AppTheme.lightTheme, AppTheme.darkTheme]) {
+          final reelsProvider = _StubEmptyReelsProviders()
+            ..reelsLoading = false
+            ..getAllReelsList = [];
+
+          await tester.pumpWidget(
+            ScreenUtilInit(
+              designSize: const Size(360, 690),
+              builder: (context, _) => MultiProvider(
+                providers: [
+                  ChangeNotifierProvider<ReelsProviders>.value(
+                    value: reelsProvider,
+                  ),
+                ],
+                child: MaterialApp(
+                  theme: theme,
+                  home: const Scaffold(body: ReelsScreen()),
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+          await tester.pump();
+
+          final container = tester.widget<Container>(
+            find.byKey(const Key('reels_empty_state')),
+          );
+          expect(container.color, equals(Colors.black));
+
+          final noDataText = tester.widget<Text>(find.text('No data Found'));
+          expect(noDataText.style?.color, equals(Colors.white));
+        }
+      },
+    );
+
+    testWidgets(
+      'AppNoData adapts text color to light and dark theme by default',
+      (tester) async {
+        Future<Color?> pumpAndReadColor(ThemeData theme) async {
+          await tester.pumpWidget(
+            ScreenUtilInit(
+              key: ValueKey<Brightness>(theme.brightness),
+              designSize: const Size(360, 690),
+              builder: (context, _) => MaterialApp(
+                theme: theme,
+                home: const Scaffold(body: AppNoData()),
+              ),
+            ),
+          );
+          await tester.pump();
+          final text = tester.widget<Text>(find.text('No data Found'));
+          return text.style?.color;
+        }
+
+        expect(
+          await pumpAndReadColor(AppTheme.lightTheme),
+          equals(AppColorTokens.lightTextPrimary),
+        );
+        expect(
+          await pumpAndReadColor(AppTheme.darkTheme),
+          equals(AppColorTokens.darkTextPrimary),
+        );
+      },
+    );
   });
+}
+
+class _StubEmptyReelsProviders extends ReelsProviders {
+  @override
+  Future getAllReels({String postId = "0"}) async {}
 }

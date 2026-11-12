@@ -276,5 +276,56 @@ void main() {
       expect(find.text("రాజకీయ విశ్లేషణ: సమగ్ర సమీక్ష"), findsOneWidget);
       expect(find.text("చదవండి"), findsOneWidget);
     });
+
+    testWidgets(
+      'SearchDiscoverScreen Notifications tab hides quick service tabs, Taaja heading, and notification count',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 3.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        final homeProvider = HomeProvider();
+        final notifProvider = NotificationsProvider();
+        final bookmarksProvider = BookmarksProvider();
+
+        await tester.pumpWidget(
+          ScreenUtilInit(
+            designSize: const Size(360, 690),
+            builder: (context, child) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+                ChangeNotifierProvider<NotificationsProvider>.value(
+                  value: notifProvider,
+                ),
+                ChangeNotifierProvider<BookmarksProvider>.value(
+                  value: bookmarksProvider,
+                ),
+              ],
+              child: const MaterialApp(
+                home: SearchDiscoverScreen(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        await tester.tap(find.text("నోటిఫికేషన్‌లు"));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(find.byKey(const Key('notifications_tab_view')), findsOneWidget);
+        expect(find.text("రిపోర్టర్లు"), findsNothing);
+        expect(find.text("గేమ్స్"), findsNothing);
+        expect(find.text("సినిమా రివ్యూస్"), findsNothing);
+        expect(find.text("తాజా నోటిఫికేషన్‌లు"), findsNothing);
+        expect(find.textContaining("అలర్ట్‌లు"), findsNothing);
+        expect(find.text("నోటిఫికేషన్‌లు ఏవీ లేవు"), findsOneWidget);
+      },
+    );
   });
 }

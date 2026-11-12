@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../events_data/event_repo.dart';
 import '../../globel_keys/globel_keys.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'contest_model.dart';
 import 'contest_repo.dart';
@@ -59,40 +60,42 @@ class AdsContestProvider extends ChangeNotifier {
     showModalBottomSheet(
       context: contexti,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      backgroundColor: ThemedPopupPalette.of(contexti).backgroundColor,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext contexts) {
+        final palette = ThemedPopupPalette.of(contexts);
         return Container(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.error_outline,
-                color: Colors.red,
+                color: palette.accentColor,
                 size: 60,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 "Contest Program Unavailable",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: palette.accentColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 "The contest program is currently not available. Please try logging in again and joining the contest.",
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[700],
+                  color: palette.bodyColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Consumer<AdsContestProvider>(
                   builder: (context,adsContestProvider,__) {
                     return ElevatedButton(
@@ -102,7 +105,7 @@ class AdsContestProvider extends ChangeNotifier {
                           Navigator.pushAndRemoveUntil(contexts, MaterialPageRoute(builder: (contexts) => LoginBackgroundView()), (route) => false);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: palette.accentColor,
                           minimumSize: Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),

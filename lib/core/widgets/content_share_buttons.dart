@@ -2,11 +2,11 @@ import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Compact, theme-aware WhatsApp quick-share and general share action buttons
-/// reused across full-screen content cards such as Movie Reviews and Polls.
+/// Compact, theme-aware WhatsApp quick-share and optional general share action
+/// buttons reused across full-screen content cards such as Movie Reviews and Polls.
 class ContentShareButtons extends StatelessWidget {
   final VoidCallback onShareWhatsApp;
-  final VoidCallback onShareMore;
+  final VoidCallback? onShareMore;
   final bool useDarkOverlay;
   final Key? whatsAppButtonKey;
   final Key? shareButtonKey;
@@ -14,7 +14,7 @@ class ContentShareButtons extends StatelessWidget {
   const ContentShareButtons({
     super.key,
     required this.onShareWhatsApp,
-    required this.onShareMore,
+    this.onShareMore,
     this.useDarkOverlay = true,
     this.whatsAppButtonKey,
     this.shareButtonKey,
@@ -66,34 +66,36 @@ class ContentShareButtons extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 8.w),
-        Tooltip(
-          message: 'Share',
-          child: Semantics(
-            button: true,
-            label: 'Share',
-            child: InkWell(
-              key: shareButtonKey,
-              onTap: onShareMore,
-              borderRadius: BorderRadius.circular(20.r),
-              child: Container(
-                width: 32.r,
-                height: 32.r,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: surfaceColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: borderColor, width: 1),
-                ),
-                child: Icon(
-                  Icons.share_rounded,
-                  color: iconColor,
-                  size: 17.sp,
+        if (onShareMore != null) ...[
+          SizedBox(width: 8.w),
+          Tooltip(
+            message: 'Share',
+            child: Semantics(
+              button: true,
+              label: 'Share',
+              child: InkWell(
+                key: shareButtonKey,
+                onTap: onShareMore,
+                borderRadius: BorderRadius.circular(20.r),
+                child: Container(
+                  width: 32.r,
+                  height: 32.r,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: surfaceColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: borderColor, width: 1),
+                  ),
+                  child: Icon(
+                    Icons.share_rounded,
+                    color: iconColor,
+                    size: 17.sp,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }

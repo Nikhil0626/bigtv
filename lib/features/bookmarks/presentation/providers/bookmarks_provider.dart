@@ -7,7 +7,7 @@ import '../../data/models/bookmark_post_model.dart';
 import '../../data/repositories/bookmarks_repository.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
-import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
@@ -256,7 +256,6 @@ class BookmarksProvider extends ChangeNotifier {
 
   /// Show login required dialog when unauthenticated user tries to bookmark
   static Future<bool> showLoginRequiredDialog(BuildContext context) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     String langCode = 'te';
     try {
       langCode = context.read<HomeProvider>().langCode;
@@ -266,20 +265,21 @@ class BookmarksProvider extends ChangeNotifier {
     final bool? shouldLogin = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) {
+        final palette = ThemedPopupPalette.of(dialogCtx);
         return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1E222A) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          backgroundColor: palette.backgroundColor,
+          shape: palette.dialogShape(16.r),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.primaryRed.withValues(alpha: 0.12),
+                  color: palette.accentColor.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.bookmark_border_rounded,
-                  color: AppColorTokens.primaryRed,
+                  color: palette.accentColor,
                   size: 22,
                 ),
               ),
@@ -290,7 +290,7 @@ class BookmarksProvider extends ChangeNotifier {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    color: palette.titleColor,
                   ),
                 ),
               ),
@@ -302,7 +302,7 @@ class BookmarksProvider extends ChangeNotifier {
                 : 'വാർത്തകൾ ബുക്ക്‌മാർക്ക് ചെയ്യാനും പിന്നീട് വായിക്കാനും ദയവായി ലോഗിൻ ചെയ്യുക.',
             style: TextStyle(
               fontSize: 13.sp,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+              color: palette.bodyColor,
             ),
           ),
           actions: [
@@ -310,12 +310,12 @@ class BookmarksProvider extends ChangeNotifier {
               onPressed: () => Navigator.pop(dialogCtx, false),
               child: Text(
                 isTelugu ? 'రద్దు చేయి' : 'റദ്దాക്കുക',
-                style: TextStyle(color: const Color(0xFF64748B), fontSize: 13.sp),
+                style: TextStyle(color: palette.bodyColor, fontSize: 13.sp),
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColorTokens.primaryRed,
+                backgroundColor: palette.accentColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                 padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
                 elevation: 0,

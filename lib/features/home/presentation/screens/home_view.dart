@@ -149,12 +149,15 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       builder: (_, homeProvider, __) {
         final bool isDark = Theme.of(context).brightness == Brightness.dark;
         final bool isSearchTab = homeProvider.selectedIndex == 0;
+        final bool isReelsTab = homeProvider.selectedIndex == 2;
 
-        final Color systemStatusBarColor = isSearchTab
-            ? AppColorTokens.primaryRed
-            : (isDark ? const Color(0xFF0F0F12) : Colors.white);
+        final Color systemStatusBarColor = isReelsTab
+            ? Colors.transparent
+            : isSearchTab
+                ? AppColorTokens.primaryRed
+                : (isDark ? const Color(0xFF0F0F12) : Colors.white);
 
-        final bool isSystemDark = isSearchTab || isDark;
+        final bool isSystemDark = isReelsTab || isSearchTab || isDark;
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
@@ -175,7 +178,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
               SystemNavigator.pop();
             },
             child: Scaffold(
-              backgroundColor: systemStatusBarColor,
+              backgroundColor: isReelsTab ? Colors.black : systemStatusBarColor,
               extendBody: true,
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
               floatingActionButton: null,
@@ -355,11 +358,10 @@ class HomeBottomNavigationBar extends StatelessWidget {
         if (index == 0) {
           EventRepo().addEvent({"aiTagName": "search", "aiTagId": "-2", "createAt": DateTime.now().toString()}, "ai_tag_click");
         } else if (index == 1) {
-          if (homeProvider.getAllPostList.isEmpty) {
-            homeProvider.getAllPost();
-          }
           homeProvider.aiTagDataLoaded(false);
           homeProvider.setSelectedTagId(0);
+          homeProvider.resetToFirstPost();
+          homeProvider.getAllPost();
           EventRepo().addEvent({"aiTagName": "news", "aiTagId": "-1", "createAt": DateTime.now().toString()}, "ai_tag_click");
         } else if (index == 2) {
           EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");

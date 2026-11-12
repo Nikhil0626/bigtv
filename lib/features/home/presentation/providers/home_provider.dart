@@ -62,6 +62,12 @@ import 'package:chotanews/utils/local_data.dart';
 
 
 class HomeProvider extends ChangeNotifier {
+  final HomeRepo? _homeRepoOverride;
+
+  HomeProvider({HomeRepo? homeRepo}) : _homeRepoOverride = homeRepo;
+
+  HomeRepo get _homeRepo => _homeRepoOverride ?? HomeRepo();
+
   List getAllPostList = [];
   List homePostsList = [];
 
@@ -120,6 +126,9 @@ class HomeProvider extends ChangeNotifier {
       videoTagsLanguage = null;
       getAllPostList = [];
       _currentPageIndex = 0;
+      if (pageController != null && pageController!.hasClients) {
+        pageController!.jumpToPage(0);
+      }
       postsLanguage = newCode;
     }
     langCode = newCode;
@@ -144,6 +153,9 @@ class HomeProvider extends ChangeNotifier {
       videoTagsLanguage = null;
       getAllPostList = [];
       _currentPageIndex = 0;
+      if (pageController != null && pageController!.hasClients) {
+        pageController!.jumpToPage(0);
+      }
       postsLanguage = code;
     }
     langCode = code;
@@ -529,7 +541,17 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  PageController? pageController = PageController();
+  PageController? pageController = PageController(keepPage: false);
+
+  void resetToFirstPost() {
+    _currentPageIndex = 0;
+    if (pageController != null && pageController!.hasClients) {
+      pageController!.jumpToPage(0);
+    } else {
+      pageController?.dispose();
+      pageController = PageController(initialPage: 0, keepPage: false);
+    }
+  }
   String? allPostLastId = "0";
   bool isLoadingMore = false;
   bool hasMorePosts = true;
@@ -572,90 +594,108 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
     final bool isPagination = postIds != "0";
+    final bool isRefreshingFeed = isReload && !isPagination;
+    final List previousPosts = isRefreshingFeed ? List.from(getAllPostList) : const [];
 
-    if (!isPagination) {
-      final context = mainNavigatorKey.currentContext;
-      if (context != null) {
-        context.read<RatingProvider>().ratingsList = [];
-        context.read<RatingProvider>().ratedArticleIds = {};
-        context.read<PollProvider>().clearData();
+    try {
+      if (!isPagination) {
+        final context = mainNavigatorKey.currentContext;
+        if (context != null) {
+          context.read<RatingProvider>().ratingsList = [];
+          context.read<RatingProvider>().ratedArticleIds = {};
+          context.read<PollProvider>().clearData();
+        }
+
+        if (!isRefreshingFeed || previousPosts.isEmpty) {
+          isHomeLoading = true;
+          getAllPostList = [];
+          homePostsList = [];
+          dynamicMovieReviews = [];
+          dynamicPolls = [];
+          _currentPageIndex = 0;
+          if (pageController != null && pageController!.hasClients) {
+            pageController!.jumpToPage(0);
+          }
+          isBookMark = [];
+          isWebView = false;
+          webUrl = "";
+        }
+        allPostLastId = "0";
+        hasMorePosts = true;
+      } else {
+        isLoadingMore = true;
+        notifyListeners();
       }
 
-      isHomeLoading = true;
-      getAllPostList = [];
-      homePostsList = [];
-      dynamicMovieReviews = [];
-      dynamicPolls = [];
-      _currentPageIndex = 0;
-      isBookMark = [];
-      isWebView = false;
-      webUrl = "";
-      allPostLastId = "0";
-      hasMorePosts = true;
-    } else {
-      isLoadingMore = true;
-      notifyListeners();
-    }
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String langCode = preferences.getString("selectedLanguageCode") ?? "te";
+      postsLanguage = langCode;
 
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String langCode = preferences.getString("selectedLanguageCode") ?? "te";
-    postsLanguage = langCode;
+      String? deviceId = preferences.getString("deviceId");
+      String? userIdStr = preferences.getString("userId");
+      int userId = 0;
+      if (userIdStr != null && userIdStr.isNotEmpty) {
+        userId = int.tryParse(userIdStr) ?? 0;
+      }
 
-    String? deviceId = preferences.getString("deviceId");
-    String? userIdStr = preferences.getString("userId");
-    int userId = 0;
-    if (userIdStr != null && userIdStr.isNotEmpty) {
-      userId = int.tryParse(userIdStr) ?? 0;
-    }
+      String categoriesStr = preferences.getString("categoriesId") ?? "";
+      List<int> categoriesIdList = categoriesStr.isNotEmpty
+          ? categoriesStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
+          : [];
 
-    String categoriesStr = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIdList = categoriesStr.isNotEmpty
-        ? categoriesStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
-        : [];
+      String locationStr = preferences.getString("locationIds") ?? "";
+      List<int> locationIdList = locationStr.isNotEmpty
+          ? locationStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
+          : [];
 
-    String locationStr = preferences.getString("locationIds") ?? "";
-    List<int> locationIdList = locationStr.isNotEmpty
-        ? locationStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
-        : [];
+      Map<String, dynamic> body = {
+        "device_id": deviceId ?? "",
+        "postId": int.tryParse(postIds) ?? 0,
+        "locationIds": locationIdList,
+        "categoriesId": categoriesIdList,
+        "userId": userId,
+        "isAdManager": false,
+        "isBigTv": true,
+        "lang": langCode,
+        "isHomePost": true,
+        "isHomePast": true,
+      };
+      log("all post body ${body.toString()}");
+      Response response = await _homeRepo.getAllPosts(body);
 
-    Map<String, dynamic> body = {
-      "device_id": deviceId ?? "",
-      "postId": int.tryParse(postIds) ?? 0,
-      "locationIds": locationIdList,
-      "categoriesId": categoriesIdList,
-      "userId": userId,
-      "isAdManager": false,
-      "isBigTv": true,
-      "lang": langCode,
-      "isHomePost": true,
-      "isHomePast": true,
-    };
-    log("all post body ${body.toString()}");
-    try {
-      Response response = await HomeRepo().getAllPosts(body);
-      
       var responseData = response.data;
       List data = [];
       if (responseData is Map) {
-         data = responseData['posts'] ?? responseData['data'] ?? [];
-         if (!isPagination) {
-           isWebView = responseData['webView'] ?? false;
-           webUrl = responseData['webUrl'] ?? "";
-         }
-         final apiLastId = responseData['lastId'];
-         if (apiLastId != null && apiLastId.toString() != "0") {
-           allPostLastId = apiLastId.toString();
-         }
-         if (responseData['ads_list'] != null) {
-           getImageAdsList.addAll(responseData['ads_list']);
-         }
+        data = responseData['posts'] ?? responseData['data'] ?? [];
+        if (!isPagination) {
+          isWebView = responseData['webView'] ?? false;
+          webUrl = responseData['webUrl'] ?? "";
+        }
+        final apiLastId = responseData['lastId'];
+        if (apiLastId != null && apiLastId.toString() != "0") {
+          allPostLastId = apiLastId.toString();
+        }
+        if (responseData['ads_list'] != null) {
+          getImageAdsList.addAll(responseData['ads_list']);
+        }
       } else if (responseData is List) {
-         data = responseData;
+        data = responseData;
       }
 
       if (data.isEmpty) {
-        hasMorePosts = false;
-        log("No more posts returned from API for postId: $postIds");
+        if (isRefreshingFeed && previousPosts.isNotEmpty) {
+          getAllPostList = List.from(previousPosts);
+        } else {
+          hasMorePosts = false;
+          log("No more posts returned from API for postId: $postIds");
+        }
+      } else if (isRefreshingFeed) {
+        getAllPostList = [];
+        homePostsList = [];
+        dynamicMovieReviews = [];
+        dynamicPolls = [];
+        _currentPageIndex = 0;
+        isBookMark = [];
       }
 
       // Extract homepost items from response and prepend them to the feed (only on initial load)
@@ -693,7 +733,7 @@ class HomeProvider extends ChangeNotifier {
           moreFollowList = moreFollowTagsList;
         } else {
           try {
-            final fetched = await HomeRepo().getMoreFollowTags(queryParams: {
+            final fetched = await _homeRepo.getMoreFollowTags(queryParams: {
               if (deviceId != null && deviceId.isNotEmpty) "device_id": deviceId,
               if (userId > 0) "userId": userId,
               "lang": langCode,
@@ -814,8 +854,14 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     } on DioException catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
+      if (isRefreshingFeed && previousPosts.isNotEmpty && getAllPostList.isEmpty) {
+        getAllPostList = List.from(previousPosts);
+      }
     } catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
+      if (isRefreshingFeed && previousPosts.isNotEmpty && getAllPostList.isEmpty) {
+        getAllPostList = List.from(previousPosts);
+      }
     } finally {
       isReload = false;
       if (!isPagination) {
@@ -825,6 +871,17 @@ class HomeProvider extends ChangeNotifier {
         isLoadingMore = false;
       }
       notifyListeners();
+      if (!isPagination) {
+        try {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (pageController != null &&
+                pageController!.hasClients &&
+                (pageController!.page?.round() ?? 0) != 0) {
+              pageController!.jumpToPage(0);
+            }
+          });
+        } catch (_) {}
+      }
     }
   }
 
@@ -1205,37 +1262,72 @@ class HomeProvider extends ChangeNotifier {
   int currentIndex = 0;
 
   Future<void> getAllPostsByAiId(dynamic postId) async {
-    isBookMark = [];
-    getAllPostList = [];
-    isHomeLoading = true;
-    notifyListeners();
-    currentIndex = 0;
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? deviceId = preferences.getString("deviceId");
-    String? userId = preferences.getString("userId");
+    final bool isRefreshingFeed = isReload;
+    final List previousPosts = isRefreshingFeed ? List.from(getAllPostList) : const [];
 
-    Map<String, dynamic> body = {
-      "deviceid": deviceId ?? "",
-      "aitagid": postId,
-      "user_id": userId ?? "",
-      "isAdManager": "false",
-      "isBigTv": "true",
-    };
-    log(body.toString());
     try {
-      Response response = await HomeRepo().getAllAiTagsById(body);
+      isBookMark = [];
+      if (!isRefreshingFeed || previousPosts.isEmpty) {
+        getAllPostList = [];
+        isHomeLoading = true;
+        notifyListeners();
+      }
+      currentIndex = 0;
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String? deviceId = preferences.getString("deviceId");
+      String? userId = preferences.getString("userId");
+
+      Map<String, dynamic> body = {
+        "deviceid": deviceId ?? "",
+        "aitagid": postId,
+        "user_id": userId ?? "",
+        "isAdManager": "false",
+        "isBigTv": "true",
+      };
+      log(body.toString());
+      Response response = await _homeRepo.getAllAiTagsById(body);
       log(response.data.toString());
-      List data = response.data;
-      getAllPostList.addAll(data);
-      TranslationService().preloadAllArticles(getAllPostList);
+      final dynamic rawData = response.data;
+      List data = [];
+      if (rawData is List) {
+        data = rawData;
+      } else if (rawData is Map) {
+        final dynamic list = rawData['posts'] ?? rawData['data'];
+        if (list is List) {
+          data = list;
+        }
+      }
+      if (data.isNotEmpty) {
+        getAllPostList = List.from(data);
+        _currentPageIndex = 0;
+        TranslationService().preloadAllArticles(getAllPostList);
+      } else if (isRefreshingFeed && previousPosts.isNotEmpty) {
+        getAllPostList = List.from(previousPosts);
+      }
     } on DioException catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
+      if (isRefreshingFeed && previousPosts.isNotEmpty) {
+        getAllPostList = List.from(previousPosts);
+      }
     } catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
+      if (isRefreshingFeed && previousPosts.isNotEmpty) {
+        getAllPostList = List.from(previousPosts);
+      }
     } finally {
       isHomeLoading = false;
       isInitialHomeLoaded = true;
+      isReload = false;
       notifyListeners();
+      try {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (pageController != null &&
+              pageController!.hasClients &&
+              (pageController!.page?.round() ?? 0) != 0) {
+            pageController!.jumpToPage(0);
+          }
+        });
+      } catch (_) {}
     }
   }
 
