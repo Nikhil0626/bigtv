@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_booking_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/my_tickets_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
@@ -550,22 +551,31 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
                               if (isGuest) {
                                 showDialog(
                                   context: context,
-                                  builder: (context) {
+                                  builder: (dialogCtx) {
+                                    final palette = ThemedPopupPalette.of(dialogCtx);
                                     return AlertDialog(
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      backgroundColor: palette.backgroundColor,
+                                      shape: palette.dialogShape(14),
                                       contentPadding: const EdgeInsets.all(24),
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Text(
+                                          Text(
                                             "Guest User",
-                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: palette.titleColor,
+                                            ),
                                           ),
                                           const SizedBox(height: 16),
-                                          const Text(
+                                          Text(
                                             "You are using the app as a guest user. Please login with your mobile number to continue.",
                                             textAlign: TextAlign.center,
-                                            style: TextStyle(fontSize: 16),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: palette.bodyColor,
+                                            ),
                                           ),
                                           const SizedBox(height: 24),
                                           SizedBox(
@@ -573,7 +583,7 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
                                             height: 48,
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: AppColorTokens.primaryRed,
+                                                backgroundColor: palette.accentColor,
                                                 padding: const EdgeInsets.symmetric(horizontal: 8),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius: BorderRadius.circular(8),
@@ -581,12 +591,12 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
                                               ),
                                               onPressed: () {
                                                 try {
-                                                  context.read<HomeProvider>().isPlayingYoutube(false);
+                                                  dialogCtx.read<HomeProvider>().isPlayingYoutube(false);
                                                 } catch (_) {}
                                                 try {
-                                                  context.read<VideoProvider>().pauseVideo();
+                                                  dialogCtx.read<VideoProvider>().pauseVideo();
                                                 } catch (_) {}
-                                                Navigator.pop(context); // close dialog
+                                                Navigator.pop(dialogCtx); // close dialog
                                                 Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
                                               },
                                               child: const FittedBox(

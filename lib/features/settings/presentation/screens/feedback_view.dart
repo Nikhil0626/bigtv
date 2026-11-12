@@ -79,10 +79,18 @@ class FeedbackFormState extends State<FeedbackForm> {
     super.dispose();
   }
 
+  bool _isOtherOption(String title) =>
+      title.trim().toLowerCase().contains('other');
+
+  bool get _isOtherSelected => _selectedOptions.any(_isOtherOption);
+
   void _toggleOption(String option) {
     setState(() {
       if (_selectedOptions.contains(option)) {
         _selectedOptions.remove(option);
+        if (!_isOtherSelected) {
+          _feedbackTextController.clear();
+        }
       } else {
         _selectedOptions.add(option);
       }
@@ -98,7 +106,8 @@ class FeedbackFormState extends State<FeedbackForm> {
     }
 
     final settings = context.read<SettingsProvider>();
-    settings.feedbackController.text = _feedbackTextController.text.trim();
+    settings.feedbackController.text =
+        _isOtherSelected ? _feedbackTextController.text.trim() : '';
     settings.selectedFeedbackList = _selectedOptions.toList();
 
     settings.postFeedBack(_selectedRating).then((_) {
@@ -507,82 +516,86 @@ class FeedbackFormState extends State<FeedbackForm> {
                             },
                           ),
 
-                          SizedBox(height: 16.h),
+                          if (_isOtherSelected) ...[
+                            SizedBox(height: 16.h),
 
-                          // SECTION 3: "Anything else? (optional)" + Input
-                          RichText(
-                            text: TextSpan(
-                              text: "Anything else? ",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14.5.sp,
-                                fontWeight: FontWeight.w800,
-                                color: isDark ? Colors.white : const Color(0xFF181A20),
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: "(optional)",
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF7A7E85),
-                                  ),
+                            // SECTION 3: "Anything else? (optional)" + Input
+                            RichText(
+                              key: const Key('feedback_other_comment_section'),
+                              text: TextSpan(
+                                text: "Anything else? ",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 14.5.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : const Color(0xFF181A20),
                                 ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-
-                          Container(
-                            padding: EdgeInsets.all(10.w),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
-                                width: 0.9,
+                                children: [
+                                  TextSpan(
+                                    text: "(optional)",
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF7A7E85),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                TextField(
-                                  controller: _feedbackTextController,
-                                  maxLength: 500,
-                                  maxLines: 2,
-                                  minLines: 2,
-                                  onChanged: (_) => setState(() {}),
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 13.sp,
-                                    color: isDark ? Colors.white : const Color(0xFF1E2022),
-                                  ),
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                    border: InputBorder.none,
-                                    hintText: "Tell us a little more...",
-                                    hintStyle: TextStyle(
+                            SizedBox(height: 8.h),
+
+                            Container(
+                              padding: EdgeInsets.all(10.w),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
+                                  width: 0.9,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  TextField(
+                                    key: const Key('feedback_other_text_field'),
+                                    controller: _feedbackTextController,
+                                    maxLength: 500,
+                                    maxLines: 2,
+                                    minLines: 2,
+                                    onChanged: (_) => setState(() {}),
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 13.sp,
-                                      color: isDark ? const Color(0xFF757575) : const Color(0xFF9EA3AE),
-                                      fontWeight: FontWeight.w400,
+                                      color: isDark ? Colors.white : const Color(0xFF1E2022),
                                     ),
-                                    counterText: "",
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      border: InputBorder.none,
+                                      hintText: "Tell us a little more...",
+                                      hintStyle: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 13.sp,
+                                        color: isDark ? const Color(0xFF757575) : const Color(0xFF9EA3AE),
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      counterText: "",
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  "${_feedbackTextController.text.length}/500",
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 11.sp,
-                                    color: isDark ? const Color(0xFF757575) : const Color(0xFF9EA3AE),
+                                  Text(
+                                    "${_feedbackTextController.text.length}/500",
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 11.sp,
+                                      color: isDark ? const Color(0xFF757575) : const Color(0xFF9EA3AE),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
 
                           SizedBox(height: 18.h),
 

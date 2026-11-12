@@ -1,4 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/services/video_position_service.dart';
@@ -10,6 +16,20 @@ import 'package:dio/dio.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  late Directory hiveDir;
+
+  setUpAll(() {
+    hiveDir = Directory.systemTemp.createTempSync('services_test_hive');
+    Hive.init(hiveDir.path);
+  });
+
+  tearDownAll(() async {
+    await Hive.close();
+    if (hiveDir.existsSync()) {
+      hiveDir.deleteSync(recursive: true);
+    }
+  });
 
   group('Services Tests', () {
     test('BaseUrls contains required API endpoints and domain constants', () {
@@ -162,5 +182,105 @@ void main() {
       final teluguText = LiveTvShareHelper.getShareText(channelName: 'BIG TV', isTelugu: true);
       expect(teluguText, contains('https://app.bigtv24x7.com/live'));
     });
+
+    testWidgets(
+      'LiveTvShareHelper.shareLiveTv includes BigTV logo image alongside share URL text',
+      (tester) async {
+        final tempDir = Directory.systemTemp.createTempSync('livetv_share_test');
+        addTearDown(() {
+          if (tempDir.existsSync()) {
+            tempDir.deleteSync(recursive: true);
+          }
+        });
+
+        List<XFile>? sharedFiles;
+        String? sharedText;
+        String? sharedSubject;
+        String? fallbackText;
+
+        late BuildContext capturedContext;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                capturedContext = context;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        late bool fileExists;
+        late int fileLength;
+        await tester.runAsync(() async {
+          await LiveTvShareHelper.shareLiveTv(
+            context: capturedContext,
+            channelName: 'BIGTV',
+            langCode: 'en',
+            tempDirectoryProvider: () async => tempDir,
+            shareXFilesFn: (files, {text, subject, sharePositionOrigin}) async {
+              sharedFiles = files;
+              sharedText = text;
+              sharedSubject = subject;
+            },
+            shareTextFn: (text, {subject, sharePositionOrigin}) async {
+              fallbackText = text;
+            },
+          );
+          final logo = File(sharedFiles!.first.path);
+          fileExists = await logo.exists();
+          fileLength = await logo.length();
+        });
+
+        expect(fallbackText, isNull);
+        expect(sharedFiles, isNotNull);
+        expect(sharedFiles, hasLength(1));
+        expect(sharedFiles!.first.path, endsWith('bigtv_live_logo.png'));
+        expect(fileExists, isTrue);
+        expect(fileLength, greaterThan(0));
+        expect(sharedText, contains('https://app.bigtv24x7.com/live'));
+        expect(sharedText, contains('BIGTV'));
+        expect(sharedSubject, equals('Watch BIGTV Live 24x7'));
+      },
+    );
+
+    testWidgets(
+      'LiveTvShareHelper.shareLiveTv falls back to text share if asset loading fails',
+      (tester) async {
+        String? fallbackText;
+        String? fallbackSubject;
+
+        late BuildContext capturedContext;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                capturedContext = context;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        await tester.runAsync(() async {
+          await LiveTvShareHelper.shareLiveTv(
+            context: capturedContext,
+            channelName: 'BIGTV',
+            langCode: 'te',
+            loadAssetFn: (_) async => ByteData(0),
+            shareXFilesFn: (files, {text, subject, sharePositionOrigin}) async {
+              fail('shareXFilesFn should not be called when logo asset is unavailable');
+            },
+            shareTextFn: (text, {subject, sharePositionOrigin}) async {
+              fallbackText = text;
+              fallbackSubject = subject;
+            },
+          );
+        });
+
+        expect(fallbackText, contains('https://app.bigtv24x7.com/live'));
+        expect(fallbackSubject, equals('Watch BIGTV Live 24x7'));
+      },
+    );
   });
 }

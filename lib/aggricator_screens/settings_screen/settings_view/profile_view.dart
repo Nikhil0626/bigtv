@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/services/webengage_notification.dart';
@@ -438,24 +439,25 @@ class ProfileViewState extends State<ProfileView> {
                               if (!profileProvider.isProfileLoading) {
                                 showModalBottomSheet(
                                   context: context,
-                                  backgroundColor: isDark ? const Color(0xFF1E2026) : Colors.white,
+                                  backgroundColor: ThemedPopupPalette.of(context).backgroundColor,
                                   shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                                   ),
                                   builder: (BuildContext context1) {
+                                    final palette = ThemedPopupPalette.of(context1);
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
+                                          Icon(Icons.warning_amber_rounded, color: palette.accentColor, size: 40),
                                           height(height: 12),
                                           Text(
                                             "Delete Account?",
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: textPrimaryColor,
+                                              color: palette.titleColor,
                                             ),
                                           ),
                                           height(height: 8),
@@ -464,7 +466,7 @@ class ProfileViewState extends State<ProfileView> {
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontSize: 14,
-                                              color: textSecondaryColor,
+                                              color: palette.bodyColor,
                                             ),
                                           ),
                                           height(height: 24),
@@ -472,14 +474,14 @@ class ProfileViewState extends State<ProfileView> {
                                             children: [
                                               Expanded(
                                                 child: OutlinedButton(
-                                                  onPressed: () => Navigator.pop(context),
+                                                  onPressed: () => Navigator.pop(context1),
                                                   style: OutlinedButton.styleFrom(
-                                                    side: BorderSide(color: isDark ? const Color(0xFF3E3E3E) : Colors.grey.shade300),
+                                                    side: BorderSide(color: palette.borderColor),
                                                   ),
                                                   child: Text(
                                                     "Cancel",
                                                     style: fontStyle(
-                                                      color: textPrimaryColor,
+                                                      color: palette.titleColor,
                                                       fontSize: 16,
                                                       fontWeight: FontWeight.w600,
                                                     ),
@@ -490,10 +492,10 @@ class ProfileViewState extends State<ProfileView> {
                                               Expanded(
                                                 child: ElevatedButton(
                                                   style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.red,
+                                                    backgroundColor: palette.accentColor,
                                                   ),
                                                   onPressed: () async {
-                                                    Navigator.pop(context);
+                                                    Navigator.pop(context1);
                                                     SharedPreferences preferences = await SharedPreferences.getInstance();
                                                     profileProvider.deleteAccount().then((value) {
                                                       if (!context.mounted) return;

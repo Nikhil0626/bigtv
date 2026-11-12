@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/theme/color_tokens.dart';
+import '../../../../core/theme/themed_popup_palette.dart';
 import '../../../../utils/local_data.dart';
 import '../../../../utils/app_enums.dart';
 import '../../../auth/presentation/providers/authentication_provider.dart';
@@ -175,23 +175,22 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
   }
 
   void _showLoginRequiredDialog(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     showDialog(
       context: context,
       builder: (dialogCtx) {
+        final palette = ThemedPopupPalette.of(dialogCtx);
         return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1E2024) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
+          backgroundColor: palette.backgroundColor,
+          shape: palette.dialogShape(18.r),
           title: Row(
             children: [
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.primaryRed.withValues(alpha: 0.12),
+                  color: palette.accentColor.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(Icons.lock_rounded, color: AppColorTokens.primaryRed, size: 22.sp),
+                child: Icon(Icons.lock_rounded, color: palette.accentColor, size: 22.sp),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -200,7 +199,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    color: palette.titleColor,
                   ),
                 ),
               ),
@@ -212,7 +211,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                 : 'ഗെയിമുകൾ കളിക്കാനും നിങ്ങളുടെ റാങ്ക്, സ്‌ട്രീക്കുകൾ രേഖപ്പെടുത്താനും ദയവായി ലോഗിൻ ചെയ്യുക.',
             style: TextStyle(
               fontSize: 13.sp,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              color: palette.bodyColor,
               height: 1.4,
             ),
           ),
@@ -222,12 +221,12 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
               onPressed: () => Navigator.pop(dialogCtx),
               child: Text(
                 widget.isTelugu ? 'రద్దు' : 'റദ്ദാക്കുക',
-                style: TextStyle(color: const Color(0xFF64748B), fontSize: 13.sp),
+                style: TextStyle(color: palette.bodyColor, fontSize: 13.sp),
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColorTokens.primaryRed,
+                backgroundColor: palette.accentColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                 padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
                 elevation: 0,

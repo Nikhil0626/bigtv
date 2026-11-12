@@ -209,20 +209,30 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   @override
   void initState() {
     log("is come from lin----k ${widget.postId}");
-    getWebData();
-    final home = context.read<HomeProvider>();
-    if (home.getSinglePostList.isEmpty ||
-        home.getSinglePostList['id']?.toString() != widget.postId.toString()) {
-      home.getIndividualPost(widget.postId, isAds: true);
-    }
     super.initState();
+    getWebData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final home = context.read<HomeProvider>();
+      if (home.getSinglePostList.isEmpty ||
+          home.getSinglePostList['id']?.toString() != widget.postId.toString()) {
+        home.getIndividualPost(widget.postId, isAds: true);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-      final articleFromProvider = homeProvider.getSinglePostList.isEmpty ? <String, dynamic>{} : Map<String, dynamic>.from(homeProvider.getSinglePostList);
-      final article = articleFromProvider.isNotEmpty ? articleFromProvider : (widget.initialArticle ?? <String, dynamic>{});
+      final matchesRequestedPost = homeProvider.getSinglePostList.isNotEmpty &&
+          homeProvider.getSinglePostList['id']?.toString() ==
+              widget.postId.toString();
+      final articleFromProvider = matchesRequestedPost
+          ? Map<String, dynamic>.from(homeProvider.getSinglePostList)
+          : <String, dynamic>{};
+      final article = articleFromProvider.isNotEmpty
+          ? articleFromProvider
+          : (widget.initialArticle ?? <String, dynamic>{});
 
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(

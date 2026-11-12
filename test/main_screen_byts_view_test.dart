@@ -5,14 +5,17 @@ import 'package:chotanews/aggricator_screens/rating_screen/rating_repo/rating_re
 import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews_screen.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/gallery_screen.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/core/theme/app_theme.dart';
 import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
+import 'package:chotanews/features/home/data/repositories/home_repo.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/widgets/infocus_bar_widget.dart';
 import 'package:chotanews/features/home/presentation/widgets/main_screen_byts_view.dart';
 import 'package:chotanews/services/content_share_dispatcher.dart';
 import 'package:chotanews/services/translation_service.dart';
+import 'package:chotanews/utils/botton_actions.dart';
 import 'package:chotanews/utils/translated_text.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
@@ -31,6 +34,60 @@ class _StubRatingRepo extends RatingRepo {
       requestOptions: dio.RequestOptions(path: '/moviereviews/$postId'),
       statusCode: 200,
       data: <String, dynamic>{'reviews': []},
+    );
+  }
+}
+
+class _FakeHomeRepo extends HomeRepo {
+  bool shouldThrow = false;
+  List<Map<String, dynamic>> nextPosts = const [];
+  List<Map<String, dynamic>> nextAiTagPosts = const [];
+  int getAllPostsCalls = 0;
+  int getAllAiTagsByIdCalls = 0;
+  Duration delay = Duration.zero;
+
+  @override
+  Future getAllPosts(queryParams) async {
+    getAllPostsCalls++;
+    if (delay > Duration.zero) {
+      await Future<void>.delayed(delay);
+    }
+    if (shouldThrow) {
+      throw dio.DioException(
+        requestOptions: dio.RequestOptions(path: '/allposts'),
+      );
+    }
+    return dio.Response(
+      requestOptions: dio.RequestOptions(path: '/allposts'),
+      statusCode: 200,
+      data: <String, dynamic>{'posts': nextPosts},
+    );
+  }
+
+  @override
+  Future getMoreFollowTags({Map<String, dynamic>? queryParams}) async {
+    return dio.Response(
+      requestOptions: dio.RequestOptions(path: '/morefollow'),
+      statusCode: 200,
+      data: const [],
+    );
+  }
+
+  @override
+  Future getAllAiTagsById(body) async {
+    getAllAiTagsByIdCalls++;
+    if (delay > Duration.zero) {
+      await Future<void>.delayed(delay);
+    }
+    if (shouldThrow) {
+      throw dio.DioException(
+        requestOptions: dio.RequestOptions(path: '/aitag/content'),
+      );
+    }
+    return dio.Response(
+      requestOptions: dio.RequestOptions(path: '/aitag/content'),
+      statusCode: 200,
+      data: nextAiTagPosts,
     );
   }
 }
@@ -156,7 +213,7 @@ void main() {
 
   Widget buildHarness({
     required Widget child,
-    required _TestHomeProvider homeProvider,
+    required HomeProvider homeProvider,
     ThemeData? theme,
     bool withBottomNavOverlay = false,
   }) {
@@ -610,10 +667,172 @@ void main() {
         await tester.pump();
         expect(homeProvider.getAllPostsByAiIdCalls, equals(1));
 
-        // Verify loading indicator renders without overflow when isReload is true.
+        // Keep the refresh icon visible instead of swapping to a circular loader when isReload is true.
         homeProvider.isReloadData();
         await tester.pump();
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+
+        // When isAiTagDataLoaded is true but selectedTagId is null/0, reload falls back to getAllPost.
+        homeProvider
+          ..isReloadFalse()
+          ..setSelectedTagId(0);
+        await tester.tap(reloadFinder);
+        await tester.pump();
+        expect(homeProvider.getAllPostCalls, equals(1));
+        expect(homeProvider.getAllPostsByAiIdCalls, equals(1));
+      },
+    );
+
+    testWidgets(
+      'Refresh button clears loading spinner after real HomeProvider reload for AI tags and errors',
+      (tester) async {
+        setViewport(tester, logicalSize: const Size(360, 806));
+        final fakeRepo = _FakeHomeRepo()
+          ..delay = const Duration(milliseconds: 40)
+          ..nextAiTagPosts = [
+            buildArticle()..['id'] = 202..['title'] = 'Refreshed AI Post',
+            buildArticle()..['id'] = 203..['title'] = 'Second AI Post',
+          ];
+        final homeProvider = HomeProvider(homeRepo: fakeRepo)
+          ..getAllPostList = [
+            buildArticle()..['id'] = 101,
+            buildArticle()..['id'] = 102,
+          ]
+          ..isInitialHomeLoaded = true
+          ..aiTagDataLoaded(true)
+          ..setSelectedTagId(42);
+
+        await tester.pumpWidget(
+          buildHarness(
+            homeProvider: homeProvider,
+            child: MainScreenBytView(article: homeProvider.getAllPostList.first),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+        await tester.tap(find.byKey(const Key('news_card_reload_button')));
+        await tester.pump();
+
+        // Refresh icon stays visible while request is in flight (no circular loader), and duplicate taps are ignored.
+        expect(homeProvider.isReload, isTrue);
+        expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        await tester.tap(find.byKey(const Key('news_card_reload_button')));
+        await tester.pump();
+        expect(fakeRepo.getAllAiTagsByIdCalls, equals(1));
+
+        // Once AI-tag fetch completes, spinner disappears cleanly.
+        await tester.pump(const Duration(milliseconds: 60));
+        expect(homeProvider.isReload, isFalse);
+        expect(homeProvider.isHomeLoading, isFalse);
+        expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(homeProvider.getAllPostList.first['id'], equals(202));
+
+        // Now test failed feed refresh: spinner still stops and existing posts are preserved.
+        homeProvider.aiTagDataLoaded(false);
+        fakeRepo.shouldThrow = true;
+        await tester.tap(find.byKey(const Key('news_card_reload_button')));
+        await tester.pump();
+        expect(homeProvider.isReload, isTrue);
+        await tester.pump(const Duration(milliseconds: 60));
+        expect(homeProvider.isReload, isFalse);
+        expect(homeProvider.isHomeLoading, isFalse);
+        expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+        expect(homeProvider.getAllPostList, hasLength(2));
+        expect(homeProvider.getAllPostList.first['id'], equals(202));
+      },
+    );
+
+    testWidgets(
+      'Gallery post replaces Like action with Reload button that triggers reload',
+      (tester) async {
+        setViewport(tester, logicalSize: const Size(360, 806));
+        final homeProvider = _TestHomeProvider();
+        final galleryArticle = <String, dynamic>{
+          'id': 305,
+          'type': 'Gallery',
+          'subType': 'Gallery',
+          'title': 'Photo Gallery',
+          'gallery': const <dynamic>[],
+        };
+
+        await tester.pumpWidget(
+          buildHarness(
+            homeProvider: homeProvider,
+            child: FullPageCarousel(
+              isHome: true,
+              imageUrls: const <dynamic>[],
+              postDetails: galleryArticle,
+              autoPlay: false,
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(
+          find.byKey(const Key('gallery_card_reload_button')),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (w) => w is BottomActions && w.label == 'లైక్',
+          ),
+          findsNothing,
+        );
+
+        await tester.tap(find.byKey(const Key('gallery_card_reload_button')));
+        await tester.pump();
+        expect(homeProvider.getAllPostCalls, equals(1));
+      },
+    );
+
+    testWidgets(
+      'BigTvPostLogo aligns flush to bottom-right corner above red divider without bottom spacing',
+      (tester) async {
+        setViewport(
+          tester,
+          logicalSize: const Size(360, 806),
+          bottomPadding: 20.0,
+        );
+        final homeProvider = _TestHomeProvider();
+
+        await tester.pumpWidget(
+          buildHarness(
+            homeProvider: homeProvider,
+            child: MainScreenBytView(article: buildArticle()),
+          ),
+        );
+        await tester.pump();
+
+        final logoFinder = find.byWidgetPredicate(
+          (w) =>
+              w is Image &&
+              w.image is AssetImage &&
+              (w.image as AssetImage).assetName ==
+                  'assets/images/BigTvPostLogo.png',
+        );
+        final dividerFinder = find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.color == const Color(0xFFED1C24) &&
+              w.constraints?.maxHeight == 4.0,
+        );
+
+        expect(logoFinder, findsOneWidget);
+        expect(dividerFinder, findsOneWidget);
+
+        final logoWidget = tester.widget<Image>(logoFinder);
+        expect(logoWidget.height, isNull);
+        expect(logoWidget.alignment, equals(Alignment.bottomRight));
+
+        final logoRect = tester.getRect(logoFinder);
+        final dividerRect = tester.getRect(dividerFinder);
+        expect(logoRect.bottom, closeTo(dividerRect.top, 0.1));
+        expect(logoRect.right, closeTo(360.0, 0.1));
       },
     );
   });

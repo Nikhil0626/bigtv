@@ -52,8 +52,7 @@ class PollShareHelper {
     final title = (article['title'] ?? rawPollMap['title'] ?? '')
         .toString()
         .trim();
-    final category =
-        (article['category'] ?? article['categoryName'] ?? '').toString().trim();
+    final category = _extractCategoryLabel(article);
 
     final options = _extractOptionTexts(article, rawPollMap, pollData);
 
@@ -187,6 +186,41 @@ class PollShareHelper {
       if (texts.length >= 4) break;
     }
     return texts;
+  }
+
+  static String _extractCategoryLabel(Map<String, dynamic> article) {
+    final String primary = _parseCategoryValue(article['category']);
+    if (primary.isNotEmpty) return primary;
+    final String secondary = _parseCategoryValue(article['categoryName']);
+    if (secondary.isNotEmpty) return secondary;
+    return _parseCategoryValue(article['category_name']);
+  }
+
+  static String _parseCategoryValue(dynamic raw) {
+    if (raw == null) return '';
+    if (raw is List) {
+      final parts = raw
+          .map(_parseCategoryValue)
+          .where((item) => item.isNotEmpty)
+          .toList();
+      return parts.join(', ');
+    }
+    if (raw is Map) {
+      return _parseCategoryValue(
+        raw['name'] ??
+            raw['categoryName'] ??
+            raw['category_name'] ??
+            raw['title'],
+      );
+    }
+    final text = raw.toString().trim();
+    if (text.isEmpty ||
+        text.toLowerCase() == 'null' ||
+        text == '[]' ||
+        text == '{}') {
+      return '';
+    }
+    return text;
   }
 
   static String _normalizeLanguage({String? langCode, bool? isTelugu}) {

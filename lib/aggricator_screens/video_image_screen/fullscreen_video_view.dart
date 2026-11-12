@@ -74,6 +74,32 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
         backgroundColor: Colors.black,
         body: Consumer<VideoProvider>(
           builder: (context, videoProvider, __) {
+            final VideoPlayerController? activeController =
+                videoProvider.controller ??
+                    (videoProvider.isControllerDisposed(widget.controller)
+                        ? null
+                        : widget.controller);
+
+            if (activeController == null ||
+                !activeController.value.isInitialized) {
+              return Stack(
+                children: [
+                  const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                  Positioned(
+                    top: 20,
+                    left: 20,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back,
+                          color: Colors.white, size: 30),
+                      onPressed: _exitFullscreen,
+                    ),
+                  ),
+                ],
+              );
+            }
+
             return Stack(
               alignment: Alignment.center,
               children: [
@@ -81,8 +107,8 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                   onTap: _toggleControls,
                   child: Center(
                     child: AspectRatio(
-                      aspectRatio: widget.controller.value.aspectRatio,
-                      child: VideoPlayer(widget.controller),
+                      aspectRatio: activeController.value.aspectRatio,
+                      child: VideoPlayer(activeController),
                     ),
                   ),
                 ),
@@ -123,7 +149,7 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                               ),
                               Expanded(
                                 child: VideoProgressIndicator(
-                                  widget.controller,
+                                  activeController,
                                   allowScrubbing: true,
                                   colors: const VideoProgressColors(
                                     playedColor: Colors.red,

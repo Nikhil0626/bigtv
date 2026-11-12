@@ -1,11 +1,7 @@
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../aggricator_screens/individual_post_details/individual_post_view.dart';
 import '../../../../core/theme/color_tokens.dart';
@@ -85,41 +81,17 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              isTelugu ? "బుక్‌మార్క్‌లు" : "ബുക്ക്‌മാർക്കുകൾ",
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
+            Flexible(
+              child: Text(
+                isTelugu ? "బుక్‌మార్క్‌లు" : "ബുക്ക്‌മാർക്കുകൾ",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Consumer<BookmarksProvider>(
-              builder: (context, provider, _) {
-                if (!provider.isLoggedIn || provider.totalBookmarks <= 0) return const SizedBox.shrink();
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF262A32)
-                        : const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF374151)
-                          : const Color(0xFFE2E8F0),
-                    ),
-                  ),
-                  child: Text(
-                    "${provider.totalBookmarks}",
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
-                    ),
-                  ),
-                );
-              },
             ),
           ],
         ),
@@ -322,25 +294,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     ),
                     SizedBox(height: 8.h),
 
-                    // Action buttons: WhatsApp share & Remove bookmark
+                    // Action button: Remove bookmark
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        // WhatsApp Share Button
-                        InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () => _sharePost(post),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Image.asset(
-                              "assets/images/WhatsApp_icon.png",
-                              height: 22,
-                              width: 22,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 14.w),
-
                         // Bookmark Remove / Toggle Icon
                         InkWell(
                           borderRadius: BorderRadius.circular(20),
@@ -527,32 +484,6 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         ),
       ),
     );
-  }
-
-  void _sharePost(BookmarkPostModel post) async {
-    final String title = post.title;
-    final String link = Platform.isIOS ? post.linkUrlIos : post.linkUrlAndroid;
-    final String postUrl = post.postUrl;
-    final String shareText = "$title\n${postUrl.isNotEmpty ? '$postUrl\n' : ''}$link";
-
-    try {
-      if (Platform.isAndroid) {
-        const platform = MethodChannel('com.chotanews/whatsapp');
-        try {
-          await platform.invokeMethod('shareToWhatsApp', {'imagePath': '', 'text': shareText});
-          return;
-        } catch (_) {}
-      }
-
-      final url = "whatsapp://send?text=${Uri.encodeComponent(shareText)}";
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url));
-      } else {
-        await Share.share(shareText);
-      }
-    } catch (e) {
-      debugPrint("Bookmark share error: $e");
-    }
   }
 
   String _formatCreatedDate(String rawDate) {

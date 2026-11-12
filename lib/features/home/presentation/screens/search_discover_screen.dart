@@ -4,7 +4,6 @@ import 'package:chotanews/aggricator_screens/individual_post_details/individual_
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_feed_screen.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews_screen.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
 import 'package:chotanews/features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/editorial_screen.dart';
@@ -190,7 +189,6 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
           builder: (context) => IndividualPostView1(
             postId: targetPostId!,
             isComeFrom: true,
-            initialArticle: notification.toInitialArticleMap(),
           ),
         ),
       );
@@ -438,9 +436,8 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     NotificationsProvider notifProvider,
     bool isTelugu,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Expanded(
+      key: const Key('notifications_tab_view'),
       child: RefreshIndicator(
         color: AppColorTokens.primaryRed,
         onRefresh: () async {
@@ -449,308 +446,47 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             languageCode: homeProvider.langCode == 'ml' ? 'ml' : 'te',
           );
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Quick Services Horizontal Bar
-            SizedBox(height: 8.h),
-            _buildQuickServicesRow(context, homeProvider, isTelugu),
-            SizedBox(height: 10.h),
-
-            // Section Header: "All Notifications" with live pulse dot & count
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 4.w,
-                        height: 16.h,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(top: 6.h),
+          child: notifProvider.isLoading && notifProvider.notifications.isEmpty
+              ? const NotificationShimmerList(count: 6)
+              : notifProvider.errorMessage != null && notifProvider.notifications.isEmpty
+                  ? _buildErrorState(context, notifProvider, isTelugu)
+                  : notifProvider.filteredNotifications.isEmpty
+                      ? _buildEmptyState(context, notifProvider, isTelugu)
+                      : ListView.builder(
+                          controller: _scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(
+                            parent: BouncingScrollPhysics(),
                           ),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        isTelugu ? "తాజా నోటిఫికేషన్‌లు" : "ഏറ്റവും പുതിയ അറിയിപ്പുകൾ",
-                        style: TextStyle(
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          fontSize: 14.5.sp,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (notifProvider.total > 0)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2E1A1A) : const Color(0xFFFEF2F2),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: isDark ? const Color(0xFF5A2222) : const Color(0xFFFECACA), width: 0.8),
-                      ),
-                      child: Text(
-                        "${notifProvider.total} ${isTelugu ? "అలర్ట్‌లు" : "അറിയിപ്പുകൾ"}",
-                        style: TextStyle(
-                          color: AppColorTokens.primaryRed,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            SizedBox(height: 8.h),
-
-            // Main Notification List / Loading / Error / Empty States
-            Expanded(
-              child: notifProvider.isLoading && notifProvider.notifications.isEmpty
-                  ? const NotificationShimmerList(count: 6)
-                  : notifProvider.errorMessage != null && notifProvider.notifications.isEmpty
-                      ? _buildErrorState(context, notifProvider, isTelugu)
-                      : notifProvider.filteredNotifications.isEmpty
-                          ? _buildEmptyState(context, notifProvider, isTelugu)
-                          : ListView.builder(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(
-                                parent: BouncingScrollPhysics(),
-                              ),
-                              padding: EdgeInsets.only(top: 2.h, bottom: 95.h),
-                              itemCount: notifProvider.filteredNotifications.length +
-                                  (notifProvider.hasMore && notifProvider.searchQuery.isEmpty ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index == notifProvider.filteredNotifications.length) {
-                                  return Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                                    child: Center(
-                                      child: SizedBox(
-                                        width: 24.w,
-                                        height: 24.w,
-                                        child: const CircularProgressIndicator(
-                                          strokeWidth: 2.2,
-                                          color: AppColorTokens.primaryRed,
-                                        ),
-                                      ),
+                          padding: EdgeInsets.only(top: 2.h, bottom: 95.h),
+                          itemCount: notifProvider.filteredNotifications.length +
+                              (notifProvider.hasMore && notifProvider.searchQuery.isEmpty ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == notifProvider.filteredNotifications.length) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16.h),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 24.w,
+                                    height: 24.w,
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2.2,
+                                      color: AppColorTokens.primaryRed,
                                     ),
-                                  );
-                                }
+                                  ),
+                                ),
+                              );
+                            }
 
-                                final item = notifProvider.filteredNotifications[index];
-                                return NotificationItemCard(
-                                  notification: item,
-                                  isTelugu: isTelugu,
-                                  onTap: () => _openNotificationPost(context, item),
-                                );
-                              },
-                            ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Compact Horizontal Quick Services Row for Notifications Tab
-  Widget _buildQuickServicesRow(
-    BuildContext context,
-    HomeProvider homeProvider,
-    bool isTelugu,
-  ) {
-    return SizedBox(
-      height: 38.h,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: 14.w),
-        children: [
-          // 1. REPORTERS
-          _buildCompactChip(
-            index: 0,
-            icon: Icons.mic_rounded,
-            iconColor: const Color(0xFF7C3AED),
-            imagePath: 'assets/images/reporters_3d_icon.png',
-            label: isTelugu ? "రిపోర్టర్లు" : "റിപ്പോർട്ടർമാർ",
-            onTap: () {
-              final targetLang = isTelugu ? 'te' : 'ml';
-              final repProvider = context.read<ReportersProvider>();
-              if (repProvider.currentLanguage != targetLang) {
-                repProvider.loadReporters(languageCode: targetLang, force: true);
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ReportersScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
-
-          // 2. GAMES
-          _buildCompactChip(
-            index: 1,
-            icon: Icons.sports_esports_rounded,
-            iconColor: const Color(0xFF059669),
-            imagePath: 'assets/images/game_3d_icon.png',
-            label: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
-            onTap: () => GamesBottomSheet.show(context, isTelugu),
-          ),
-          SizedBox(width: 8.w),
-
-          // 3. MOVIE REVIEWS
-          _buildCompactChip(
-            index: 2,
-            icon: Icons.movie_filter_rounded,
-            iconColor: const Color(0xFFE50914),
-            imagePath: 'assets/images/movie_reviews_3d_icon.png',
-            label: isTelugu ? "సినిమా రివ్యూస్" : "സിനിമ റിവ്യൂകൾ",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MovieReviewsScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
-
-          // 4. POLLS
-          _buildCompactChip(
-            index: 3,
-            icon: Icons.how_to_vote_rounded,
-            iconColor: const Color(0xFFE50914),
-            imagePath: 'assets/images/polls_3d_icon.png',
-            label: isTelugu ? "పోల్స్" : "വോട്ടെടുപ്പ്",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PollsFeedScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
-
-          // 5. E-PAPER (Telugu only)
-          if (isTelugu) ...[
-            _buildCompactChip(
-              index: 4,
-              icon: Icons.newspaper_rounded,
-              iconColor: const Color(0xFFD97706),
-              imagePath: 'assets/images/epaper_3d_icon.png',
-              label: "ఈ-పేపర్",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EpaperScreen()),
-                );
-              },
-            ),
-            SizedBox(width: 8.w),
-          ],
-
-          // 6. EDITORIAL
-          _buildCompactChip(
-            index: 5,
-            icon: Icons.article_rounded,
-            iconColor: const Color(0xFFFF2A2A),
-            imagePath: 'assets/images/editorial_3d_icon.png',
-            label: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EditorialScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
-
-          // 7. BOOKMARKS
-          _buildCompactChip(
-            index: 6,
-            icon: Icons.bookmark_rounded,
-            iconColor: const Color(0xFFBE185D),
-            imagePath: 'assets/images/bookmarks_3d_icon.png',
-            label: isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BookmarksScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
-
-          // 8. MY FEED / NEWS (Arranged last)
-          _buildCompactChip(
-            index: 7,
-            icon: Icons.dynamic_feed_rounded,
-            iconColor: const Color(0xFF2563EB),
-            imagePath: 'assets/images/myfeed_3d_icon.png',
-            label: isTelugu ? "న్యూస్" : "വാർത്തകൾ",
-            onTap: () => _navigateToHome(context, homeProvider),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Compact Pill Chip for Horizontal Quick Services with Lottie 3D Micro-Animation
-  Widget _buildCompactChip({
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    required VoidCallback onTap,
-    String? imagePath,
-    int index = 0,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Material(
-      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-      borderRadius: BorderRadius.circular(20.r),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20.r),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (imagePath != null)
-                Lottie3DIcon(
-                  imagePath: imagePath,
-                  width: 19.w,
-                  height: 19.w,
-                  index: index,
-                  fallback: Icon(icon, size: 14.sp, color: iconColor),
-                )
-              else
-                Icon(icon, size: 14.sp, color: iconColor),
-              SizedBox(width: 6.w),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isDark ? Colors.white : const Color(0xFF1E293B),
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+                            final item = notifProvider.filteredNotifications[index];
+                            return NotificationItemCard(
+                              notification: item,
+                              isTelugu: isTelugu,
+                              onTap: () => _openNotificationPost(context, item),
+                            );
+                          },
+                        ),
         ),
       ),
     );
@@ -1025,20 +761,13 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       ),
                     ),
                     SizedBox(width: 4.w),
-                    Consumer<BookmarksProvider>(
-                      builder: (context, provider, _) {
-                        final countText = (provider.isLoggedIn && provider.totalBookmarks > 0)
-                            ? " (${provider.totalBookmarks})"
-                            : "";
-                        return Text(
-                          "${isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ"}$countText",
-                          style: TextStyle(
-                            color: isDark ? const Color(0xFFFF6B6B) : const Color(0xFFDC2626),
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        );
-                      },
+                    Text(
+                      isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFFFF6B6B) : const Color(0xFFDC2626),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),

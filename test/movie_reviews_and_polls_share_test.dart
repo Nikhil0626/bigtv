@@ -20,8 +20,10 @@ import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/services/content_share_dispatcher.dart';
 import 'package:chotanews/services/movie_review_share_helper.dart';
 import 'package:chotanews/services/poll_share_helper.dart';
+import 'package:chotanews/widgets/clean_youtube_player.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
@@ -30,6 +32,7 @@ import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class FakeRatingRepo extends RatingRepo {
   bool shouldSucceed;
@@ -460,6 +463,33 @@ void main() {
         langCode: 'te',
       );
       expect(teText, contains('📊 BIG TV పోల్ (రాజకీయాలు)'));
+
+      // Empty array/null categoryName must never render "([])"
+      final emptyCatPoll = <String, dynamic>{
+        'id': 295,
+        'title': 'Sample Poll',
+        'categoryName': [],
+        'poll_options': [
+          {'id': 1, 'text': 'Yes'},
+        ],
+      };
+      final teNoCat = PollShareHelper.getShareText(
+        article: emptyCatPoll,
+        langCode: 'te',
+      );
+      expect(teNoCat, contains('📊 BIG TV పోల్\n'));
+      expect(teNoCat, isNot(contains('([])')));
+
+      final listCatPoll = <String, dynamic>{
+        'id': 296,
+        'title': 'List Poll',
+        'categoryName': ['రాజకీయాలు'],
+      };
+      final teListCat = PollShareHelper.getShareText(
+        article: listCatPoll,
+        langCode: 'te',
+      );
+      expect(teListCat, contains('📊 BIG TV పోల్ (రాజకీయాలు)'));
       expect(teText, contains('Who will win the upcoming debate?'));
       expect(teText, contains('1. Party A'));
       expect(teText, contains('2. Party B'));
@@ -745,6 +775,22 @@ void main() {
       await tester.pump();
       expect(find.byKey(const Key('wa_btn_dark')), findsOneWidget);
       expect(find.byKey(const Key('sys_btn_dark')), findsOneWidget);
+
+      await tester.pumpWidget(
+        wrapWidget(
+          theme: AppTheme.darkTheme,
+          child: ContentShareButtons(
+            useDarkOverlay: true,
+            whatsAppButtonKey: const Key('wa_only_btn'),
+            shareButtonKey: const Key('sys_only_btn'),
+            onShareWhatsApp: () => whatsAppTapped++,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byKey(const Key('wa_only_btn')), findsOneWidget);
+      expect(find.byKey(const Key('sys_only_btn')), findsNothing);
+      expect(find.byIcon(Icons.share_rounded), findsNothing);
     });
   });
 
@@ -998,8 +1044,9 @@ void main() {
       );
       expect(
         find.byKey(const Key('movie_review_share_button')),
-        findsOneWidget,
+        findsNothing,
       );
+      expect(find.byIcon(Icons.share_rounded), findsNothing);
 
       // Tap WhatsApp quick share
       await tester.tap(
@@ -1013,12 +1060,6 @@ void main() {
         sharedText,
         contains('https://app.bigtv24x7.com/moviereviews?postId=1051'),
       );
-
-      // Tap general share button
-      await tester.tap(find.byKey(const Key('movie_review_share_button')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(wasWhatsAppOnly, isFalse);
       expect(sharedText, contains('3.5/5'));
     });
 
@@ -1116,8 +1157,9 @@ void main() {
       );
       expect(
         find.byKey(const Key('movie_review_share_button')),
-        findsOneWidget,
+        findsNothing,
       );
+      expect(find.byIcon(Icons.share_rounded), findsNothing);
     });
 
     testWidgets('MovieReviewsScreen switches between swipe view and grid view',
@@ -1138,8 +1180,12 @@ void main() {
 
       expect(find.text('1/1'), findsOneWidget);
       expect(
-        find.byKey(const Key('movie_review_share_button')),
+        find.byKey(const Key('movie_review_whatsapp_share_button')),
         findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_share_button')),
+        findsNothing,
       );
 
       await tester.tap(find.byIcon(Icons.grid_view_rounded));
@@ -1150,6 +1196,554 @@ void main() {
       await tester.tap(find.byIcon(Icons.view_carousel_rounded));
       await tester.pump();
       expect(ratingProvider.isGridView, isFalse);
+    });
+
+    testWidgets(
+        'MovieRatings renders trailer as first carousel slide followed by image_url and gallery images',
+        (tester) async {
+      setPhoneViewport(tester);
+      final articleWithTrailerAndGallery = <String, dynamic>{
+        'id': 294,
+        'title': 'రామాయణం 🚩',
+        'content': 'Epic tale of dharma and devotion.',
+        'image_url':
+            'https://api.pravasamedia.com/api/v1/files/f1ce3a8d-22c3-4513-9ee9-2b26878d3fd4',
+        'video_url':
+            'https://www.youtube.com/watch?v=OZTI2Qgf1xE&list=RDXbizke4zftY&index=9',
+        'video_platform': 'Youtube',
+        'gallery': [
+          {
+            'Url':
+                'https://bigtv-cms.s3.ap-south-1.amazonaws.com/cms_news_4d9b9d7e-6390-420d-b44c-ef0d2c4377eb.png'
+          },
+          {
+            'Url':
+                'https://bigtv-cms.s3.ap-south-1.amazonaws.com/cms_news_7e6860c4-73f9-4387-bf49-39ea53fae036.png'
+          },
+          {
+            'Url':
+                'https://bigtv-cms.s3.ap-south-1.amazonaws.com/cms_news_85b50499-6fbb-4d24-a8e9-c1b0f4738ec8.png'
+          },
+        ],
+        'chotarating': '4.2/5',
+        'chotaMeter': '4.2/5',
+        'externalRatings': [
+          {'platform_name': 'IMDb', 'platform_rating': '7.8/10'},
+          {'platform_name': 'BookMyShow', 'platform_rating': '8/10'},
+          {'platform_name': 'Rotten Tomatoes', 'platform_rating': '6.9/10'},
+        ],
+      };
+
+      await tester.pumpWidget(
+        wrapWidget(
+          child: MovieRatings(article: articleWithTrailerAndGallery),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // First slide must be Trailer
+      expect(
+        find.byKey(const Key('movie_review_hero_carousel')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_slide')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_play_button')),
+        findsOneWidget,
+      );
+      expect(find.text('TRAILER'), findsOneWidget);
+
+      // 5 slides total: 1 trailer + 1 image_url + 3 gallery images -> 5 dots
+      final dotsRow = tester.widget<Row>(
+        find.descendant(
+          of: find.byKey(const Key('movie_review_carousel_dots')),
+          matching: find.byType(Row),
+        ),
+      );
+      expect(dotsRow.children.length, equals(5));
+
+      // Swipe to slide 1 (image_url) and verify it renders
+      final carouselFinder = find.byKey(const Key('movie_review_hero_carousel'));
+      await tester.drag(carouselFinder, const Offset(-350, 0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(
+        find.byKey(const Key('movie_review_image_slide_1')),
+        findsOneWidget,
+      );
+
+      // Swipe through gallery images 2, 3, 4
+      await tester.drag(carouselFinder, const Offset(-350, 0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(
+        find.byKey(const Key('movie_review_image_slide_2')),
+        findsOneWidget,
+      );
+
+      await tester.drag(carouselFinder, const Offset(-350, 0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(
+        find.byKey(const Key('movie_review_image_slide_3')),
+        findsOneWidget,
+      );
+
+      await tester.drag(carouselFinder, const Offset(-350, 0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(
+        find.byKey(const Key('movie_review_image_slide_4')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+        'MovieRatings shows only unique image slides without trailer when video_url is absent',
+        (tester) async {
+      setPhoneViewport(tester);
+      final articleImagesOnly = <String, dynamic>{
+        'id': 295,
+        'title': 'Gallery Only Movie',
+        'image_url': 'https://example.com/poster.png',
+        'video_url': '',
+        'gallery': [
+          {'Url': 'https://example.com/poster.png'},
+          {'Url': 'https://example.com/still1.png'},
+        ],
+      };
+
+      await tester.pumpWidget(
+        wrapWidget(
+          child: MovieRatings(article: articleImagesOnly),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(
+        find.byKey(const Key('movie_review_trailer_slide')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_image_slide_0')),
+        findsOneWidget,
+      );
+
+      // Duplicate poster URL is deduplicated -> 2 slides total
+      final dotsRow = tester.widget<Row>(
+        find.descendant(
+          of: find.byKey(const Key('movie_review_carousel_dots')),
+          matching: find.byType(Row),
+        ),
+      );
+      expect(dotsRow.children.length, equals(2));
+    });
+
+    testWidgets(
+        'MovieRatings landscape layout keeps trailer button above title/dots and hides swipe header',
+        (tester) async {
+      tester.view.physicalSize = const Size(2400, 1080);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final landscapeReview = <String, dynamic>{
+        'id': 294,
+        'title': 'రామాయణం 🚩',
+        'content': 'Epic tale of dharma and devotion.',
+        'image_url': 'https://example.com/poster.png',
+        'video_url': 'https://www.youtube.com/watch?v=OZTI2Qgf1xE',
+        'gallery': [
+          {'Url': 'https://example.com/still1.png'},
+        ],
+        'chotarating': '4.2/5',
+        'externalRatings': [
+          {'platform_name': 'IMDb', 'platform_rating': '7.8/10'},
+        ],
+      };
+
+      final homeProvider = TestHomeProvider()..stubReviews = [landscapeReview];
+      final ratingProvider = RatingProvider(ratingRepo: FakeRatingRepo());
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(360, 690),
+          builder: (_, __) => MultiProvider(
+            providers: [
+              ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+              ChangeNotifierProvider<RatingProvider>.value(
+                value: ratingProvider,
+              ),
+              ChangeNotifierProvider<AuthenticationProvider>(
+                create: (_) => AuthenticationProvider(),
+              ),
+            ],
+            child: const MaterialApp(
+              home: MovieReviewsScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.byKey(const Key('movie_reviews_swipe_header')),
+        findsNothing,
+      );
+
+      final playRect = tester.getRect(
+        find.byKey(const Key('movie_review_trailer_play_button')),
+      );
+      final dotsRect = tester.getRect(
+        find.byKey(const Key('movie_review_carousel_dots')),
+      );
+      expect(playRect.bottom, lessThanOrEqualTo(dotsRect.top));
+    });
+
+    testWidgets(
+        'MovieRatings trailer ignores video-surface taps, shows fullscreen/play-pause/seek-bar/close icons, and close returns to carousel',
+        (tester) async {
+      setPhoneViewport(tester);
+
+      final List<dynamic> orientationHistory = [];
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'SystemChrome.setPreferredOrientations') {
+          orientationHistory.add(call.arguments);
+        }
+        return null;
+      });
+      addTearDown(() {
+        messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+      });
+
+      final reviewWithTrailer = <String, dynamic>{
+        'id': 294,
+        'title': 'రామాయణం 🚩',
+        'content': 'Epic tale of dharma and devotion.',
+        'image_url': 'https://example.com/poster.png',
+        'video_url': 'https://www.youtube.com/watch?v=OZTI2Qgf1xE',
+        'gallery': [
+          {'Url': 'https://example.com/gallery1.png'},
+        ],
+        'externalRatings': [
+          {'platform_name': 'IMDb', 'platform_rating': '7.8/10'},
+        ],
+      };
+
+      YoutubePlayerController? capturedController;
+      await tester.pumpWidget(
+        wrapWidget(
+          child: MovieRatings(
+            article: reviewWithTrailer,
+            youtubePlayerBuilder: (controller, isLandscape) {
+              capturedController = controller;
+              return ColoredBox(
+                key: ValueKey('fake_yt_player_$isLandscape'),
+                color: Colors.black,
+                child: const SizedBox.expand(),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Tap Play on trailer slide
+      await tester.tap(find.byKey(const Key('movie_review_trailer_play_button')));
+      await tester.pump();
+
+      expect(capturedController, isNotNull);
+      capturedController!.updateValue(
+        capturedController!.value.copyWith(isPlaying: true, hasPlayed: true),
+      );
+      await tester.pump();
+
+      // Initially controls are hidden while trailer plays cleanly
+      expect(
+        find.byKey(const Key('movie_review_trailer_tap_surface')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_fullscreen_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_play_pause_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_youtube_seek_bar')),
+        findsNothing,
+      );
+      expect(find.byKey(const ValueKey('fake_yt_player_false')), findsOneWidget);
+
+      // 1st tap on video screen reveals all 4 controls without pausing playback
+      final trailerRect = tester.getRect(
+        find.byKey(const Key('movie_review_trailer_tap_surface')),
+      );
+      await tester.tapAt(Offset(trailerRect.center.dx, trailerRect.top + 24));
+      await tester.pump();
+
+      expect(capturedController!.value.isPlaying, isTrue);
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+      expect(
+        find.byKey(const Key('movie_review_trailer_fullscreen_button')),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.fullscreen), findsOneWidget);
+      expect(
+        find.byKey(const Key('movie_review_trailer_play_pause_button')),
+        findsOneWidget,
+      );
+      final portraitPlayPauseIcon = tester.widget<Icon>(
+        find.byIcon(Icons.pause_rounded),
+      );
+      expect(portraitPlayPauseIcon.size, equals(44));
+      final portraitPlayPauseRect = tester.getRect(
+        find.byKey(const Key('movie_review_trailer_play_pause_button')),
+      );
+      expect(
+        (portraitPlayPauseRect.center - trailerRect.center).distance,
+        lessThan(2.0),
+      );
+      expect(
+        find.byKey(const Key('movie_review_youtube_seek_bar')),
+        findsOneWidget,
+      );
+
+      // 2nd tap on screen hides all 4 controls again without pausing playback
+      await tester.tapAt(Offset(trailerRect.center.dx, trailerRect.top + 24));
+      await tester.pump();
+      expect(capturedController!.value.isPlaying, isTrue);
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_fullscreen_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_play_pause_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('movie_review_youtube_seek_bar')),
+        findsNothing,
+      );
+
+      // 3rd tap brings controls back -> verify pause state switches center icon
+      await tester.tapAt(Offset(trailerRect.center.dx, trailerRect.top + 24));
+      await tester.pump();
+      capturedController!.updateValue(
+        capturedController!.value.copyWith(isPlaying: false),
+      );
+      await tester.pump();
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+
+      // Tap customised fullscreen button -> requests landscape orientation
+      await tester.tap(
+        find.byKey(const Key('movie_review_trailer_fullscreen_button')),
+      );
+      await tester.pump();
+      expect(
+        orientationHistory.last,
+        containsAll([
+          'DeviceOrientation.landscapeLeft',
+          'DeviceOrientation.landscapeRight',
+        ]),
+      );
+
+      // Simulate device rotated to landscape while playing trailer
+      tester.view.physicalSize = const Size(2400, 1080);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.byKey(const Key('movie_review_trailer_landscape_fullscreen')),
+        findsOneWidget,
+      );
+      final landscapePlayIcon = tester.widget<Icon>(
+        find.byIcon(Icons.play_arrow_rounded),
+      );
+      expect(landscapePlayIcon.size, equals(52));
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_play_pause_button')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_youtube_seek_bar')),
+        findsOneWidget,
+      );
+      final coverFittedBox = tester.widget<FittedBox>(
+        find.byKey(const Key('movie_review_trailer_landscape_cover')),
+      );
+      expect(coverFittedBox.fit, equals(BoxFit.cover));
+      expect(find.byKey(const ValueKey('fake_yt_player_true')), findsOneWidget);
+      expect(find.byIcon(Icons.fullscreen_exit), findsOneWidget);
+      expect(find.text('IMDb'), findsNothing);
+
+      // Tapping screen in landscape hides controls; another tap brings them back
+      final landscapeTapRect = tester.getRect(
+        find.byKey(const Key('movie_review_trailer_tap_surface')),
+      );
+      await tester.tapAt(
+        Offset(landscapeTapRect.center.dx, landscapeTapRect.top + 24),
+      );
+      await tester.pump();
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsNothing,
+      );
+      await tester.tapAt(
+        Offset(landscapeTapRect.center.dx, landscapeTapRect.top + 24),
+      );
+      await tester.pump();
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsOneWidget,
+      );
+
+      // Tap close button in landscape -> exits fullscreen and returns to carousel view
+      await tester.tap(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+      );
+      await tester.pump();
+      expect(
+        orientationHistory.last,
+        containsAll([
+          'DeviceOrientation.portraitUp',
+          'DeviceOrientation.portraitDown',
+        ]),
+      );
+
+      setPhoneViewport(tester);
+      await tester.pump();
+      expect(
+        find.byKey(const Key('movie_review_hero_carousel')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_carousel_dots')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_play_button')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('movie_review_trailer_close_button')),
+        findsNothing,
+      );
+      expect(find.text('IMDb'), findsOneWidget);
+    });
+
+    testWidgets(
+        'MovieRatings aligns hero images in 50% and all review text details in 50%',
+        (tester) async {
+      setPhoneViewport(tester);
+
+      final article = <String, dynamic>{
+        'id': 294,
+        'title': 'రామాయణం 🚩',
+        'content': 'Epic tale of dharma and devotion across generations.',
+        'image_url': 'https://example.com/poster.png',
+        'gallery': [
+          {'Url': 'https://example.com/still1.png'},
+        ],
+        'chotarating': '4.2/5',
+        'externalRatings': [
+          {'platform_name': 'IMDb', 'platform_rating': '7.8/10'},
+          {'platform_name': 'BookMyShow', 'platform_rating': '8/10'},
+          {'platform_name': 'Rotten Tomatoes', 'platform_rating': '6.9/10'},
+        ],
+      };
+
+      await tester.pumpWidget(
+        wrapWidget(
+          child: MovieRatings(article: article),
+        ),
+      );
+      await tester.pump();
+
+      final Rect cardRect = tester.getRect(find.byType(MovieRatings));
+      final Rect heroRect =
+          tester.getRect(find.byKey(const Key('movie_review_hero_section')));
+      final Rect carouselRect =
+          tester.getRect(find.byKey(const Key('movie_review_hero_carousel')));
+      final Rect detailsRect =
+          tester.getRect(find.byKey(const Key('movie_review_details_section')));
+
+      expect(heroRect.height, closeTo(cardRect.height * 0.5, 1.0));
+      expect(detailsRect.height, closeTo(cardRect.height * 0.5, 1.0));
+      expect(carouselRect.height, closeTo(heroRect.height, 1.0));
+      expect(heroRect.bottom, closeTo(detailsRect.top, 1.0));
+      expect(find.text('BIG TV 4.2/5'), findsOneWidget);
+      expect(find.text('IMDb'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    test(
+        'CleanYoutubePlayer script and playerHtml hide YouTube share, suggestions, and logo safely',
+        () {
+      const script = CleanYoutubePlayer.youtubeHideUiUserScript;
+
+      expect(script, contains('if (window === window.top) return;'));
+      expect(script, contains('.ytp-share-button'));
+      expect(script, contains('.ytp-pause-overlay'));
+      expect(script, contains('.ytp-related-videos'));
+      expect(script, contains('.ytp-endscreen-content'));
+      expect(script, contains('.ytp-watermark'));
+      expect(script, contains('.ytp-youtube-button'));
+      expect(script, contains('.ytp-chrome-top'));
+      expect(script, contains('.ytp-chrome-bottom'));
+      expect(script, contains('.html5-video-container'));
+      expect(script, contains('MutationObserver'));
+
+      final controller = YoutubePlayerController(
+        initialVideoId: 'OZTI2Qgf1xE',
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: false,
+          hideControls: true,
+        ),
+      );
+      addTearDown(controller.dispose);
+
+      final html = CleanYoutubePlayer.buildPlayerHtml(controller);
+      expect(html, contains('"OZTI2Qgf1xE"'));
+      expect(html, contains("'controls': 0"));
+      expect(html, contains("'rel': 0"));
+      expect(html, contains("'showinfo': 0"));
+      expect(html, contains("'iv_load_policy': 3"));
+      expect(html, contains("'modestbranding': 1"));
+      expect(html, contains("'disablekb': 1"));
+      expect(html, isNot(contains("'end': null")));
     });
   });
 
@@ -1218,7 +1812,8 @@ void main() {
         find.byKey(const Key('poll_whatsapp_share_button')),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('poll_share_button')), findsOneWidget);
+      expect(find.byKey(const Key('poll_share_button')), findsNothing);
+      expect(find.byIcon(Icons.share_rounded), findsNothing);
 
       // Tap WhatsApp share button
       await tester.tap(find.byKey(const Key('poll_whatsapp_share_button')));
@@ -1230,12 +1825,6 @@ void main() {
         sharedText,
         contains('https://app.bigtv24x7.com/polls?postId=1050'),
       );
-
-      // Tap system share button
-      await tester.tap(find.byKey(const Key('poll_share_button')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(wasWhatsAppOnly, isFalse);
       expect(sharedText, contains('Who will win the upcoming AP Assembly Debate?'));
     });
 
@@ -1264,7 +1853,8 @@ void main() {
         find.byKey(const Key('poll_whatsapp_share_button')),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('poll_share_button')), findsOneWidget);
+      expect(find.byKey(const Key('poll_share_button')), findsNothing);
+      expect(find.byIcon(Icons.share_rounded), findsNothing);
     });
 
     testWidgets('PollsFeedScreen switches between swipe view and grid view',
@@ -1284,7 +1874,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('1/1'), findsOneWidget);
-      expect(find.byKey(const Key('poll_share_button')), findsOneWidget);
+      expect(
+        find.byKey(const Key('poll_whatsapp_share_button')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('poll_share_button')), findsNothing);
 
       await tester.tap(find.byIcon(Icons.grid_view_rounded));
       await tester.pump();

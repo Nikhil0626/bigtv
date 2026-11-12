@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/core/widgets/content_share_buttons.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
@@ -8,20 +9,50 @@ import 'package:chotanews/services/movie_review_share_helper.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/date_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chotanews/widgets/clean_youtube_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../rating_model.dart';
 import '../rating_provider/rating_provider.dart';
 import 'list_reviews.dart';
 
+class _HeroMediaSlide {
+  final bool isTrailer;
+  final String imageUrl;
+  final String videoUrl;
+  final String? youtubeId;
+
+  const _HeroMediaSlide.trailer({
+    required this.videoUrl,
+    required String thumbnailUrl,
+    this.youtubeId,
+  })  : isTrailer = true,
+        imageUrl = thumbnailUrl;
+
+  const _HeroMediaSlide.image({
+    required this.imageUrl,
+  })  : isTrailer = false,
+        videoUrl = '',
+        youtubeId = null;
+}
+
 class MovieRatings extends StatefulWidget {
-  const MovieRatings({super.key, this.article});
+  const MovieRatings({
+    super.key,
+    this.article,
+    this.youtubePlayerBuilder,
+  });
 
   final dynamic article;
+  final Widget Function(YoutubePlayerController controller, bool isLandscape)?
+      youtubePlayerBuilder;
 
   @override
   State<MovieRatings> createState() => _MovieRatingsState();
@@ -29,6 +60,15 @@ class MovieRatings extends StatefulWidget {
 
 class _MovieRatingsState extends State<MovieRatings> {
   final ScreenshotController _screenshotController = ScreenshotController();
+  late final PageController _heroPageController = PageController();
+  final GlobalKey _ytPlayerGlobalKey = GlobalKey();
+  int _currentSlideIndex = 0;
+  YoutubePlayerController? _trailerYtController;
+  VideoPlayerController? _trailerVideoController;
+  bool _isPlayingTrailer = false;
+  bool _isTrailerBuffering = false;
+  bool _wasInFullScreen = false;
+  bool _showTrailerControls = false;
 
   @override
   void initState() {
@@ -43,11 +83,35 @@ class _MovieRatingsState extends State<MovieRatings> {
     super.didUpdateWidget(oldWidget);
     final oldId = oldWidget.article is Map ? oldWidget.article['id'] : null;
     final newId = widget.article is Map ? widget.article['id'] : null;
-    if (newId != null && newId != oldId) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _hydrateReviewState();
-      });
+    if (newId != oldId) {
+      _stopTrailer(updateState: false);
+      _currentSlideIndex = 0;
+      if (_heroPageController.hasClients) {
+        _heroPageController.jumpToPage(0);
+      }
+      if (newId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _hydrateReviewState();
+        });
+      }
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final bool routeCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+    final bool tickerEnabled = TickerMode.valuesOf(context).enabled;
+    if ((!routeCurrent || !tickerEnabled) && _isPlayingTrailer) {
+      _stopTrailer(updateState: false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopTrailer(updateState: false);
+    _heroPageController.dispose();
+    super.dispose();
   }
 
   void _hydrateReviewState() {
@@ -86,15 +150,10 @@ class _MovieRatingsState extends State<MovieRatings> {
     showDialog(
       context: context,
       builder: (dialogCtx) {
+        final palette = ThemedPopupPalette.of(dialogCtx);
         return Dialog(
-          backgroundColor: AppColorTokens.cinematicSurface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-            side: BorderSide(
-              color: Colors.white.withValues(alpha: 0.1),
-              width: 1,
-            ),
-          ),
+          backgroundColor: palette.backgroundColor,
+          shape: palette.dialogShape(16.r),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 22.h),
             child: Column(
@@ -104,12 +163,12 @@ class _MovieRatingsState extends State<MovieRatings> {
                   width: 50.r,
                   height: 50.r,
                   decoration: BoxDecoration(
-                    color: AppColorTokens.cinemaRed.withValues(alpha: 0.15),
+                    color: palette.accentColor.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.rate_review_rounded,
-                    color: AppColorTokens.cinemaRed,
+                    color: palette.accentColor,
                     size: 26.sp,
                   ),
                 ),
@@ -117,7 +176,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                 Text(
                   'లాగిన్ అవ్వండి',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: palette.titleColor,
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -127,7 +186,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                   'సినిమా రివ్యూ సమర్పించడానికి మరియు మీ రేటింగ్ ఇవ్వడానికి దయచేసి లాగిన్ అవ్వండి.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: const Color(0xFF94A3B8),
+                    color: palette.bodyColor,
                     fontSize: 13.5.sp,
                     height: 1.4,
                   ),
@@ -138,9 +197,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.25),
-                          ),
+                          side: BorderSide(color: palette.borderColor),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r),
                           ),
@@ -150,7 +207,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                         child: Text(
                           'రద్దు',
                           style: TextStyle(
-                            color: const Color(0xFF94A3B8),
+                            color: palette.bodyColor,
                             fontSize: 13.5.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -161,7 +218,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColorTokens.cinemaRed,
+                          backgroundColor: palette.accentColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r),
                           ),
@@ -245,8 +302,7 @@ class _MovieRatingsState extends State<MovieRatings> {
         .toString();
     final String synopsis =
         (article['description'] ?? article['content'] ?? '').toString();
-    final String imageUrl =
-        _getImageUrl(article['image_url'] ?? article['imageUrl']);
+    final List<_HeroMediaSlide> mediaSlides = _buildMediaSlides(article);
 
     final String chotaMeter = (article['chotaMeter'] ??
             article['chotarating'] ??
@@ -259,7 +315,71 @@ class _MovieRatingsState extends State<MovieRatings> {
     final bool hasBadges = genreTelugu.isNotEmpty ||
         certification.isNotEmpty ||
         (chotaMeter.isNotEmpty && chotaMeter != 'null');
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
+    if (_isPlayingTrailer &&
+        isLandscape &&
+        (_trailerYtController != null || _trailerVideoController != null)) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            _toggleTrailerFullScreen(true);
+          }
+        },
+        child: Container(
+          key: const Key('movie_review_trailer_landscape_fullscreen'),
+          color: Colors.black,
+          width: double.infinity,
+          height: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: ClipRect(
+                  child: FittedBox(
+                    key: const Key('movie_review_trailer_landscape_cover'),
+                    fit: BoxFit.cover,
+                    child: _trailerYtController != null
+                        ? _buildYoutubePlayerWidget(isLandscape: true)
+                        : _buildDirectVideoPlayer(isLandscape: true),
+                  ),
+                ),
+              ),
+              ..._buildTrailerOverlayControls(isLandscape: true),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _buildMainContent(
+      context,
+      article: article,
+      movieTitle: movieTitle,
+      genreTelugu: genreTelugu,
+      certification: certification,
+      metaInfo: metaInfo,
+      synopsis: synopsis,
+      mediaSlides: mediaSlides,
+      chotaMeter: chotaMeter,
+      hasBadges: hasBadges,
+    );
+  }
+
+  Widget _buildMainContent(
+    BuildContext context, {
+    required Map<String, dynamic> article,
+    required String movieTitle,
+    required String genreTelugu,
+    required String certification,
+    required String metaInfo,
+    required String synopsis,
+    required List<_HeroMediaSlide> mediaSlides,
+    required String chotaMeter,
+    required bool hasBadges,
+  }) {
     return Screenshot(
       controller: _screenshotController,
       child: Container(
@@ -269,11 +389,20 @@ class _MovieRatingsState extends State<MovieRatings> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Hero Poster Section with title overlay
-            _buildHeroPoster(imageUrl, movieTitle),
-
-            // Movie Details, Ratings & User Review Card
+            // Top Hero Carousel (50% height: trailer + review images)
             Expanded(
+              key: const Key('movie_review_hero_section'),
+              flex: 1,
+              child: _buildHeroCarousel(
+                mediaSlides,
+                movieTitle,
+              ),
+            ),
+
+            // Movie Details, Ratings & User Review Card (50% height)
+            Expanded(
+              key: const Key('movie_review_details_section'),
+              flex: 1,
               child: SafeArea(
                 top: false,
                 child: Padding(
@@ -397,9 +526,6 @@ class _MovieRatingsState extends State<MovieRatings> {
                             whatsAppButtonKey: const Key(
                               'movie_review_whatsapp_share_button',
                             ),
-                            shareButtonKey: const Key(
-                              'movie_review_share_button',
-                            ),
                             onShareWhatsApp: () {
                               MovieReviewShareHelper.shareMovieReview(
                                 context: context,
@@ -409,17 +535,6 @@ class _MovieRatingsState extends State<MovieRatings> {
                                     .movieReviewDetails,
                                 screenshotController: _screenshotController,
                                 isWhatsAppOnly: true,
-                              );
-                            },
-                            onShareMore: () {
-                              MovieReviewShareHelper.shareMovieReview(
-                                context: context,
-                                article: article,
-                                ratingDetails: context
-                                    .read<RatingProvider>()
-                                    .movieReviewDetails,
-                                screenshotController: _screenshotController,
-                                isWhatsAppOnly: false,
                               );
                             },
                           ),
@@ -472,110 +587,785 @@ class _MovieRatingsState extends State<MovieRatings> {
     );
   }
 
-  // Hero Poster with smooth dark fade and bold title
-  Widget _buildHeroPoster(String imageUrl, String movieTitle) {
-    final posterHeight = MediaQuery.of(context).size.height * 0.33;
+  String? _extractYoutubeId(String url) {
+    if (url.isEmpty) return null;
+    final ytId = YoutubePlayer.convertUrlToId(url);
+    if (ytId != null && ytId.isNotEmpty) return ytId;
+    final regExp = RegExp(
+      r'(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})',
+      caseSensitive: false,
+    );
+    final match = regExp.firstMatch(url);
+    if (match != null && match.groupCount >= 1) {
+      return match.group(1);
+    }
+    return null;
+  }
 
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        // Image
-        GestureDetector(
-          onTap: () {
-            if (imageUrl.isNotEmpty) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ImagePreview(
-                    imageUrl: imageUrl,
-                    title: movieTitle,
-                  ),
-                ),
-              );
-            }
-          },
-          child: SizedBox(
-            height: posterHeight,
-            width: double.infinity,
-            child: imageUrl.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: AppColorTokens.cinematicSurface,
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColorTokens.cinemaRed,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: const Color(0xFF1A1A20),
-                      child: Center(
-                        child: Icon(
-                          Icons.movie_rounded,
-                          size: 60.sp,
-                          color: Colors.white24,
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(
-                    color: const Color(0xFF1A1A20),
-                    child: Center(
-                      child: Icon(
-                        Icons.movie_rounded,
-                        size: 60.sp,
-                        color: Colors.white24,
-                      ),
-                    ),
-                  ),
+  List<_HeroMediaSlide> _buildMediaSlides(Map<String, dynamic> article) {
+    final String rawVideoUrl = (article['video_url'] ??
+            article['videoUrl'] ??
+            article['trailer_url'] ??
+            article['trailerUrl'] ??
+            '')
+        .toString()
+        .trim();
+    final String videoUrl =
+        rawVideoUrl.toLowerCase() == 'null' ? '' : rawVideoUrl;
+
+    final List<String> imageUrls = [];
+    final Set<String> seen = {};
+
+    void addImage(dynamic raw) {
+      final resolved = _getImageUrl(raw);
+      if (resolved.isNotEmpty && seen.add(resolved)) {
+        imageUrls.add(resolved);
+      }
+    }
+
+    addImage(article['image_url'] ?? article['imageUrl']);
+
+    final dynamic rawGallery = article['gallery'] ?? article['images'];
+    if (rawGallery is List) {
+      for (final item in rawGallery) {
+        if (item is Map) {
+          addImage(
+            item['Url'] ??
+                item['url'] ??
+                item['image_url'] ??
+                item['imageUrl'] ??
+                item['image'],
+          );
+        } else {
+          addImage(item);
+        }
+      }
+    }
+
+    final List<_HeroMediaSlide> slides = [];
+    if (videoUrl.isNotEmpty) {
+      final String? ytId = _extractYoutubeId(videoUrl);
+      final String trailerThumb = imageUrls.isNotEmpty
+          ? imageUrls.first
+          : (ytId != null && ytId.isNotEmpty
+              ? 'https://img.youtube.com/vi/$ytId/hqdefault.jpg'
+              : '');
+      slides.add(
+        _HeroMediaSlide.trailer(
+          videoUrl: videoUrl,
+          thumbnailUrl: trailerThumb,
+          youtubeId: ytId,
+        ),
+      );
+    }
+
+    for (final url in imageUrls) {
+      slides.add(_HeroMediaSlide.image(imageUrl: url));
+    }
+    return slides;
+  }
+
+  Future<void> _startTrailer(_HeroMediaSlide slide) async {
+    _stopTrailer(updateState: false);
+    final ytId = slide.youtubeId ?? _extractYoutubeId(slide.videoUrl);
+    if (ytId != null && ytId.isNotEmpty) {
+      final controller = YoutubePlayerController(
+        initialVideoId: ytId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: false,
+          hideControls: true,
+        ),
+      );
+      setState(() {
+        _trailerYtController = controller;
+        _isPlayingTrailer = true;
+        _isTrailerBuffering = false;
+        _showTrailerControls = false;
+      });
+      return;
+    }
+
+    final uri = Uri.tryParse(slide.videoUrl);
+    if (uri == null) return;
+    setState(() {
+      _isPlayingTrailer = true;
+      _isTrailerBuffering = true;
+      _showTrailerControls = false;
+    });
+    final controller = VideoPlayerController.networkUrl(uri);
+    _trailerVideoController = controller;
+    try {
+      await controller.initialize();
+      if (!mounted || _trailerVideoController != controller) {
+        await controller.dispose();
+        return;
+      }
+      await controller.play();
+      setState(() {
+        _isTrailerBuffering = false;
+      });
+    } catch (_) {
+      _stopTrailer();
+    }
+  }
+
+  void _stopTrailer({bool updateState = true}) {
+    final yt = _trailerYtController;
+    final bool shouldRestorePortrait =
+        _wasInFullScreen || (yt?.value.isFullScreen ?? false);
+    _trailerYtController = null;
+    if (yt != null) {
+      try {
+        yt.pause();
+        yt.dispose();
+      } catch (_) {}
+    }
+
+    final vc = _trailerVideoController;
+    _trailerVideoController = null;
+    if (vc != null) {
+      try {
+        vc.pause();
+        vc.dispose();
+      } catch (_) {}
+    }
+
+    _wasInFullScreen = false;
+    _isPlayingTrailer = false;
+    _isTrailerBuffering = false;
+    _showTrailerControls = false;
+    if (shouldRestorePortrait) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
+    }
+    if (updateState && mounted) {
+      setState(() {});
+    }
+  }
+
+  Widget _buildHeroImagePlaceholder() {
+    return Container(
+      color: const Color(0xFF1A1A20),
+      child: Center(
+        child: Icon(
+          Icons.movie_rounded,
+          size: 60.sp,
+          color: Colors.white24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNetworkSlideImage(String imageUrl) {
+    if (imageUrl.isEmpty) {
+      return _buildHeroImagePlaceholder();
+    }
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      placeholder: (context, url) => Container(
+        color: AppColorTokens.cinematicSurface,
+        child: const Center(
+          child: CircularProgressIndicator(
+            color: AppColorTokens.cinemaRed,
+            strokeWidth: 2,
           ),
         ),
+      ),
+      errorWidget: (context, url, error) => _buildHeroImagePlaceholder(),
+    );
+  }
 
-        // Gradient Shade Overlay
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.transparent,
-                  AppColorTokens.cinematicBackground.withValues(alpha: 0.7),
-                  AppColorTokens.cinematicBackground,
-                ],
-                stops: const [0.0, 0.35, 0.8, 1.0],
+  void _toggleTrailerFullScreen(bool isCurrentlyLandscape) {
+    if (isCurrentlyLandscape) {
+      _wasInFullScreen = false;
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
+    } else {
+      _wasInFullScreen = true;
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
+  }
+
+  void _toggleTrailerControlsVisibility() {
+    setState(() {
+      _showTrailerControls = !_showTrailerControls;
+    });
+  }
+
+  Widget _buildTrailerCircleButton({
+    required Key buttonKey,
+    required IconData icon,
+    required VoidCallback onTap,
+    double iconSize = 22,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(8),
+    bool showBorder = false,
+  }) {
+    return InkWell(
+      key: buttonKey,
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(40),
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          shape: BoxShape.circle,
+          border: showBorder
+              ? Border.all(
+                  color: Colors.white.withValues(alpha: 0.45),
+                  width: 1.5,
+                )
+              : null,
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: iconSize,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTrailerCloseButton() {
+    return _buildTrailerCircleButton(
+      buttonKey: const Key('movie_review_trailer_close_button'),
+      icon: Icons.close_rounded,
+      onTap: _stopTrailer,
+    );
+  }
+
+  Widget _buildTrailerFullScreenButton(bool isLandscape) {
+    return _buildTrailerCircleButton(
+      buttonKey: const Key('movie_review_trailer_fullscreen_button'),
+      icon: isLandscape ? Icons.fullscreen_exit : Icons.fullscreen,
+      iconSize: 24,
+      onTap: () => _toggleTrailerFullScreen(isLandscape),
+    );
+  }
+
+  void _toggleTrailerPlayPause() {
+    final yt = _trailerYtController;
+    if (yt != null) {
+      if (yt.value.isPlaying) {
+        yt.pause();
+      } else {
+        yt.play();
+      }
+      return;
+    }
+    final vc = _trailerVideoController;
+    if (vc != null) {
+      if (vc.value.isPlaying) {
+        vc.pause();
+      } else {
+        vc.play();
+      }
+    }
+  }
+
+  Widget _buildTrailerPlayPauseButton({required bool isLandscape}) {
+    final double iconSize = isLandscape ? 52 : 44;
+    final EdgeInsetsGeometry padding = EdgeInsets.all(isLandscape ? 14 : 12);
+
+    final yt = _trailerYtController;
+    if (yt != null) {
+      return ValueListenableBuilder<YoutubePlayerValue>(
+        valueListenable: yt,
+        builder: (context, ytValue, _) {
+          return _buildTrailerCircleButton(
+            buttonKey: const Key('movie_review_trailer_play_pause_button'),
+            icon: ytValue.isPlaying
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            iconSize: iconSize,
+            padding: padding,
+            showBorder: true,
+            onTap: _toggleTrailerPlayPause,
+          );
+        },
+      );
+    }
+
+    final vc = _trailerVideoController;
+    if (vc != null) {
+      return ValueListenableBuilder<VideoPlayerValue>(
+        valueListenable: vc,
+        builder: (context, videoValue, _) {
+          return _buildTrailerCircleButton(
+            buttonKey: const Key('movie_review_trailer_play_pause_button'),
+            icon: videoValue.isPlaying
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            iconSize: iconSize,
+            padding: padding,
+            showBorder: true,
+            onTap: _toggleTrailerPlayPause,
+          );
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildYoutubePlayerWidget({required bool isLandscape}) {
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final double? ytWidth =
+        isLandscape ? screenSize.height * (16 / 9) : null;
+    final double? ytHeight = isLandscape ? screenSize.height : null;
+
+    final customBuilder = widget.youtubePlayerBuilder;
+    if (customBuilder != null) {
+      return SizedBox(
+        key: _ytPlayerGlobalKey,
+        width: ytWidth ?? double.infinity,
+        height: ytHeight,
+        child: customBuilder(_trailerYtController!, isLandscape),
+      );
+    }
+
+    return SizedBox(
+      key: _ytPlayerGlobalKey,
+      width: ytWidth ?? double.infinity,
+      height: ytHeight,
+      child: CleanYoutubePlayer(
+        controller: _trailerYtController!,
+        width: ytWidth,
+        onEnded: (_) => _stopTrailer(),
+      ),
+    );
+  }
+
+  Widget _buildScrubSeekBar({
+    Key? barKey,
+    required int totalMs,
+    required int currentMs,
+    required ValueChanged<Duration> onSeek,
+  }) {
+    final double progress =
+        totalMs > 0 ? (currentMs / totalMs).clamp(0.0, 1.0) : 0.0;
+    return LayoutBuilder(
+      key: barKey,
+      builder: (context, constraints) {
+        void seekAt(double dx) {
+          if (constraints.maxWidth > 0 && totalMs > 0) {
+            final f = (dx / constraints.maxWidth).clamp(0.0, 1.0);
+            onSeek(Duration(milliseconds: (f * totalMs).toInt()));
+          }
+        }
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragUpdate: (details) => seekAt(details.localPosition.dx),
+          onTapDown: (details) => seekAt(details.localPosition.dx),
+          child: Container(
+            height: 24,
+            alignment: Alignment.center,
+            color: Colors.transparent,
+            child: Container(
+              height: 4,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.28),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColorTokens.cinemaRed,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        );
+      },
+    );
+  }
 
-        // Stylized Bold Yellow Movie Title
-        Positioned(
-          bottom: 2.h,
-          child: Text(
-            movieTitle.toUpperCase(),
-            textAlign: TextAlign.center,
-            style: GoogleFonts.bebasNeue(
-              fontSize: 42.sp,
-              color: AppColorTokens.movieTitleGold,
-              letterSpacing: 2.2,
-              fontWeight: FontWeight.w900,
-              height: 1.0,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.8),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
+  Widget _buildTrailerSeekBar() {
+    final ytController = _trailerYtController;
+    if (ytController != null) {
+      return ValueListenableBuilder<YoutubePlayerValue>(
+        valueListenable: ytController,
+        builder: (context, ytValue, _) {
+          return _buildScrubSeekBar(
+            barKey: const Key('movie_review_youtube_seek_bar'),
+            totalMs: ytValue.metaData.duration.inMilliseconds,
+            currentMs: ytValue.position.inMilliseconds,
+            onSeek: ytController.seekTo,
+          );
+        },
+      );
+    }
+
+    final vc = _trailerVideoController;
+    if (vc != null) {
+      return ValueListenableBuilder<VideoPlayerValue>(
+        valueListenable: vc,
+        builder: (context, videoValue, _) {
+          return _buildScrubSeekBar(
+            barKey: const Key('movie_review_youtube_seek_bar'),
+            totalMs: videoValue.duration.inMilliseconds,
+            currentMs: videoValue.position.inMilliseconds,
+            onSeek: vc.seekTo,
+          );
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  List<Widget> _buildTrailerOverlayControls({required bool isLandscape}) {
+    final double topInset = isLandscape ? 16 : 10;
+    final double sideInset = isLandscape ? 16 : 12;
+
+    return [
+      Positioned.fill(
+        child: GestureDetector(
+          key: const Key('movie_review_trailer_tap_surface'),
+          behavior: HitTestBehavior.opaque,
+          onTap: _toggleTrailerControlsVisibility,
+          child: const SizedBox.expand(),
+        ),
+      ),
+      if (_showTrailerControls) ...[
+        const Positioned.fill(
+          child: IgnorePointer(
+            child: ColoredBox(color: Colors.black26),
           ),
         ),
+        Positioned(
+          top: topInset,
+          left: sideInset,
+          child: _buildTrailerCloseButton(),
+        ),
+        Positioned(
+          top: topInset,
+          right: sideInset,
+          child: _buildTrailerFullScreenButton(isLandscape),
+        ),
+        Center(
+          child: _buildTrailerPlayPauseButton(isLandscape: isLandscape),
+        ),
+        if (_trailerYtController != null ||
+            (_trailerVideoController != null &&
+                _trailerVideoController!.value.isInitialized))
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(
+                sideInset,
+                8,
+                sideInset,
+                isLandscape ? 10 : 6,
+              ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black54],
+                ),
+              ),
+              child: _buildTrailerSeekBar(),
+            ),
+          ),
       ],
+    ];
+  }
+
+  Widget _buildDirectVideoPlayer({bool isLandscape = false}) {
+    if (_trailerVideoController == null ||
+        !_trailerVideoController!.value.isInitialized) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColorTokens.cinemaRed),
+      );
+    }
+    final size = _trailerVideoController!.value.size;
+    final double vWidth = size.width > 0 ? size.width : 1280;
+    final double vHeight = size.height > 0 ? size.height : 720;
+
+    return isLandscape
+        ? SizedBox(
+            width: vWidth,
+            height: vHeight,
+            child: VideoPlayer(_trailerVideoController!),
+          )
+        : Center(
+            child: AspectRatio(
+              aspectRatio: _trailerVideoController!.value.aspectRatio,
+              child: VideoPlayer(_trailerVideoController!),
+            ),
+          );
+  }
+
+  Widget _buildTrailerSlide(_HeroMediaSlide slide) {
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (_isPlayingTrailer) {
+      return Container(
+        key: const Key('movie_review_trailer_slide'),
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (_trailerYtController != null)
+              Center(
+                child: _buildYoutubePlayerWidget(isLandscape: isLandscape),
+              )
+            else if (_trailerVideoController != null &&
+                _trailerVideoController!.value.isInitialized)
+              _buildDirectVideoPlayer()
+            else
+              Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildNetworkSlideImage(slide.imageUrl),
+                  if (_isTrailerBuffering)
+                    const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColorTokens.cinemaRed,
+                      ),
+                    ),
+                ],
+              ),
+            ..._buildTrailerOverlayControls(isLandscape: isLandscape),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      key: const Key('movie_review_trailer_slide'),
+      onTap: () => _startTrailer(slide),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildNetworkSlideImage(slide.imageUrl),
+          Align(
+            alignment: isLandscape ? const Alignment(0, -0.35) : Alignment.center,
+            child: Container(
+              key: const Key('movie_review_trailer_play_button'),
+              padding: EdgeInsets.symmetric(
+                horizontal: isLandscape ? 12 : 14.w,
+                vertical: isLandscape ? 6 : 8.h,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.72),
+                borderRadius: BorderRadius.circular(28.r),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  width: 1.2,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: isLandscape ? 24 : 30.r,
+                    height: isLandscape ? 24 : 30.r,
+                    decoration: const BoxDecoration(
+                      color: AppColorTokens.cinemaRed,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: isLandscape ? 16 : 20.sp,
+                    ),
+                  ),
+                  SizedBox(width: isLandscape ? 6 : 8.w),
+                  Text(
+                    'TRAILER',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isLandscape ? 11 : 12.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Hero Carousel (Trailer + All Review Images) with smooth dark fade and bold title
+  Widget _buildHeroCarousel(
+    List<_HeroMediaSlide> slides,
+    String movieTitle,
+  ) {
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final int safeIndex =
+        slides.isEmpty ? 0 : _currentSlideIndex.clamp(0, slides.length - 1);
+
+    return SizedBox.expand(
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          if (slides.isEmpty)
+            Positioned.fill(child: _buildHeroImagePlaceholder())
+          else
+            Positioned.fill(
+              child: PageView.builder(
+                key: const Key('movie_review_hero_carousel'),
+                controller: _heroPageController,
+                itemCount: slides.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentSlideIndex = index;
+                  });
+                  if (index != 0 && _isPlayingTrailer) {
+                    _stopTrailer();
+                  }
+                },
+                itemBuilder: (context, index) {
+                  final slide = slides[index];
+                  if (slide.isTrailer) {
+                    return _buildTrailerSlide(slide);
+                  }
+                  return GestureDetector(
+                    key: Key('movie_review_image_slide_$index'),
+                    onTap: () {
+                      if (slide.imageUrl.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                              imageUrl: slide.imageUrl,
+                              title: movieTitle,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: _buildNetworkSlideImage(slide.imageUrl),
+                  );
+                },
+              ),
+            ),
+
+          // Gradient Shade Overlay (ignored for taps so images & trailer remain interactive)
+          if (!_isPlayingTrailer)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.4),
+                        Colors.transparent,
+                        AppColorTokens.cinematicBackground.withValues(alpha: 0.7),
+                        AppColorTokens.cinematicBackground,
+                      ],
+                      stops: const [0.0, 0.35, 0.8, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Carousel Dots + Stylized Bold Yellow Movie Title
+          if (!_isPlayingTrailer)
+            Positioned(
+              bottom: 4.h,
+              left: 12.w,
+              right: 12.w,
+              child: IgnorePointer(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (slides.length > 1)
+                      Container(
+                        key: const Key('movie_review_carousel_dots'),
+                        margin: EdgeInsets.only(bottom: 4.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(slides.length, (i) {
+                            final isActive = i == safeIndex;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: EdgeInsets.symmetric(horizontal: 3.w),
+                              width: isActive ? 16.w : 6.w,
+                              height: 6.w,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AppColorTokens.cinemaRed
+                                    : Colors.white.withValues(alpha: 0.55),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    if (movieTitle.isNotEmpty)
+                      Text(
+                        movieTitle.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.bebasNeue(
+                          fontSize: isLandscape ? 24 : 42.sp,
+                          color: AppColorTokens.movieTitleGold,
+                          letterSpacing: 2.2,
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.8),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -696,7 +1486,7 @@ class _MovieRatingsState extends State<MovieRatings> {
             ratingProvider.movieReviewDetails?.totalReviews;
 
         return Container(
-          padding: EdgeInsets.all(12.w),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: AppColorTokens.cinematicCard,
             borderRadius: BorderRadius.circular(14.r),
@@ -788,7 +1578,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                 ],
               ),
 
-              SizedBox(height: 8.h),
+              SizedBox(height: 6.h),
 
               // Star Rating & Score Row
               Row(
@@ -865,7 +1655,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                 ],
               ),
 
-              SizedBox(height: 8.h),
+              SizedBox(height: 6.h),
 
               // Nested Review Box: Either User Review Display or Edit Form
               if (isEditing) ...[
@@ -1054,8 +1844,11 @@ class _MovieRatingsState extends State<MovieRatings> {
       );
     }
 
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     return SizedBox(
-      height: 88.h,
+      height: isLandscape ? 96.0 : 88.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),

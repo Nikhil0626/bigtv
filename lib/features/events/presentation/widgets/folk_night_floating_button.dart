@@ -1,5 +1,6 @@
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
@@ -69,10 +70,10 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
       showDialog(
         context: context,
         builder: (dialogCtx) {
+          final palette = ThemedPopupPalette.of(dialogCtx);
           return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.r),
-            ),
+            backgroundColor: palette.backgroundColor,
+            shape: palette.dialogShape(16.r),
             contentPadding: EdgeInsets.all(24.w),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -80,12 +81,12 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
                 Container(
                   padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
-                    color: AppColorTokens.primaryRed.withValues(alpha: 0.1),
+                    color: palette.accentColor.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.lock_outline_rounded,
-                    color: AppColorTokens.primaryRed,
+                    color: palette.accentColor,
                     size: 32.sp,
                   ),
                 ),
@@ -95,7 +96,7 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: palette.titleColor,
                   ),
                 ),
                 SizedBox(height: 10.h),
@@ -104,7 +105,7 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: Colors.black54,
+                    color: palette.bodyColor,
                     height: 1.4,
                   ),
                 ),
@@ -114,7 +115,7 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
                   height: 46.h,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColorTokens.primaryRed,
+                      backgroundColor: palette.accentColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r),
                       ),

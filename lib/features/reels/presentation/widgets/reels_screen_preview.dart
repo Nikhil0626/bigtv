@@ -15,7 +15,6 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/botton_actions.dart';
 import 'package:chotanews/utils/commant_screen.dart';
-import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -1015,19 +1014,20 @@ class _ReelsCardViewState extends State<ReelsCardView>
               final bool isBuffering = videoValue.isBuffering;
 
               return Container(
-                color: InFocusBarWidget.barBackgroundColor,
+                color: Colors.black,
                 width: double.infinity,
                 height: double.infinity,
-                alignment: Alignment.center,
                 child: Stack(
-                  alignment: Alignment.center,
+                  fit: StackFit.expand,
                   children: [
-                    FittedBox(
-                      fit: BoxFit.contain,
-                      child: SizedBox(
-                        width: vWidth,
-                        height: vHeight,
-                        child: VideoPlayer(widget.videoController!),
+                    ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: vWidth,
+                          height: vHeight,
+                          child: VideoPlayer(widget.videoController!),
+                        ),
                       ),
                     ),
                     if (isBuffering)
@@ -1060,35 +1060,36 @@ class _ReelsCardViewState extends State<ReelsCardView>
                   (!ytValue.isReady && widget.isCurrentPage);
 
               return Container(
-                color: InFocusBarWidget.barBackgroundColor,
+                color: Colors.black,
                 width: double.infinity,
                 height: double.infinity,
-                alignment: Alignment.center,
                 child: Stack(
-                  alignment: Alignment.center,
+                  fit: StackFit.expand,
                   children: [
-                    FittedBox(
-                      fit: BoxFit.contain,
-                      child: SizedBox(
-                        width: screenWidth,
-                        height: screenWidth / (9 / 16),
-                        child: IgnorePointer(
-                          ignoring: true,
-                          child: YoutubePlayer(
-                            controller: widget.youtubeController!,
-                            aspectRatio: 9 / 16,
-                            onReady: () {
-                              if (_isPlaybackAllowed()) {
-                                try {
-                                  widget.youtubeController?.play();
-                                } catch (_) {}
-                              } else {
-                                try {
-                                  widget.youtubeController?.pause();
-                                } catch (_) {}
-                              }
-                            },
-                            bufferIndicator: const SizedBox.shrink(),
+                    ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: screenWidth,
+                          height: screenWidth / (9 / 16),
+                          child: IgnorePointer(
+                            ignoring: true,
+                            child: YoutubePlayer(
+                              controller: widget.youtubeController!,
+                              aspectRatio: 9 / 16,
+                              onReady: () {
+                                if (_isPlaybackAllowed()) {
+                                  try {
+                                    widget.youtubeController?.play();
+                                  } catch (_) {}
+                                } else {
+                                  try {
+                                    widget.youtubeController?.pause();
+                                  } catch (_) {}
+                                }
+                              },
+                              bufferIndicator: const SizedBox.shrink(),
+                            ),
                           ),
                         ),
                       ),
@@ -1106,21 +1107,20 @@ class _ReelsCardViewState extends State<ReelsCardView>
       );
     }
 
-    // 3. Instant Thumbnail Cover (Fills screen with BoxFit.contain)
+    // 3. Instant Thumbnail Cover (Fills screen with BoxFit.cover)
     if (widget.reelCard.thumbnailUrl.isNotEmpty) {
       return Container(
-        color: InFocusBarWidget.barBackgroundColor,
+        color: Colors.black,
         width: double.infinity,
         height: double.infinity,
-        alignment: Alignment.center,
         child: Stack(
-          alignment: Alignment.center,
+          fit: StackFit.expand,
           children: [
             CachedNetworkImage(
               imageUrl: widget.reelCard.thumbnailUrl,
-              fit: BoxFit.contain,
-              placeholder: (_, __) => Container(color: InFocusBarWidget.barBackgroundColor),
-              errorWidget: (_, __, ___) => Container(color: InFocusBarWidget.barBackgroundColor),
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(color: Colors.black),
+              errorWidget: (_, __, ___) => Container(color: Colors.black),
             ),
             if (widget.isCurrentPage)
               _buildBufferingIndicator()
@@ -1131,7 +1131,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
       );
     }
 
-    return Container(color: InFocusBarWidget.barBackgroundColor);
+    return Container(color: Colors.black);
   }
 
   Widget _buildProgressBar(double bottomOffset) {
@@ -1253,9 +1253,13 @@ class _ReelsCardViewState extends State<ReelsCardView>
     final double bottomBarHeight =
         hasBottomNav ? (50.0 + bottomPadding) : bottomPadding;
 
+    final double contentBottomBase =
+        hasBottomNav ? bottomBarHeight : bottomPadding;
+
     return Stack(
       children: [
         Positioned.fill(
+          bottom: hasBottomNav ? bottomBarHeight : 0,
           child: GestureDetector(
             key: const Key('reel_card_gesture_area'),
             behavior: HitTestBehavior.opaque,
@@ -1269,7 +1273,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
         ),
         // Full-width bottom-to-top black gradient shade for contrast & readability
         Positioned(
-          bottom: 0,
+          bottom: hasBottomNav ? bottomBarHeight : 0,
           left: 0,
           right: 0,
           height: 320.h,
@@ -1294,7 +1298,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
         ),
         // Description content directly on gradient (no box)
         Positioned(
-          bottom: 55,
+          bottom: contentBottomBase + 14,
           left: 0,
           right: 80,
           child: Container(
@@ -1325,35 +1329,22 @@ class _ReelsCardViewState extends State<ReelsCardView>
                 Row(
                   children: [
                     if (widget.reelCard.publisherImage.isNotEmpty) ...[
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const InAppWebViewScreen(
-                                webUrl: "https://www.youtube.com",
-                                title: "Videos",
-                              ),
+                      SizedBox(
+                        height: 36.r,
+                        width: 36.r,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(18.r)),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.reelCard.publisherImage,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: AppColors.borderColor.withValues(alpha: .2),
                             ),
-                          );
-                        },
-                        child: SizedBox(
-                          height: 36.r,
-                          width: 36.r,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(18.r)),
-                            child: CachedNetworkImage(
-                              imageUrl: widget.reelCard.publisherImage,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: AppColors.borderColor.withValues(alpha: .2),
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.account_circle,
-                                  size: 36.r,
-                                  color: Colors.grey.shade300,
-                                ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Icon(
+                                Icons.account_circle,
+                                size: 36.r,
+                                color: Colors.grey.shade300,
                               ),
                             ),
                           ),
@@ -1388,7 +1379,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
         _buildDoubleTapLikePopup(),
         Positioned(
           right: 10,
-          bottom: 110,
+          bottom: contentBottomBase + 56,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -27,31 +27,51 @@ class HomeRepo extends BaseService{
   }
 
   Future getAllPosts(queryParams) async {
-    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.getAllPost, method: RequestType.post, body: queryParams);
-    final data = response.data;
-    final posts = data is Map ? (data['posts'] ?? data['data']) : data;
-    if (response.statusCode == 200 && posts is List && posts.isNotEmpty) {
-      return response;
-    }
-
-    // Fallback to production if dev returns no posts or fails
+    dynamic devResponse;
     try {
-      Response prodResponse = await makeRequest(
+      devResponse = await makeRequest(
+        baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.getAllPost,
+        method: RequestType.post,
+        body: queryParams,
+      );
+      if (devResponse is Response) {
+        final data = devResponse.data;
+        final posts = data is Map ? (data['posts'] ?? data['data']) : data;
+        if (devResponse.statusCode == 200 && posts is List && posts.isNotEmpty) {
+          return devResponse;
+        }
+      }
+    } catch (_) {}
+
+    // Fallback to production if dev fails, throws, or returns no posts
+    try {
+      final prodResponse = await makeRequest(
         baseUrl: "https://api.chotanews.com",
         url: BaseUrls.getAllPost,
         method: RequestType.post,
         body: queryParams,
       );
-      if (prodResponse.statusCode == 200 && prodResponse.data != null) {
+      if (prodResponse is Response &&
+          prodResponse.statusCode == 200 &&
+          prodResponse.data != null) {
         final prodData = prodResponse.data;
-        final prodPosts = prodData is Map ? (prodData['posts'] ?? prodData['data']) : prodData;
+        final prodPosts =
+            prodData is Map ? (prodData['posts'] ?? prodData['data']) : prodData;
         if (prodPosts is List && prodPosts.isNotEmpty) {
           return prodResponse;
         }
       }
     } catch (_) {}
 
-    return response;
+    if (devResponse is Response) {
+      return devResponse;
+    }
+    return Response(
+      requestOptions: RequestOptions(path: BaseUrls.getAllPost),
+      statusCode: 500,
+      data: const {'posts': []},
+    );
   }
 
   Future getMoreFollowTags({Map<String, dynamic>? queryParams}) async {
@@ -128,9 +148,45 @@ class HomeRepo extends BaseService{
   }
 
 
-  Future getAllAiTagsById(body) async{
-    Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.aiTagsById,method: RequestType.get,queryParameters: body);
-    return response;
+  Future getAllAiTagsById(body) async {
+    dynamic devResponse;
+    try {
+      devResponse = await makeRequest(
+        baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.aiTagsById,
+        method: RequestType.get,
+        queryParameters: body,
+      );
+      if (devResponse is Response &&
+          devResponse.statusCode == 200 &&
+          devResponse.data is List &&
+          (devResponse.data as List).isNotEmpty) {
+        return devResponse;
+      }
+    } catch (_) {}
+
+    try {
+      final prodResponse = await makeRequest(
+        baseUrl: "https://api.chotanews.com",
+        url: BaseUrls.aiTagsById,
+        method: RequestType.get,
+        queryParameters: body,
+      );
+      if (prodResponse is Response &&
+          prodResponse.statusCode == 200 &&
+          prodResponse.data != null) {
+        return prodResponse;
+      }
+    } catch (_) {}
+
+    if (devResponse is Response) {
+      return devResponse;
+    }
+    return Response(
+      requestOptions: RequestOptions(path: BaseUrls.aiTagsById),
+      statusCode: 500,
+      data: const [],
+    );
   }
 
   Future surveyApi() async{

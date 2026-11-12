@@ -82,18 +82,24 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
         ? 0
         : ratingProvider.currentReviewIndex.clamp(0, reviews.length - 1);
 
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     return Column(
       children: [
-        _buildSwipeHeader(
-          reviews: reviews,
-          safeIndex: safeIndex,
-          isTelugu: isTelugu,
-          ratingProvider: ratingProvider,
-        ),
-        const Divider(color: Color(0xFF24242D), height: 1),
+        if (!isLandscape) ...[
+          _buildSwipeHeader(
+            reviews: reviews,
+            safeIndex: safeIndex,
+            isTelugu: isTelugu,
+            ratingProvider: ratingProvider,
+          ),
+          const Divider(color: Color(0xFF24242D), height: 1),
+        ],
         Expanded(
           child: PageView.builder(
             controller: _pageController,
+            physics: isLandscape ? const NeverScrollableScrollPhysics() : null,
             scrollDirection: Axis.vertical,
             itemCount: reviews.length,
             onPageChanged: ratingProvider.setCurrentReviewIndex,

@@ -5,6 +5,7 @@ import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart'
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/core/theme/theme_provider.dart';
+import 'package:chotanews/core/theme/themed_popup_palette.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
@@ -164,6 +165,20 @@ class SettingsViewState extends State<SettingsView> {
                   Consumer<SettingsProvider>(
                     builder: (context, settingsProvider, _) {
                       return _buildSettingsRow(context, "Signout.svg", !settingsProvider.isNotificationsEnabled ? "Login" : "Logout", () async {
+                        if (settingsProvider.isNotificationsEnabled) {
+                          final bool confirmed = await showThemedConfirmDialog(
+                            context: context,
+                            dialogKey: const Key('settings_logout_confirm_dialog'),
+                            cancelKey: const Key('settings_logout_cancel_button'),
+                            confirmKey: const Key('settings_logout_confirm_button'),
+                            icon: Icons.logout_rounded,
+                            title: "Logout",
+                            message: "Are you sure you want to logout from your account?",
+                            cancelLabel: "Cancel",
+                            confirmLabel: "Logout",
+                          );
+                          if (!confirmed || !context.mounted) return;
+                        }
                         closeSubscribe();
                         SharedPreferences preferences = await SharedPreferences.getInstance();
                         String? deviceId = preferences.getString("deviceId");
@@ -254,14 +269,18 @@ class SettingsViewState extends State<SettingsView> {
               children: [
                 iconWidget,
                 width(width: 16.w),
-                Text(
-                  title,
-                  style: context.typography.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: effectiveTextColor,
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.typography.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: effectiveTextColor,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Icon(Icons.arrow_forward_ios, size: 16, color: effectiveChevronColor),
               ],
             ),
