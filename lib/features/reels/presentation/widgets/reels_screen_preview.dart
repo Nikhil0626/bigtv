@@ -27,6 +27,7 @@ import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 
 class ReelPreviewScreen extends StatefulWidget {
   final int initialIndex;
@@ -595,9 +596,38 @@ class _ReelsCardViewState extends State<ReelsCardView>
       _hasCompleted = false;
       _playCount = 0;
     }
-    // When this card transitions from off-screen to the active visible page, reset completion state
+    // When this card transitions from off-screen to the active visible page (user scrolled to it)
     if (!oldWidget.isCurrentPage && widget.isCurrentPage) {
       _hasCompleted = false;
+      if (_isPlaybackAllowed()) {
+        try {
+          final vc = widget.videoController;
+          if (vc != null && vc.value.isInitialized && !vc.value.isPlaying) {
+            final pos = vc.value.position;
+            final dur = vc.value.duration;
+            if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 500)) {
+              vc.seekTo(Duration.zero);
+            }
+            vc.play();
+          }
+        } catch (_) {}
+        try {
+          final yc = widget.youtubeController;
+          if (yc != null && !yc.value.isPlaying) {
+            if (yc.value.playerState == PlayerState.ended) {
+              yc.seekTo(Duration.zero);
+            }
+            yc.play();
+          }
+        } catch (_) {}
+      }
+    } else if (oldWidget.isCurrentPage && !widget.isCurrentPage) {
+      try {
+        widget.videoController?.pause();
+      } catch (_) {}
+      try {
+        widget.youtubeController?.pause();
+      } catch (_) {}
     }
   }
 
@@ -795,6 +825,40 @@ class _ReelsCardViewState extends State<ReelsCardView>
     });
   }
 
+  Widget _buildBufferingIndicator() {
+    return Center(
+      child: Container(
+        width: 64.r,
+        height: 64.r,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.55),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.25),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Center(
+          child: SizedBox(
+            width: 30.r,
+            height: 30.r,
+            child: const CircularProgressIndicator(
+              strokeWidth: 2.8,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPlayPauseOverlay(bool isPlaying) {
     return ValueListenableBuilder<({bool show, IconData icon})>(
       valueListenable: _feedbackState,
@@ -868,14 +932,14 @@ class _ReelsCardViewState extends State<ReelsCardView>
       // Verify duration is valid (>1.5s) and video is not in an initial buffering/unloaded state
       if (dur > const Duration(milliseconds: 1500) && !controller.value.isBuffering) {
         // Completion condition:
-        // 1. Position is within 300ms of duration OR controller reported isCompleted
-        // 2. Position has played at least 85% of total duration
+        // 1. Position is within 400ms of duration OR controller reported isCompleted
+        // 2. Position has played at least 80% of total duration OR controller reported isCompleted
         // 3. Position is at least 1.5 seconds into the video (prevents false early triggers)
-        final bool isNearEnd = pos >= dur - const Duration(milliseconds: 300) ||
+        final bool isNearEnd = pos >= dur - const Duration(milliseconds: 400) ||
             controller.value.isCompleted;
         final bool hasPlayedSufficiently =
-            pos.inMilliseconds >= (dur.inMilliseconds * 0.85) &&
-            pos >= const Duration(milliseconds: 1500);
+            pos.inMilliseconds >= (dur.inMilliseconds * 0.80) ||
+            controller.value.isCompleted;
 
         if (isNearEnd && hasPlayedSufficiently && !_hasCompleted) {
           _hasCompleted = true;
@@ -906,17 +970,24 @@ class _ReelsCardViewState extends State<ReelsCardView>
       return;
     }
     if (ytController != null) {
-      if (ytController.value.playerState == PlayerState.ended && !_hasCompleted) {
+      final pos = ytController.value.position;
+      final dur = ytController.metadata.duration;
+      final bool isEnded = ytController.value.playerState == PlayerState.ended;
+      final bool isNearEnd = dur > const Duration(seconds: 1) &&
+          pos >= dur - const Duration(milliseconds: 500) &&
+          pos >= const Duration(seconds: 2);
+
+      if ((isEnded || isNearEnd) && !_hasCompleted) {
         _hasCompleted = true;
         _playCount++;
         AnalyticsService.instance.track(AnalyticsEventName.reelComplete, properties: {
           'reel_id': widget.reelCard.id,
-          'watch_duration_seconds': ytController.metadata.duration.inSeconds,
+          'watch_duration_seconds': dur.inSeconds,
         });
         widget.onVideoEnded?.call();
       } else if (ytController.value.playerState == PlayerState.playing &&
           _hasCompleted &&
-          ytController.value.position < const Duration(milliseconds: 500)) {
+          pos < const Duration(milliseconds: 500)) {
         _hasCompleted = false;
       }
     }
@@ -941,6 +1012,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
           return ValueListenableBuilder<VideoPlayerValue>(
             valueListenable: widget.videoController!,
             builder: (context, videoValue, _) {
+              final bool isBuffering = videoValue.isBuffering;
+
               return Container(
                 color: InFocusBarWidget.barBackgroundColor,
                 width: double.infinity,
@@ -957,7 +1030,10 @@ class _ReelsCardViewState extends State<ReelsCardView>
                         child: VideoPlayer(widget.videoController!),
                       ),
                     ),
-                    _buildPlayPauseOverlay(videoValue.isPlaying),
+                    if (isBuffering)
+                      _buildBufferingIndicator()
+                    else
+                      _buildPlayPauseOverlay(videoValue.isPlaying),
                   ],
                 ),
               );
@@ -979,6 +1055,10 @@ class _ReelsCardViewState extends State<ReelsCardView>
           return ValueListenableBuilder<YoutubePlayerValue>(
             valueListenable: widget.youtubeController!,
             builder: (context, ytValue, _) {
+              final bool isBuffering =
+                  ytValue.playerState == PlayerState.buffering ||
+                  (!ytValue.isReady && widget.isCurrentPage);
+
               return Container(
                 color: InFocusBarWidget.barBackgroundColor,
                 width: double.infinity,
@@ -998,24 +1078,25 @@ class _ReelsCardViewState extends State<ReelsCardView>
                             controller: widget.youtubeController!,
                             aspectRatio: 9 / 16,
                             onReady: () {
-                              if (!_isPlaybackAllowed()) {
+                              if (_isPlaybackAllowed()) {
+                                try {
+                                  widget.youtubeController?.play();
+                                } catch (_) {}
+                              } else {
                                 try {
                                   widget.youtubeController?.pause();
                                 } catch (_) {}
                               }
                             },
-                            bufferIndicator: const Align(
-                              alignment: Alignment.bottomCenter,
-                              child: LinearProgressIndicator(
-                                color: Colors.white,
-                                backgroundColor: Colors.transparent,
-                              ),
-                            ),
+                            bufferIndicator: const SizedBox.shrink(),
                           ),
                         ),
                       ),
                     ),
-                    _buildPlayPauseOverlay(ytValue.isPlaying),
+                    if (isBuffering)
+                      _buildBufferingIndicator()
+                    else
+                      _buildPlayPauseOverlay(ytValue.isPlaying),
                   ],
                 ),
               );
@@ -1041,7 +1122,10 @@ class _ReelsCardViewState extends State<ReelsCardView>
               placeholder: (_, __) => Container(color: InFocusBarWidget.barBackgroundColor),
               errorWidget: (_, __, ___) => Container(color: InFocusBarWidget.barBackgroundColor),
             ),
-            _buildPlayPauseOverlay(false),
+            if (widget.isCurrentPage)
+              _buildBufferingIndicator()
+            else
+              _buildPlayPauseOverlay(false),
           ],
         ),
       );
@@ -1050,8 +1134,125 @@ class _ReelsCardViewState extends State<ReelsCardView>
     return Container(color: InFocusBarWidget.barBackgroundColor);
   }
 
+  Widget _buildProgressBar(double bottomOffset) {
+    if (widget.videoController != null &&
+        widget.videoController!.value.isInitialized) {
+      return Positioned(
+        bottom: bottomOffset,
+        left: 0,
+        right: 0,
+        child: ValueListenableBuilder<VideoPlayerValue>(
+          valueListenable: widget.videoController!,
+          builder: (context, videoValue, _) {
+            final int total = videoValue.duration.inMilliseconds;
+            final int current = videoValue.position.inMilliseconds;
+            final double progress = (total > 0)
+                ? (current / total).clamp(0.0, 1.0)
+                : 0.0;
+            return _buildProgressBarLine(
+              progress: progress,
+              onSeek: (fraction) {
+                final targetMs = (fraction * total).toInt();
+                widget.videoController?.seekTo(Duration(milliseconds: targetMs));
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    if (widget.youtubeController != null) {
+      return Positioned(
+        bottom: bottomOffset,
+        left: 0,
+        right: 0,
+        child: ValueListenableBuilder<YoutubePlayerValue>(
+          valueListenable: widget.youtubeController!,
+          builder: (context, ytValue, _) {
+            final int total = ytValue.metaData.duration.inMilliseconds;
+            final int current = ytValue.position.inMilliseconds;
+            final double progress = (total > 0)
+                ? (current / total).clamp(0.0, 1.0)
+                : 0.0;
+            return _buildProgressBarLine(
+              progress: progress,
+              onSeek: (fraction) {
+                final targetMs = (fraction * total).toInt();
+                widget.youtubeController?.seekTo(Duration(milliseconds: targetMs));
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildProgressBarLine({
+    required double progress,
+    required ValueChanged<double> onSeek,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragUpdate: (details) {
+            final double boxWidth = constraints.maxWidth;
+            if (boxWidth > 0) {
+              final double fraction =
+                  (details.localPosition.dx / boxWidth).clamp(0.0, 1.0);
+              onSeek(fraction);
+            }
+          },
+          onTapDown: (details) {
+            final double boxWidth = constraints.maxWidth;
+            if (boxWidth > 0) {
+              final double fraction =
+                  (details.localPosition.dx / boxWidth).clamp(0.0, 1.0);
+              onSeek(fraction);
+            }
+          },
+          child: Container(
+            height: 12.h,
+            alignment: Alignment.bottomCenter,
+            color: Colors.transparent,
+            child: Container(
+              height: 2.8.h,
+              width: double.infinity,
+              color: Colors.white.withValues(alpha: 0.22),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColorTokens.cinemaRed,
+                    borderRadius: BorderRadius.horizontal(
+                      right: Radius.circular(1.5.r),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    HomeProvider? homeProvider;
+    try {
+      homeProvider = context.watch<HomeProvider>();
+    } catch (_) {}
+    final bool isRootTab = ModalRoute.of(context)?.isFirst ?? true;
+    final bool hasBottomNav =
+        isRootTab && (homeProvider?.isBottomEnable ?? true);
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final double bottomBarHeight =
+        hasBottomNav ? (50.0 + bottomPadding) : bottomPadding;
+
     return Stack(
       children: [
         Positioned.fill(
@@ -1296,6 +1497,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
         ],
       ),
     ),
+    _buildProgressBar(bottomBarHeight),
       ],
     );
   }
