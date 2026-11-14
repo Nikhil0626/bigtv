@@ -169,16 +169,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
           },
           onReturnHome: () {
             Navigator.pop(dialogCtx);
-            if (widget.isDailyPuzzle) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ZipLevelSelectionScreen(),
-                ),
-              );
-            } else {
-              Navigator.pop(context);
-            }
+            _handleDashboardTap(game);
           },
           onNextLevel: () async {
             Navigator.pop(dialogCtx);
@@ -217,7 +208,54 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
     );
   }
 
+  Future<void> _ensureProfileAndProceed(
+    ZipGameProvider game, {
+    required VoidCallback onProceed,
+  }) async {
+    final profileProvider = context.read<ProfileProvider>();
+    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+
+    if (profile.hasValidName) {
+      // User has ALREADY updated their name in profile or any game!
+      // Do not show popup; use that name directly and fire sync
+      _fireBackgroundSync(game, displayName: profile.name, photoUrl: profile.photoUrl);
+      onProceed();
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId') ?? 'guest';
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => GameProfilePromptDialog(
+          initialName: '',
+          initialPhotoUrl: profile.photoUrl,
+          userId: userId,
+          onProfileSaved: (savedName, savedPhoto) async {
+            _fireBackgroundSync(
+              game,
+              displayName: savedName,
+              photoUrl: savedPhoto,
+            );
+            onProceed();
+          },
+        ),
+      );
+    }
+  }
+
   Future<void> _shareCurrentGame(ZipGameProvider game) async {
+    if (widget.isDailyPuzzle && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        game,
+        onProceed: () => _performShare(game),
+      );
+    } else {
+      await _performShare(game);
+    }
+  }
+
+  Future<void> _performShare(ZipGameProvider game) async {
     final formattedTime = widget.isViewOnly && widget.initialElapsedMs != null
         ? '${(widget.initialElapsedMs! / 1000).toStringAsFixed(1)}s'
         : (game.currentPath.isNotEmpty ? game.formattedTime : null);
@@ -250,33 +288,31 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
   }
 
   Future<void> _handleDoneOrBack(ZipGameProvider game, {required bool isDone}) async {
-    final profileProvider = context.read<ProfileProvider>();
-    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+    await _ensureProfileAndProceed(
+      game,
+      onProceed: _navigateAfterDoneOrBack,
+    );
+  }
 
-    if (profile.hasValidName) {
-      // User has ALREADY updated their name in profile or any game!
-      // Navigate immediately with 0ms delay!
-      _navigateAfterDoneOrBack();
-      _fireBackgroundSync(game, displayName: profile.name, photoUrl: profile.photoUrl);
+  Future<void> _handleDashboardTap(ZipGameProvider game) async {
+    if (widget.isDailyPuzzle && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        game,
+        onProceed: () {
+          _hasHandledCompletionFlow = true;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ZipLevelSelectionScreen(),
+            ),
+          );
+        },
+      );
     } else {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId') ?? 'guest';
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => GameProfilePromptDialog(
-          initialName: '',
-          initialPhotoUrl: profile.photoUrl,
-          userId: userId,
-          onProfileSaved: (savedName, savedPhoto) async {
-            _navigateAfterDoneOrBack();
-            _fireBackgroundSync(
-              game,
-              displayName: savedName,
-              photoUrl: savedPhoto,
-            );
-          },
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ZipLevelSelectionScreen(),
         ),
       );
     }
@@ -774,7 +810,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
             SizedBox(height: 8.h),
             Wrap(
               alignment: WrapAlignment.end,
-              spacing: 6.w,
+              spacing: 8.w,
               runSpacing: 4.h,
               children: [
                 OutlinedButton.icon(
@@ -782,64 +818,24 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                     foregroundColor: const Color(0xFF10B981),
                     side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  icon: Icon(Icons.share_rounded, size: 13.sp, color: const Color(0xFF10B981)),
-                  label: const Text('Share', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.share_rounded, size: 14.sp, color: const Color(0xFF10B981)),
+                  label: const Text('Share', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   onPressed: () => _shareCurrentGame(game),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () {
-                    if (widget.isDailyPuzzle) {
-                      _handleDoneOrBack(game, isDone: true);
-                    } else {
-                      _showCompletionDialog(game);
-                    }
-                  },
-                  child: const Text('Done', style: TextStyle(fontSize: 11)),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    side: const BorderSide(color: Colors.green, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () {
-                    if (widget.isDailyPuzzle) {
-                      _handleDoneOrBack(game, isDone: false);
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Back', style: TextStyle(fontSize: 11)),
-                ),
-                ElevatedButton(
+                ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ZipLevelSelectionScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Dashboard', style: TextStyle(fontSize: 11)),
+                  onPressed: () => _handleDashboardTap(game),
+                  icon: Icon(Icons.dashboard_rounded, size: 14.sp, color: Colors.white),
+                  label: const Text('Dashboard', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

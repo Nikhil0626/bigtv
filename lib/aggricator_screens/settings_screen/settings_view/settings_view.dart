@@ -201,8 +201,13 @@ class SettingsViewState extends State<SettingsView> {
             Padding(
               padding: const EdgeInsets.only(bottom: 70.0),
               child: Text(
-                "V${settingsProvider.appVersion}",
+                settingsProvider.userId.isNotEmpty &&
+                        settingsProvider.userId != "0" &&
+                        settingsProvider.userId.toLowerCase() != "null"
+                    ? "V${settingsProvider.appVersion} (${settingsProvider.userId})"
+                    : "V${settingsProvider.appVersion}",
                 style: fontStyle(fontWeight: FontWeight.normal),
+                textAlign: TextAlign.center,
               ),
             ),
           ],

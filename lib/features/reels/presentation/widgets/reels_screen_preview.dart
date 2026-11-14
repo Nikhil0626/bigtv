@@ -42,7 +42,8 @@ class ReelPreviewScreen extends StatefulWidget {
   ReelPreviewScreenState createState() => ReelPreviewScreenState();
 }
 
-class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindingObserver {
+class ReelPreviewScreenState extends State<ReelPreviewScreen>
+    with WidgetsBindingObserver {
   late PageController _pageController;
   late final ValueNotifier<int> _currentIndexNotifier;
   final ValueNotifier<int> _controllersRevision = ValueNotifier<int>(0);
@@ -73,11 +74,13 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindin
       _syncPauseSubscription();
       final reelsList = context.read<ReelsProviders>().getAllReelsList;
       if (reelsList.isNotEmpty && currentIndex < reelsList.length) {
-        AnalyticsService.instance.track(AnalyticsEventName.reelOpen, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelOpen, properties: {
           'reel_id': reelsList[currentIndex].id,
           'position': currentIndex,
         });
-        AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelPlay, properties: {
           'reel_id': reelsList[currentIndex].id,
         });
       }
@@ -286,7 +289,8 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindin
       prevNet.pause();
       final pos = prevNet.value.position;
       final dur = prevNet.value.duration;
-      if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 500)) {
+      if (dur > Duration.zero &&
+          pos >= dur - const Duration(milliseconds: 500)) {
         prevNet.seekTo(Duration.zero);
       }
     }
@@ -306,7 +310,8 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindin
       if (nextNet != null && nextNet.value.isInitialized) {
         final pos = nextNet.value.position;
         final dur = nextNet.value.duration;
-        if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 500)) {
+        if (dur > Duration.zero &&
+            pos >= dur - const Duration(milliseconds: 500)) {
           nextNet.seekTo(Duration.zero);
         }
         nextNet.play();
@@ -432,38 +437,41 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindin
                     youtubeController: ytController,
                     isCurrentPage: index == currentIndex,
                     canPlayback: () =>
-                        _isScreenActive() && index == _currentIndexNotifier.value,
-                onVideoEnded: () {
-                  // Only permit auto-scrolling if triggered by the active visible reel!
-                  if (index != currentIndex) return;
-                  if (_isAutoScrolling) return;
+                        _isScreenActive() &&
+                        index == _currentIndexNotifier.value,
+                    onVideoEnded: () {
+                      // Only permit auto-scrolling if triggered by the active visible reel!
+                      if (index != currentIndex) return;
+                      if (_isAutoScrolling) return;
 
-                  if (index < reelsList.length - 1) {
-                    if (_pageController.hasClients) {
-                      _isAutoScrolling = true;
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 350),
-                        curve: Curves.easeInOut,
-                      ).then((_) {
-                        _isAutoScrolling = false;
-                      }).catchError((_) {
-                        _isAutoScrolling = false;
-                      });
-                    }
-                  } else {
-                    // Replay last reel from beginning
-                    final lastNet = _networkControllers[index];
-                    if (lastNet != null && lastNet.value.isInitialized) {
-                      lastNet.seekTo(Duration.zero);
-                      lastNet.play();
-                    }
-                    final lastYt = _youtubeControllers[index];
-                    if (lastYt != null) {
-                      lastYt.seekTo(Duration.zero);
-                      lastYt.play();
-                    }
-                  }
-                },
+                      if (index < reelsList.length - 1) {
+                        if (_pageController.hasClients) {
+                          _isAutoScrolling = true;
+                          _pageController
+                              .nextPage(
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeInOut,
+                          )
+                              .then((_) {
+                            _isAutoScrolling = false;
+                          }).catchError((_) {
+                            _isAutoScrolling = false;
+                          });
+                        }
+                      } else {
+                        // Replay last reel from beginning
+                        final lastNet = _networkControllers[index];
+                        if (lastNet != null && lastNet.value.isInitialized) {
+                          lastNet.seekTo(Duration.zero);
+                          lastNet.play();
+                        }
+                        final lastYt = _youtubeControllers[index];
+                        if (lastYt != null) {
+                          lastYt.seekTo(Duration.zero);
+                          lastYt.play();
+                        }
+                      }
+                    },
                   );
                 },
               );
@@ -505,8 +513,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
   Timer? _feedbackTimer;
   final ValueNotifier<({bool show, IconData icon})> _feedbackState =
       ValueNotifier<({bool show, IconData icon})>(
-        (show: false, icon: Icons.play_arrow_rounded),
-      );
+    (show: false, icon: Icons.play_arrow_rounded),
+  );
   final ValueNotifier<bool> _isLikePopVisible = ValueNotifier<bool>(false);
   late final AnimationController _likePopController;
   late final Animation<double> _likePopScale;
@@ -604,7 +612,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
           if (vc != null && vc.value.isInitialized && !vc.value.isPlaying) {
             final pos = vc.value.position;
             final dur = vc.value.duration;
-            if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 500)) {
+            if (dur > Duration.zero &&
+                pos >= dur - const Duration(milliseconds: 500)) {
               vc.seekTo(Duration.zero);
             }
             vc.play();
@@ -786,13 +795,15 @@ class _ReelsCardViewState extends State<ReelsCardView>
       if (vc.value.isPlaying) {
         vc.pause();
         nowPlaying = false;
-        AnalyticsService.instance.track(AnalyticsEventName.reelPause, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelPause, properties: {
           'reel_id': widget.reelCard.id,
         });
       } else {
         vc.play();
         nowPlaying = true;
-        AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelPlay, properties: {
           'reel_id': widget.reelCard.id,
         });
       }
@@ -800,13 +811,15 @@ class _ReelsCardViewState extends State<ReelsCardView>
       if (yc.value.isPlaying) {
         yc.pause();
         nowPlaying = false;
-        AnalyticsService.instance.track(AnalyticsEventName.reelPause, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelPause, properties: {
           'reel_id': widget.reelCard.id,
         });
       } else {
         yc.play();
         nowPlaying = true;
-        AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelPlay, properties: {
           'reel_id': widget.reelCard.id,
         });
       }
@@ -929,7 +942,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
       final dur = controller.value.duration;
 
       // Verify duration is valid (>1.5s) and video is not in an initial buffering/unloaded state
-      if (dur > const Duration(milliseconds: 1500) && !controller.value.isBuffering) {
+      if (dur > const Duration(milliseconds: 1500) &&
+          !controller.value.isBuffering) {
         // Completion condition:
         // 1. Position is within 400ms of duration OR controller reported isCompleted
         // 2. Position has played at least 80% of total duration OR controller reported isCompleted
@@ -938,19 +952,23 @@ class _ReelsCardViewState extends State<ReelsCardView>
             controller.value.isCompleted;
         final bool hasPlayedSufficiently =
             pos.inMilliseconds >= (dur.inMilliseconds * 0.80) ||
-            controller.value.isCompleted;
+                controller.value.isCompleted;
 
         if (isNearEnd && hasPlayedSufficiently && !_hasCompleted) {
           _hasCompleted = true;
           _playCount++;
-          AnalyticsService.instance.track(AnalyticsEventName.reelComplete, properties: {
+          AnalyticsService.instance
+              .track(AnalyticsEventName.reelComplete, properties: {
             'reel_id': widget.reelCard.id,
             'watch_duration_seconds': dur.inSeconds,
           });
           widget.onVideoEnded?.call();
-        } else if (pos < const Duration(milliseconds: 500) && _hasCompleted && _playCount > 0) {
+        } else if (pos < const Duration(milliseconds: 500) &&
+            _hasCompleted &&
+            _playCount > 0) {
           _hasCompleted = false;
-          AnalyticsService.instance.track(AnalyticsEventName.reelRewatch, properties: {
+          AnalyticsService.instance
+              .track(AnalyticsEventName.reelRewatch, properties: {
             'reel_id': widget.reelCard.id,
           });
         }
@@ -979,7 +997,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
       if ((isEnded || isNearEnd) && !_hasCompleted) {
         _hasCompleted = true;
         _playCount++;
-        AnalyticsService.instance.track(AnalyticsEventName.reelComplete, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.reelComplete, properties: {
           'reel_id': widget.reelCard.id,
           'watch_duration_seconds': dur.inSeconds,
         });
@@ -1002,8 +1021,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
         widget.videoController!.value.isInitialized) {
       return Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
-          widget.videoController!
-              .setVolume(homeProvider.isMuted ? 0.0 : 1.0);
+          widget.videoController!.setVolume(homeProvider.isMuted ? 0.0 : 1.0);
           final size = widget.videoController!.value.size;
           final double vWidth = size.width > 0 ? size.width : screenWidth;
           final double vHeight = size.height > 0 ? size.height : screenHeight;
@@ -1022,7 +1040,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
                   children: [
                     ClipRect(
                       child: FittedBox(
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                         child: SizedBox(
                           width: vWidth,
                           height: vHeight,
@@ -1057,7 +1075,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
             builder: (context, ytValue, _) {
               final bool isBuffering =
                   ytValue.playerState == PlayerState.buffering ||
-                  (!ytValue.isReady && widget.isCurrentPage);
+                      (!ytValue.isReady && widget.isCurrentPage);
 
               return Container(
                 color: Colors.black,
@@ -1146,14 +1164,14 @@ class _ReelsCardViewState extends State<ReelsCardView>
           builder: (context, videoValue, _) {
             final int total = videoValue.duration.inMilliseconds;
             final int current = videoValue.position.inMilliseconds;
-            final double progress = (total > 0)
-                ? (current / total).clamp(0.0, 1.0)
-                : 0.0;
+            final double progress =
+                (total > 0) ? (current / total).clamp(0.0, 1.0) : 0.0;
             return _buildProgressBarLine(
               progress: progress,
               onSeek: (fraction) {
                 final targetMs = (fraction * total).toInt();
-                widget.videoController?.seekTo(Duration(milliseconds: targetMs));
+                widget.videoController
+                    ?.seekTo(Duration(milliseconds: targetMs));
               },
             );
           },
@@ -1171,14 +1189,14 @@ class _ReelsCardViewState extends State<ReelsCardView>
           builder: (context, ytValue, _) {
             final int total = ytValue.metaData.duration.inMilliseconds;
             final int current = ytValue.position.inMilliseconds;
-            final double progress = (total > 0)
-                ? (current / total).clamp(0.0, 1.0)
-                : 0.0;
+            final double progress =
+                (total > 0) ? (current / total).clamp(0.0, 1.0) : 0.0;
             return _buildProgressBarLine(
               progress: progress,
               onSeek: (fraction) {
                 final targetMs = (fraction * total).toInt();
-                widget.youtubeController?.seekTo(Duration(milliseconds: targetMs));
+                widget.youtubeController
+                    ?.seekTo(Duration(milliseconds: targetMs));
               },
             );
           },
@@ -1338,7 +1356,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
                             imageUrl: widget.reelCard.publisherImage,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: AppColors.borderColor.withValues(alpha: .2),
+                              color:
+                                  AppColors.borderColor.withValues(alpha: .2),
                             ),
                             errorWidget: (context, url, error) => Center(
                               child: Icon(
@@ -1385,7 +1404,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
             children: [
               Consumer<ReelsProviders>(
                 builder: (context, reelsProvider, child) {
-                  final bool isLiked = reelsProvider.isReelLiked(widget.reelCard.id.toString());
+                  final bool isLiked =
+                      reelsProvider.isReelLiked(widget.reelCard.id.toString());
                   final isMl = context.watch<HomeProvider>().langCode == 'ml';
                   return BottomActions(
                     iconColor: Colors.white,
@@ -1416,9 +1436,11 @@ class _ReelsCardViewState extends State<ReelsCardView>
                     label: isMl ? 'കമന്റ്' : 'కామెంట్',
                     iconColor: Colors.white,
                     onTap: () async {
-                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                      showComments(
-                          context, widget.reelCard.id.toString(), widget.reelCard.title.toString());
+                      context
+                          .read<AuthenticationProvider>()
+                          .sendEvent("CommentPage");
+                      showComments(context, widget.reelCard.id.toString(),
+                          widget.reelCard.title.toString());
                     },
                   );
                 },
@@ -1433,62 +1455,64 @@ class _ReelsCardViewState extends State<ReelsCardView>
                     label: isMl ? 'പങ്കിടുക' : 'షేర్',
                     iconColor: Colors.white,
                     onTap: () async {
-                  log("Share Reel button tapped: ${widget.reelCard.id}");
-                  AnalyticsService.instance.track(AnalyticsEventName.reelShare, properties: {
-                    'reel_id': widget.reelCard.id,
-                    'share_target': 'general',
-                  });
+                      log("Share Reel button tapped: ${widget.reelCard.id}");
+                      AnalyticsService.instance
+                          .track(AnalyticsEventName.reelShare, properties: {
+                        'reel_id': widget.reelCard.id,
+                        'share_target': 'general',
+                      });
 
-                  final Size size = MediaQuery.of(context).size;
-                  final Rect shareOrigin =
-                      Rect.fromLTWH(0, 0, size.width, size.height / 2);
+                      final Size size = MediaQuery.of(context).size;
+                      final Rect shareOrigin =
+                          Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
-                  final String title = widget.reelCard.title.trim();
-                  final String videoUrl = widget.reelCard.videoUrl.trim();
-                  final String fallbackUrl =
-                      "https://www.bigtv24x7.com/posts?postId=${widget.reelCard.id}";
-                  final String shareLink =
-                      videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
-                  final String shareText =
-                      title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
+                      final String title = widget.reelCard.title.trim();
+                      final String videoUrl = widget.reelCard.videoUrl.trim();
+                      final String fallbackUrl =
+                          "https://www.bigtv24x7.com/posts?postId=${widget.reelCard.id}";
+                      final String shareLink =
+                          videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
+                      final String shareText =
+                          title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
 
-                  try {
-                    await Share.share(
-                      shareText,
-                      sharePositionOrigin: shareOrigin,
-                    );
-                  } catch (e) {
-                    log("Error in Share.share: $e");
-                    try {
-                      await Share.share(shareText);
-                    } catch (err) {
-                      log("Fallback Share.share failed: $err");
-                    }
-                  }
+                      try {
+                        await Share.share(
+                          shareText,
+                          sharePositionOrigin: shareOrigin,
+                        );
+                      } catch (e) {
+                        log("Error in Share.share: $e");
+                        try {
+                          await Share.share(shareText);
+                        } catch (err) {
+                          log("Fallback Share.share failed: $err");
+                        }
+                      }
 
-                  EventRepo().addEvent({
-                    "share": "reels",
-                    "postId": widget.reelCard.id.toString(),
-                    "createAt": DateTime.now().toString(),
-                    "postTitle": widget.reelCard.title.toString()
-                  }, "shared_article");
+                      EventRepo().addEvent({
+                        "share": "reels",
+                        "postId": widget.reelCard.id.toString(),
+                        "createAt": DateTime.now().toString(),
+                        "postTitle": widget.reelCard.title.toString()
+                      }, "shared_article");
 
-                  try {
-                    SharedPreferences sp = await SharedPreferences.getInstance();
-                    String? userId = sp.getString("userId");
-                    sendShareDetails(
-                        userId, widget.reelCard.id, widget.reelCard.content.toString());
-                  } catch (e) {
-                    log("Error sending share details: $e");
-                  }
+                      try {
+                        SharedPreferences sp =
+                            await SharedPreferences.getInstance();
+                        String? userId = sp.getString("userId");
+                        sendShareDetails(userId, widget.reelCard.id,
+                            widget.reelCard.content.toString());
+                      } catch (e) {
+                        log("Error sending share details: $e");
+                      }
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-    _buildProgressBar(bottomBarHeight),
+        ),
+        _buildProgressBar(bottomBarHeight),
       ],
     );
   }

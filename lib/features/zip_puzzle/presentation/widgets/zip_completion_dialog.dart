@@ -262,26 +262,44 @@ class ZipCompletionDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
+
+                // 2. Dashboard Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onReturnHome ?? onNextLevel,
+                    icon: const Icon(Icons.dashboard_rounded, color: Colors.white, size: 18),
+                    label: const Text(
+                      'Dashboard',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
 
                 if (isDailyPuzzle) ...[
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    child: OutlinedButton.icon(
                       onPressed: onViewLeaderboard,
-                      icon: const Icon(Icons.leaderboard_rounded, color: Colors.white),
+                      icon: const Icon(Icons.leaderboard_rounded, size: 18),
                       label: const Text(
                         "Today's Leaderboard",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorTokens.primaryRed,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
@@ -295,7 +313,7 @@ class ZipCompletionDialog extends StatelessWidget {
                             icon: const Icon(Icons.visibility_rounded, size: 18),
                             label: const Text('View Game'),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(vertical: 11),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10)),
                             ),
@@ -305,23 +323,17 @@ class ZipCompletionDialog extends StatelessWidget {
                       ],
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: onReturnHome ?? onNextLevel,
-                          icon: const Icon(Icons.dashboard_rounded, size: 18),
-                          label: const Text('Dashboard'),
+                          onPressed: onReplay,
+                          icon: const Icon(Icons.replay_rounded, size: 18),
+                          label: const Text('Replay'),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 11),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 6),
-                  TextButton.icon(
-                    onPressed: onReplay,
-                    icon: const Icon(Icons.replay_rounded, size: 16),
-                    label: const Text('Replay Puzzle', style: TextStyle(fontSize: 12)),
                   ),
                 ] else ...[
                   if (hasNextLevel)

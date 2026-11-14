@@ -17,12 +17,13 @@ class DailyPuzzleProvider extends ChangeNotifier {
   String _playerId = '';
   String _displayName = 'You';
 
-  DailyGameData? _todayPuzzle;
-  LevelDefinition? _todayLevelDefinition;
-  StreakCalendarResponse? _streakCalendar;
-  DailyLeaderboardResponse? _dailyLeaderboard;
-  DailySubmissionResult? _lastSubmissionResult;
-  List<GridPoint>? _completedPath;
+  // Per-game segregated state to prevent cross-game completion leaks
+  final Map<String, DailyGameData> _todayPuzzleByGame = {};
+  final Map<String, LevelDefinition> _todayLevelDefinitionByGame = {};
+  final Map<String, StreakCalendarResponse> _streakCalendarByGame = {};
+  final Map<String, DailyLeaderboardResponse> _dailyLeaderboardByGame = {};
+  final Map<String, DailySubmissionResult> _lastSubmissionsByGame = {};
+  final Map<String, List<GridPoint>> _completedPathByGame = {};
 
   bool _isLoadingToday = false;
   bool _isLoadingStreak = false;
@@ -37,15 +38,22 @@ class DailyPuzzleProvider extends ChangeNotifier {
   })  : _apiClient = apiClient ?? PuzzleGamesApiClient(),
         _repository = repository ?? ZipPuzzleRepository();
 
+  String _normalizeGameId(String id) {
+    final clean = id.trim().toLowerCase();
+    if (clean == 'zip_puzzle' || clean.isEmpty) return 'zip';
+    if (clean == 'patches') return 'patch';
+    return clean;
+  }
+
   String get gameId => _gameId;
   String get playerId => _playerId;
   String get displayName => _displayName;
-  DailyGameData? get todayPuzzle => _todayPuzzle;
-  LevelDefinition? get todayLevelDefinition => _todayLevelDefinition;
-  StreakCalendarResponse? get streakCalendar => _streakCalendar;
-  DailyLeaderboardResponse? get dailyLeaderboard => _dailyLeaderboard;
-  DailySubmissionResult? get lastSubmissionResult => _lastSubmissionResult;
-  List<GridPoint>? get completedPath => _completedPath;
+  DailyGameData? get todayPuzzle => _todayPuzzleByGame[_gameId];
+  LevelDefinition? get todayLevelDefinition => _todayLevelDefinitionByGame[_gameId];
+  StreakCalendarResponse? get streakCalendar => _streakCalendarByGame[_gameId];
+  DailyLeaderboardResponse? get dailyLeaderboard => _dailyLeaderboardByGame[_gameId];
+  DailySubmissionResult? get lastSubmissionResult => _lastSubmissionsByGame[_gameId];
+  List<GridPoint>? get completedPath => _completedPathByGame[_gameId];
 
   bool get isLoadingToday => _isLoadingToday;
   bool get isLoadingStreak => _isLoadingStreak;
@@ -54,9 +62,18 @@ class DailyPuzzleProvider extends ChangeNotifier {
   bool get isRequestingRecovery => _isRequestingRecovery;
   String? get errorMessage => _errorMessage;
 
-  bool get isTodayCompleted {
-    if (_lastSubmissionResult != null) return true;
-    final calendar = _streakCalendar;
+  DailySubmissionResult? getLastSubmissionForGame(String gameId) {
+    return _lastSubmissionsByGame[_normalizeGameId(gameId)];
+  }
+
+  StreakCalendarResponse? getStreakCalendarForGame(String gameId) {
+    return _streakCalendarByGame[_normalizeGameId(gameId)];
+  }
+
+  bool isGameCompletedToday(String gameId) {
+    final cleanId = _normalizeGameId(gameId);
+    if (_lastSubmissionsByGame[cleanId] != null) return true;
+    final calendar = _streakCalendarByGame[cleanId];
     if (calendar != null) {
       for (final day in calendar.last7Days) {
         if (day.isToday && day.completed) {
@@ -67,38 +84,75 @@ class DailyPuzzleProvider extends ChangeNotifier {
     return false;
   }
 
+  bool get isTodayCompleted => isGameCompletedToday(_gameId);
+
   int get currentStreak =>
-      _lastSubmissionResult?.streak.currentStreak ??
-      _streakCalendar?.currentStreak ??
+      _lastSubmissionsByGame[_gameId]?.streak.currentStreak ??
+      _streakCalendarByGame[_gameId]?.currentStreak ??
       0;
 
   int get longestStreak =>
-      _lastSubmissionResult?.streak.longestStreak ??
-      _streakCalendar?.longestStreak ??
+      _lastSubmissionsByGame[_gameId]?.streak.longestStreak ??
+      _streakCalendarByGame[_gameId]?.longestStreak ??
       0;
 
   bool get monthlyFreeReviveAvailable =>
-      _streakCalendar?.monthlyFreeReviveAvailable ?? true;
+      _streakCalendarByGame[_gameId]?.monthlyFreeReviveAvailable ?? true;
 
   bool get canRequestRecovery =>
-      _streakCalendar?.canRequestRecovery ?? false;
+      _streakCalendarByGame[_gameId]?.canRequestRecovery ?? false;
 
-  int get gapDays => _streakCalendar?.gapDays ?? 0;
+  int get gapDays => _streakCalendarByGame[_gameId]?.gapDays ?? 0;
 
   int get autoApproveRemaining =>
-      _streakCalendar?.autoApproveRemaining ?? 2;
+      _streakCalendarByGame[_gameId]?.autoApproveRemaining ?? 2;
 
   List<StreakDayItem> get last7Days =>
-      _streakCalendar?.last7Days ?? const [];
+      _streakCalendarByGame[_gameId]?.last7Days ?? const [];
 
   /// Initialize provider with game ID, resolves player ID and loads daily overview
   Future<void> init({String gameId = 'zip'}) async {
-    _gameId = (gameId == 'zip_puzzle' || gameId.isEmpty) ? 'zip' : gameId;
+    final cleanId = _normalizeGameId(gameId);
+    _gameId = cleanId;
+    notifyListeners();
     await _resolvePlayerIdentity();
     await Future.wait([
       loadTodayGame(),
       loadStreakCalendar(),
     ]);
+  }
+
+  /// Preload streak calendars for all active games in parallel to prevent UI lag & false states
+  Future<void> preloadAllGamesStreak() async {
+    await _resolvePlayerIdentity();
+    final games = ['patch', 'sudoku', 'zip'];
+    await Future.wait(
+      games.map((g) async {
+        try {
+          final streak = await _apiClient.getStreakCalendar(
+            gameId: g,
+            playerId: _playerId,
+          );
+          _streakCalendarByGame[g] = streak;
+
+          bool isTodayDone = false;
+          for (final day in streak.last7Days) {
+            if (day.isToday) {
+              isTodayDone = day.completed;
+              break;
+            }
+          }
+          final today = DateTime.now().toIso8601String().substring(0, 10);
+          final prefs = await SharedPreferences.getInstance();
+          if (isTodayDone) {
+            await prefs.setBool('puzzle_completed_${g}_$today', true);
+          } else if (_lastSubmissionsByGame[g] == null) {
+            await prefs.setBool('puzzle_completed_${g}_$today', false);
+          }
+        } catch (_) {}
+      }),
+    );
+    notifyListeners();
   }
 
   Future<void> _resolvePlayerIdentity() async {
@@ -146,19 +200,20 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
   /// Load today's single daily puzzle
   Future<void> loadTodayGame({String? date}) async {
+    final targetGameId = _gameId;
     _isLoadingToday = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final puzzleData = await _apiClient.getTodayGame(_gameId, date: date);
-      _todayPuzzle = puzzleData;
+      final puzzleData = await _apiClient.getTodayGame(targetGameId, date: date);
+      _todayPuzzleByGame[targetGameId] = puzzleData;
 
       // Map API model to LevelDefinition for gameplay if game is zip
-      if (_gameId == 'zip' || _gameId == 'zip_puzzle') {
+      if (targetGameId == 'zip') {
         try {
           final apiModel = puzzleData.toApiModel();
-          _todayLevelDefinition =
+          _todayLevelDefinitionByGame[targetGameId] =
               ZipLevelDefinitionMapper.mapApiLevelToDefinition(apiModel);
         } catch (e) {
           debugPrint('ZipLevelDefinitionMapper mapping error: $e');
@@ -175,6 +230,7 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
   /// Load 7-day streak calendar and recovery status
   Future<void> loadStreakCalendar() async {
+    final targetGameId = _gameId;
     if (_playerId.isEmpty) {
       await _resolvePlayerIdentity();
     }
@@ -184,16 +240,24 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
     try {
       final streak = await _apiClient.getStreakCalendar(
-        gameId: _gameId,
+        gameId: targetGameId,
         playerId: _playerId,
       );
-      _streakCalendar = streak;
+      _streakCalendarByGame[targetGameId] = streak;
+
+      bool isTodayDone = false;
       for (final day in streak.last7Days) {
-        if (day.isToday && day.completed) {
-          final today = DateTime.now().toIso8601String().substring(0, 10);
-          SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_${_gameId}_$today', true));
+        if (day.isToday) {
+          isTodayDone = day.completed;
           break;
         }
+      }
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final prefs = await SharedPreferences.getInstance();
+      if (isTodayDone) {
+        await prefs.setBool('puzzle_completed_${targetGameId}_$today', true);
+      } else if (_lastSubmissionsByGame[targetGameId] == null) {
+        await prefs.setBool('puzzle_completed_${targetGameId}_$today', false);
       }
     } catch (e) {
       debugPrint('DailyPuzzleProvider.loadStreakCalendar error: $e');
@@ -205,6 +269,7 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
   /// Load today's daily speed leaderboard
   Future<void> loadTodayLeaderboard({int page = 1, int limit = 50}) async {
+    final targetGameId = _gameId;
     if (_playerId.isEmpty) {
       await _resolvePlayerIdentity();
     }
@@ -214,12 +279,12 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
     try {
       final lb = await _apiClient.getTodayLeaderboard(
-        gameId: _gameId,
+        gameId: targetGameId,
         playerId: _playerId,
         page: page,
         limit: limit,
       );
-      _dailyLeaderboard = lb;
+      _dailyLeaderboardByGame[targetGameId] = lb;
     } catch (e) {
       debugPrint('DailyPuzzleProvider.loadTodayLeaderboard error: $e');
     } finally {
@@ -234,6 +299,7 @@ class DailyPuzzleProvider extends ChangeNotifier {
     int score = 100,
     int? moves,
   }) async {
+    final targetGameId = _gameId;
     if (_playerId.isEmpty) {
       await _resolvePlayerIdentity();
     }
@@ -243,16 +309,17 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
     try {
       final result = await _apiClient.submitTodayCompletion(
-        gameId: _gameId,
+        gameId: targetGameId,
         playerId: _playerId,
         durationMs: durationMs,
         score: score,
         displayName: _displayName,
         moves: moves,
       );
-      _lastSubmissionResult = result;
+      _lastSubmissionsByGame[targetGameId] = result;
       final today = DateTime.now().toIso8601String().substring(0, 10);
-      SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_${_gameId}_$today', true));
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('puzzle_completed_${targetGameId}_$today', true);
 
       // Refresh streak calendar and leaderboard in background
       loadStreakCalendar();
@@ -270,13 +337,14 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
   /// Save completed trace path for "View Game"
   Future<void> saveCompletedPath(List<GridPoint> path) async {
-    _completedPath = List.unmodifiable(path);
+    final targetGameId = _gameId;
+    _completedPathByGame[targetGameId] = List.unmodifiable(path);
     try {
       final prefs = await SharedPreferences.getInstance();
-      final date = _todayPuzzle?.puzzleDate ?? '';
+      final date = todayPuzzle?.puzzleDate ?? '';
       if (date.isNotEmpty) {
         final encoded = jsonEncode(path.map((p) => {'row': p.row, 'col': p.col}).toList());
-        await prefs.setString('daily_completed_path_$date', encoded);
+        await prefs.setString('daily_completed_path_${targetGameId}_$date', encoded);
       }
     } catch (e) {
       debugPrint('DailyPuzzleProvider.saveCompletedPath error: $e');
@@ -286,14 +354,16 @@ class DailyPuzzleProvider extends ChangeNotifier {
 
   /// Retrieve the user's completed trace path or fallback to solution path
   Future<List<GridPoint>> getCompletedPath() async {
-    if (_completedPath != null && _completedPath!.isNotEmpty) {
-      return _completedPath!;
+    final targetGameId = _gameId;
+    final cached = _completedPathByGame[targetGameId];
+    if (cached != null && cached.isNotEmpty) {
+      return cached;
     }
     try {
       final prefs = await SharedPreferences.getInstance();
-      final date = _todayPuzzle?.puzzleDate ?? '';
+      final date = todayPuzzle?.puzzleDate ?? '';
       if (date.isNotEmpty) {
-        final raw = prefs.getString('daily_completed_path_$date');
+        final raw = prefs.getString('daily_completed_path_${targetGameId}_$date');
         if (raw != null && raw.isNotEmpty) {
           final decoded = jsonDecode(raw) as List;
           final list = decoded
@@ -304,7 +374,7 @@ class DailyPuzzleProvider extends ChangeNotifier {
                   ))
               .toList();
           if (list.isNotEmpty) {
-            _completedPath = list;
+            _completedPathByGame[targetGameId] = list;
             return list;
           }
         }
@@ -313,9 +383,9 @@ class DailyPuzzleProvider extends ChangeNotifier {
       debugPrint('DailyPuzzleProvider.getCompletedPath error: $e');
     }
 
-    if (_todayLevelDefinition != null &&
-        _todayLevelDefinition!.solutionPath.isNotEmpty) {
-      return _todayLevelDefinition!.solutionPath;
+    final levelDef = todayLevelDefinition;
+    if (levelDef != null && levelDef.solutionPath.isNotEmpty) {
+      return levelDef.solutionPath;
     }
     return const [];
   }

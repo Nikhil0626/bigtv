@@ -208,11 +208,18 @@ class SettingsViewState extends State<SettingsView> {
 
             Consumer<SettingsProvider>(
               builder: (context, settingsProvider, _) {
+                final hasUserId = settingsProvider.userId.isNotEmpty &&
+                    settingsProvider.userId != "0" &&
+                    settingsProvider.userId.toLowerCase() != "null";
+                final versionText = hasUserId
+                    ? "V${settingsProvider.appVersion} (${settingsProvider.userId})"
+                    : "V${settingsProvider.appVersion}";
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 70.0),
                   child: Text(
-                    "V${settingsProvider.appVersion}",
+                    versionText,
                     style: fontStyle(fontWeight: FontWeight.normal),
+                    textAlign: TextAlign.center,
                   ),
                 );
               },

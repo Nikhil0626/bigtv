@@ -95,21 +95,20 @@ class ZipBoardWidget extends StatelessWidget {
                             isDark: isDark,
                           ),
                         ),
-                        if (game.isCompleted || game.isViewOnly)
+                        if ((game.isCompleted || game.isViewOnly) &&
+                            level.logoUrl != null &&
+                            level.logoUrl!.trim().isNotEmpty)
                           Positioned.fill(
                             child: IgnorePointer(
                               child: Center(
-                                child: Transform.rotate(
-                                  angle: 45 * pi / 180,
-                                  child: SizedBox(
-                                    width: max(boardWidth, boardHeight) * 1.5,
-                                    height: max(boardWidth, boardHeight) * 1.5,
-                                    child: GameWatermarkWidget(
-                                      logoUrl: level.logoUrl,
-                                      size: max(boardWidth, boardHeight) * 1.5,
-                                      fit: BoxFit.cover,
-                                      opacity: 0.52,
-                                    ),
+                                child: SizedBox(
+                                  width: max(boardWidth, boardHeight),
+                                  height: max(boardWidth, boardHeight),
+                                  child: GameWatermarkWidget(
+                                    logoUrl: level.logoUrl,
+                                    size: max(boardWidth, boardHeight),
+                                    fit: BoxFit.contain,
+                                    opacity: 0.52,
                                   ),
                                 ),
                               ),

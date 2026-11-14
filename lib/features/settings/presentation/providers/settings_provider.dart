@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/utils/local_data.dart';
+import 'package:chotanews/globel_keys/global_variables_data.dart';
 
 
 class SettingsProvider extends ChangeNotifier {
@@ -29,6 +31,7 @@ class SettingsProvider extends ChangeNotifier {
 
   bool isBookMarkLoading = false;
   String appVersion = "";
+  String userId = "";
   bool isNotificationsEnabled = false;
 
   void setSelectedStar(int star) {
@@ -46,8 +49,51 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> loadSettingsInfo() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     appVersion = sp.getString("app_version") ?? "";
+    userId = (await getUserid()) ?? "";
     isNotificationsEnabled = sp.getString("loginType") == "login";
     notifyListeners();
+
+    // Fetch fresh user ID from Profile API and store in local storage
+    final loggedIn = await isUserLoggedIn();
+    if (loggedIn || isNotificationsEnabled || userId.isNotEmpty || (sp.getString("loginId") ?? "").isNotEmpty) {
+      try {
+        final queryId = userId.isNotEmpty ? userId : (sp.getString("loginId") ?? "");
+        final body = {"user_id": queryId};
+        final Response response = await SettingsRepo().getProfile(body);
+        if (response.statusCode == 200 && response.data != null) {
+          final dynamic data = response.data;
+          dynamic apiUserId;
+          if (data is Map) {
+            if (data['profile'] is Map) {
+              apiUserId = data['profile']['id'] ??
+                  data['profile']['user_id'] ??
+                  data['profile']['userId'];
+            }
+            apiUserId ??= data['user'] is Map
+                ? (data['user']['id'] ?? data['user']['user_id'] ?? data['user']['userId'])
+                : null;
+            apiUserId ??= data['data'] is Map
+                ? (data['data']['id'] ?? data['data']['user_id'] ?? data['data']['userId'])
+                : null;
+            apiUserId ??= data['user_id'] ?? data['id'] ?? data['userId'];
+          }
+
+          if (apiUserId != null) {
+            final cleanId = apiUserId.toString().trim();
+            if (cleanId.isNotEmpty && cleanId != "0" && cleanId.toLowerCase() != "null") {
+              userId = cleanId;
+              await sp.setString('userId', cleanId);
+              await saveUserid(cleanId);
+              GlobalVariables().userId = cleanId;
+              notifyListeners();
+              log("Stored userId from Profile API in loadSettingsInfo: $cleanId");
+            }
+          }
+        }
+      } catch (e) {
+        log("Error fetching profile in loadSettingsInfo: $e");
+      }
+    }
   }
 
   Future getAllBookMarks({String id = "0"}) async {

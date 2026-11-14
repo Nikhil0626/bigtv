@@ -11,6 +11,8 @@ import 'package:http_parser/http_parser.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:chotanews/globel_keys/global_variables_data.dart';
+import 'package:chotanews/utils/local_data.dart';
 
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
@@ -137,9 +139,9 @@ class ProfileProvider extends ChangeNotifier {
     isMainLoading = true;
     notifyListeners();
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString("userId");
+    String? userId = preferences.getString("userId") ?? preferences.getString("loginId");
     Map<String, dynamic> body = {
-      "user_id": userId,
+      "user_id": userId ?? "",
     };
 
     try {
@@ -155,6 +157,30 @@ class ProfileProvider extends ChangeNotifier {
 
           final rawDob = profile['dob'];
           _parseAndPopulateDob(rawDob);
+
+          final dynamic data = response.data;
+          dynamic apiUserId = profile['id'] ??
+              profile['user_id'] ??
+              profile['userId'];
+          if (data is Map) {
+            apiUserId ??= data['user'] is Map
+                ? (data['user']['id'] ?? data['user']['user_id'] ?? data['user']['userId'])
+                : null;
+            apiUserId ??= data['data'] is Map
+                ? (data['data']['id'] ?? data['data']['user_id'] ?? data['data']['userId'])
+                : null;
+            apiUserId ??= data['user_id'] ?? data['id'] ?? data['userId'];
+          }
+          if (apiUserId != null &&
+              apiUserId.toString().trim().isNotEmpty &&
+              apiUserId.toString().trim() != "0" &&
+              apiUserId.toString().trim().toLowerCase() != "null") {
+            final cleanUserId = apiUserId.toString().trim();
+            await preferences.setString('userId', cleanUserId);
+            await saveUserid(cleanUserId);
+            GlobalVariables().userId = cleanUserId;
+            log("Stored userId from Profile API to local storage: $cleanUserId");
+          }
         }
         notifyListeners();
         log("Profile fetched successfully: ${response.data}");

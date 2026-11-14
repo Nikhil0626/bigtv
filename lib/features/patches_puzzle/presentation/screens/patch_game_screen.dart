@@ -598,7 +598,50 @@ class _PatchGameScreenState extends State<PatchGameScreen>
   }
 
 
+  Future<void> _ensureProfileAndProceed({
+    required VoidCallback onProceed,
+  }) async {
+    final profileProvider = context.read<ProfileProvider>();
+    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+
+    if (profile.hasValidName) {
+      // User has ALREADY updated their name in profile or any game!
+      // Do not show popup; use that name directly and fire sync
+      _fireBackgroundSync(displayName: profile.name, photoUrl: profile.photoUrl);
+      onProceed();
+    } else {
+      // Prompt user for Name and Profile Pic
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => PatchProfilePromptDialog(
+          initialName: '',
+          initialPhotoUrl: profile.photoUrl,
+          userId: widget.playerId,
+          onProfileSaved: (savedName, savedPhoto) async {
+            _fireBackgroundSync(
+              displayName: savedName,
+              photoUrl: savedPhoto,
+            );
+            onProceed();
+          },
+        ),
+      );
+    }
+  }
+
   Future<void> _shareCurrentGame() async {
+    if ((_isCompleted || widget.isViewOnly) && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        onProceed: _performShare,
+      );
+    } else {
+      await _performShare();
+    }
+  }
+
+  Future<void> _performShare() async {
     final duration = _cachedDurationMs ?? _currentElapsedMs;
     final formattedTime = '${(duration / 1000).toStringAsFixed(1)}s';
 
@@ -630,31 +673,29 @@ class _PatchGameScreenState extends State<PatchGameScreen>
   }
 
   Future<void> _handleDoneOrBack({required bool isDone}) async {
-    final profileProvider = context.read<ProfileProvider>();
-    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+    await _ensureProfileAndProceed(
+      onProceed: _navigateAfterDoneOrBack,
+    );
+  }
 
-    if (profile.hasValidName) {
-      // User has ALREADY updated their name in profile or any game!
-      // Navigate immediately with 0ms delay!
-      _navigateAfterDoneOrBack();
-      _fireBackgroundSync(displayName: profile.name, photoUrl: profile.photoUrl);
+  Future<void> _handleDashboardTap() async {
+    if ((_isCompleted || widget.isViewOnly) && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        onProceed: () {
+          _hasHandledCompletionFlow = true;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PatchDashboardScreen(playerId: widget.playerId),
+            ),
+          );
+        },
+      );
     } else {
-      // Prompt user for Name and Profile Pic
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => PatchProfilePromptDialog(
-          initialName: '',
-          initialPhotoUrl: profile.photoUrl,
-          userId: widget.playerId,
-          onProfileSaved: (savedName, savedPhoto) async {
-            _navigateAfterDoneOrBack();
-            _fireBackgroundSync(
-              displayName: savedName,
-              photoUrl: savedPhoto,
-            );
-          },
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PatchDashboardScreen(playerId: widget.playerId),
         ),
       );
     }
@@ -1285,22 +1326,21 @@ class _PatchGameScreenState extends State<PatchGameScreen>
                     );
                   }(),
 
-                  // 4. Background image tilted 45 degrees covering full container of game background when completed
-                  if (_isCompleted || widget.isViewOnly)
+                  // 4. Background image covering full container of game background when completed if API returns an image
+                  if ((_isCompleted || widget.isViewOnly) &&
+                      level.logoUrl != null &&
+                      level.logoUrl!.trim().isNotEmpty)
                     Positioned.fill(
                       child: IgnorePointer(
                         child: Center(
-                          child: Transform.rotate(
-                            angle: 45 * pi / 180,
-                            child: SizedBox(
-                              width: innerSize * 1.5,
-                              height: innerSize * 1.5,
-                              child: GameWatermarkWidget(
-                                logoUrl: level.logoUrl,
-                                size: innerSize * 1.5,
-                                fit: BoxFit.cover,
-                                opacity: 0.52,
-                              ),
+                          child: SizedBox(
+                            width: innerSize,
+                            height: innerSize,
+                            child: GameWatermarkWidget(
+                              logoUrl: level.logoUrl,
+                              size: innerSize,
+                              fit: BoxFit.contain,
+                              opacity: 0.52,
                             ),
                           ),
                         ),
@@ -1686,7 +1726,7 @@ class _PatchGameScreenState extends State<PatchGameScreen>
             SizedBox(height: 8.h),
             Wrap(
               alignment: WrapAlignment.end,
-              spacing: 6.w,
+              spacing: 8.w,
               runSpacing: 4.h,
               children: [
                 OutlinedButton.icon(
@@ -1694,52 +1734,24 @@ class _PatchGameScreenState extends State<PatchGameScreen>
                     foregroundColor: const Color(0xFF10B981),
                     side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  icon: Icon(Icons.share_rounded, size: 13.sp, color: const Color(0xFF10B981)),
-                  label: const Text('Share', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.share_rounded, size: 14.sp, color: const Color(0xFF10B981)),
+                  label: const Text('Share', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   onPressed: _shareCurrentGame,
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => _handleDoneOrBack(isDone: true),
-                  child: const Text('Done', style: TextStyle(fontSize: 11)),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    side: const BorderSide(color: Colors.green, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => _handleDoneOrBack(isDone: false),
-                  child: const Text('Back', style: TextStyle(fontSize: 11)),
-                ),
-                ElevatedButton(
+                ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PatchDashboardScreen(playerId: widget.playerId),
-                      ),
-                    );
-                  },
-                  child: const Text('Dashboard', style: TextStyle(fontSize: 11)),
+                  onPressed: _handleDashboardTap,
+                  icon: Icon(Icons.dashboard_rounded, size: 14.sp, color: Colors.white),
+                  label: const Text('Dashboard', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
