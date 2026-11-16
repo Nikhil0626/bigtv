@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 
 /// YouTube iframe player wrapper that injects a document-start UserScript
 /// inside all frames to strip YouTube share buttons, video suggestions,
@@ -374,6 +375,7 @@ class _CleanYoutubePlayerState extends State<CleanYoutubePlayer>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    AppWakelockManager.disable('clean_yt_$hashCode');
     _controller.removeListener(_onControllerChanged);
     super.dispose();
   }
@@ -381,6 +383,7 @@ class _CleanYoutubePlayerState extends State<CleanYoutubePlayer>
   void _handleStateChange(int code) {
     switch (code) {
       case -1:
+        AppWakelockManager.disable('clean_yt_$hashCode');
         _controller.updateValue(
           _controller.value.copyWith(
             playerState: PlayerState.unStarted,
@@ -389,6 +392,7 @@ class _CleanYoutubePlayerState extends State<CleanYoutubePlayer>
         );
         break;
       case 0:
+        AppWakelockManager.disable('clean_yt_$hashCode');
         if (_controller.flags.loop) {
           _controller.load(
             _controller.metadata.videoId.isNotEmpty
@@ -404,6 +408,7 @@ class _CleanYoutubePlayerState extends State<CleanYoutubePlayer>
         );
         break;
       case 1:
+        AppWakelockManager.enable('clean_yt_$hashCode');
         _controller.updateValue(
           _controller.value.copyWith(
             playerState: PlayerState.playing,
@@ -414,6 +419,7 @@ class _CleanYoutubePlayerState extends State<CleanYoutubePlayer>
         );
         break;
       case 2:
+        AppWakelockManager.disable('clean_yt_$hashCode');
         _controller.updateValue(
           _controller.value.copyWith(
             playerState: PlayerState.paused,

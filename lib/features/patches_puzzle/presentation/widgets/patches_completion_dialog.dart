@@ -115,7 +115,8 @@ class PatchesCompletionDialog extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColorTokens.success.withValues(alpha: 0.2),
+                            color:
+                                AppColorTokens.success.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Row(
@@ -153,7 +154,8 @@ class PatchesCompletionDialog extends StatelessWidget {
                         formattedTime: formattedTime,
                       );
                     },
-                    icon: const Icon(Icons.share_rounded, size: 18, color: Color(0xFF10B981)),
+                    icon: const Icon(Icons.share_rounded,
+                        size: 18, color: Color(0xFF10B981)),
                     label: const Text(
                       'Share My Score',
                       style: TextStyle(
@@ -164,7 +166,8 @@ class PatchesCompletionDialog extends StatelessWidget {
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF10B981),
-                      side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                      side: const BorderSide(
+                          color: Color(0xFF10B981), width: 1.5),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -179,7 +182,8 @@ class PatchesCompletionDialog extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: onDashboard ?? () => Navigator.pop(context),
-                    icon: const Icon(Icons.dashboard_rounded, color: Colors.white, size: 18),
+                    icon: const Icon(Icons.dashboard_rounded,
+                        color: Colors.white, size: 18),
                     label: const Text(
                       'Dashboard',
                       style: TextStyle(
@@ -191,38 +195,41 @@ class PatchesCompletionDialog extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
 
                 // Action Buttons
-                if (hasNextLevel) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: onNextLevel,
-                      icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                      label: const Text(
-                        'Next Level',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                  if (hasNextLevel) ...[
+                    SizedBox(
+                      width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: onNextLevel,
+                          icon:
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
+                          label: const Text(
+                            'Next Level',
+                            style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColorTokens.primaryRed,
-                        side: const BorderSide(color: AppColorTokens.primaryRed, width: 1.2),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColorTokens.primaryRed,
+                            side: const BorderSide(
+                                color: AppColorTokens.primaryRed, width: 1.2),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
+                    const SizedBox(height: 10),
+                  ],
 
                 Row(
                   children: [

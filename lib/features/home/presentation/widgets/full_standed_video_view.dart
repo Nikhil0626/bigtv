@@ -1,6 +1,7 @@
 
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -8,9 +9,9 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
 class FullStandardVideoView extends StatefulWidget {
-  dynamic reelData;
+  final dynamic reelData;
 
-   FullStandardVideoView({super.key, required this.reelData});
+  const FullStandardVideoView({super.key, required this.reelData});
 
   @override
   State<FullStandardVideoView> createState() => FullStandardVideoViewState();
@@ -65,13 +66,18 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
     try {
       ytController?.pause();
     } catch (_) {}
+    AppWakelockManager.disable('full_standard_video');
   }
 
   void _onPlayerStateChanged() {
-    if (!_isViewActive() && (ytController?.value.isPlaying ?? false)) {
+    final isPlaying = ytController?.value.isPlaying ?? false;
+    if (!_isViewActive() && isPlaying) {
       try {
         ytController?.pause();
       } catch (_) {}
+      AppWakelockManager.disable('full_standard_video');
+    } else {
+      AppWakelockManager.set('full_standard_video', isPlaying);
     }
   }
 
@@ -91,6 +97,7 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
   @override
   void dispose() {
     _reelsProviders?.removePauseListener(_pauseVideo);
+    AppWakelockManager.disable('full_standard_video');
     ytController?.removeListener(_onPlayerStateChanged);
     ytController?.dispose();
     super.dispose();

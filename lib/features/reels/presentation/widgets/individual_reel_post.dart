@@ -1,9 +1,9 @@
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:chotanews/features/home/presentation/widgets/infocus_bar_widget.dart';
 
 import 'dart:developer';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -56,13 +56,7 @@ class _ReelsCardViewState extends State<ReelsCardView> with WidgetsBindingObserv
   }
 
   void _setWakelock({required bool enabled}) {
-    try {
-      if (enabled) {
-        WakelockPlus.enable();
-      } else {
-        WakelockPlus.disable();
-      }
-    } catch (_) {}
+    AppWakelockManager.set('individual_reel', enabled);
   }
 
   bool _isViewActive() {
@@ -82,12 +76,14 @@ class _ReelsCardViewState extends State<ReelsCardView> with WidgetsBindingObserv
 
   void _onPlayerStateChanged() {
     final controller = _controllerNotifier.value;
-    if (controller != null &&
-        !_isViewActive() &&
-        controller.value.isPlaying) {
+    if (controller == null) return;
+    if (!_isViewActive() && controller.value.isPlaying) {
       try {
         controller.pause();
       } catch (_) {}
+      _setWakelock(enabled: false);
+    } else {
+      _setWakelock(enabled: controller.value.isPlaying);
     }
   }
 

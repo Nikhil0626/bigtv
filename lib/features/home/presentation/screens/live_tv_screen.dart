@@ -11,6 +11,7 @@ import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/widgets/live_eye_animation_icon.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'package:chotanews/services/live_tv_share_helper.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
 
@@ -37,7 +38,7 @@ class LiveTvScreen extends StatefulWidget {
 }
 
 class _LiveTvScreenState extends State<LiveTvScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -62,6 +63,7 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _watchCount = widget.watchCount;
     _formattedWatchCount = widget.formattedWatchCount;
     _watchCountEnabled = widget.watchCountEnabled ?? true;
@@ -109,6 +111,7 @@ class _LiveTvScreenState extends State<LiveTvScreen>
       await controller.initialize();
       controller.setLooping(true);
       await controller.play();
+      AppWakelockManager.enable('live_tv');
       _playStartTime = DateTime.now();
       AnalyticsService.instance.track(AnalyticsEventName.liveTvPlay, properties: {
         'channel_id': widget.channelName,
@@ -198,7 +201,22 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_controller != null && _controller!.value.isPlaying) {
+        AppWakelockManager.enable('live_tv');
+      }
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      AppWakelockManager.disable('live_tv');
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    AppWakelockManager.disable('live_tv');
     if (_playStartTime != null) {
       final watchDuration = DateTime.now().difference(_playStartTime!).inSeconds;
       AnalyticsService.instance.track(AnalyticsEventName.liveTvStop, properties: {
@@ -568,12 +586,14 @@ class _LiveTvScreenState extends State<LiveTvScreen>
                               setState(() {
                                 if (_controller!.value.isPlaying) {
                                   _controller!.pause();
+                                  AppWakelockManager.disable('live_tv');
                                   AnalyticsService.instance.track(AnalyticsEventName.liveTvPause, properties: {
                                     'channel_id': widget.channelName,
                                     'playback_position_seconds': _controller!.value.position.inSeconds,
                                   });
                                 } else {
                                   _controller!.play();
+                                  AppWakelockManager.enable('live_tv');
                                   AnalyticsService.instance.track(AnalyticsEventName.liveTvResume, properties: {
                                     'channel_id': widget.channelName,
                                   });

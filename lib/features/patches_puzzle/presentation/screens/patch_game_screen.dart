@@ -721,11 +721,18 @@ class _PatchGameScreenState extends State<PatchGameScreen>
     required String photoUrl,
   }) {
     final duration = _cachedDurationMs ?? _currentElapsedMs;
+    ProfileProvider? profileProvider;
+    try {
+      if (mounted) {
+        profileProvider = context.read<ProfileProvider>();
+      }
+    } catch (_) {}
 
     try {
       GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
+        profileProvider: profileProvider,
       );
     } catch (_) {}
 

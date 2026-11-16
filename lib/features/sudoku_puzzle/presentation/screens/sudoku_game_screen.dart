@@ -16,6 +16,7 @@ import '../../../../services/game_share_helper.dart';
 import '../../../../core/widgets/game_watermark_widget.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
 import 'sudoku_dashboard_screen.dart';
 
 class SudokuCellValidation {
@@ -324,28 +325,42 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
       'duration_ms': duration,
     });
 
-    PuzzleApiService.submitGame(
-      gameSlug: 'sudoku',
-      playerId: widget.playerId,
-      durationMs: duration > 0 ? duration : 30000,
-      score: 100,
-    ).then((res) {
-      final today = DateTime.now().toIso8601String().substring(0, 10);
-      SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_sudoku_$today', true));
+    final profileProvider = context.read<ProfileProvider>();
+    GameProfileManager.getUnifiedProfile(profileProvider: profileProvider).then((profile) {
+      final name = profile.hasValidName ? profile.name : null;
+      final photo = profile.photoUrl.isNotEmpty ? profile.photoUrl : null;
 
-      if (!mounted) return;
-      final rank = res['rank'] ?? 1;
-      final streak = res['streak'] != null ? res['streak']['currentStreak'] ?? 1 : 1;
-      AnalyticsService.instance.track(AnalyticsEventName.gameScoreRecorded, properties: {
-        'game_id': 'sudoku',
-        'score': 100,
-        'rank': rank,
-      });
+      PuzzleApiService.submitGame(
+        gameSlug: 'sudoku',
+        playerId: widget.playerId,
+        durationMs: duration > 0 ? duration : 30000,
+        score: 100,
+        displayName: name,
+        avatarUrl: photo,
+      ).then((res) {
+        final today = DateTime.now().toIso8601String().substring(0, 10);
+        SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_sudoku_$today', true));
 
-      setState(() {
-        _cachedDurationMs = duration;
-        _cachedRank = rank;
-        _cachedStreak = streak;
+        try {
+          if (mounted) {
+            context.read<DailyPuzzleProvider>().loadStreakCalendar();
+          }
+        } catch (_) {}
+
+        if (!mounted) return;
+        final rank = res['rank'] ?? 1;
+        final streak = res['streak'] != null ? res['streak']['currentStreak'] ?? 1 : 1;
+        AnalyticsService.instance.track(AnalyticsEventName.gameScoreRecorded, properties: {
+          'game_id': 'sudoku',
+          'score': 100,
+          'rank': rank,
+        });
+
+        setState(() {
+          _cachedDurationMs = duration;
+          _cachedRank = rank;
+          _cachedStreak = streak;
+        });
       });
     });
   }
@@ -359,6 +374,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
     if (profile.hasValidName) {
       // User has ALREADY updated their name in profile or any game!
       // Do not show popup; use that name directly and fire sync
+      _hasHandledCompletionFlow = true;
       _fireBackgroundSync(displayName: profile.name, photoUrl: profile.photoUrl);
       onProceed();
     } else {
@@ -371,6 +387,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
           initialPhotoUrl: profile.photoUrl,
           userId: widget.playerId,
           onProfileSaved: (savedName, savedPhoto) async {
+            _hasHandledCompletionFlow = true;
             _fireBackgroundSync(
               displayName: savedName,
               photoUrl: savedPhoto,
@@ -472,11 +489,18 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
     required String photoUrl,
   }) {
     final duration = _cachedDurationMs ?? _stopwatch.elapsedMilliseconds;
+    ProfileProvider? profileProvider;
+    try {
+      if (mounted) {
+        profileProvider = context.read<ProfileProvider>();
+      }
+    } catch (_) {}
 
     try {
       GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
+        profileProvider: profileProvider,
       );
     } catch (_) {}
 
@@ -717,21 +741,22 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                                   ),
                                 ),
 
-                                // Background image covering container when completed if API returns an image
-                                if ((_isCompleted || widget.isViewOnly) &&
-                                    level.logoUrl != null &&
-                                    level.logoUrl!.trim().isNotEmpty)
+                                // Background watermark image tilted 45 degrees covering container when completed
+                                if (_isCompleted || widget.isViewOnly)
                                   Positioned.fill(
                                     child: IgnorePointer(
                                       child: Center(
-                                        child: SizedBox(
-                                          width: size,
-                                          height: size,
-                                          child: GameWatermarkWidget(
-                                            logoUrl: level.logoUrl,
-                                            size: size,
-                                            fit: BoxFit.contain,
-                                            opacity: 0.52,
+                                        child: Transform.rotate(
+                                          angle: 45 * pi / 180,
+                                          child: SizedBox(
+                                            width: size * 1.5,
+                                            height: size * 1.5,
+                                            child: GameWatermarkWidget(
+                                              logoUrl: level.logoUrl,
+                                              size: size * 1.5,
+                                              fit: BoxFit.cover,
+                                              opacity: 0.52,
+                                            ),
                                           ),
                                         ),
                                       ),

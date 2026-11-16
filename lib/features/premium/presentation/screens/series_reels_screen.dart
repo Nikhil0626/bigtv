@@ -1,5 +1,5 @@
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../domain/models/series_model.dart';
@@ -166,7 +166,7 @@ class _SeriesReelsScreenState extends State<SeriesReelsScreen> with WidgetsBindi
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WakelockPlus.enable();
+    AppWakelockManager.enable('series_reels');
     _pageController = PageController(initialPage: widget.initialIndex);
     _reelsStateController = ReelsStateController(widget.initialIndex, widget.episodes);
     _reelsStateController.initPreload();
@@ -175,16 +175,16 @@ class _SeriesReelsScreenState extends State<SeriesReelsScreen> with WidgetsBindi
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      WakelockPlus.enable();
+      AppWakelockManager.enable('series_reels');
     } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      WakelockPlus.disable();
+      AppWakelockManager.disable('series_reels');
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    WakelockPlus.disable();
+    AppWakelockManager.disable('series_reels');
     _pageController.dispose();
     _reelsStateController.dispose();
     super.dispose();

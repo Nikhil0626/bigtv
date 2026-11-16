@@ -17,6 +17,7 @@ import 'package:chotanews/services/video_position_service.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 
 class TagVideoPlayerScreen extends StatefulWidget {
   final List videos;
@@ -36,7 +37,8 @@ class TagVideoPlayerScreen extends StatefulWidget {
   State<TagVideoPlayerScreen> createState() => _TagVideoPlayerScreenState();
 }
 
-class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
+class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen>
+    with WidgetsBindingObserver {
   late int _currentIndex;
   VideoPlayerController? _controller;
   bool _isInitialized = false;
@@ -340,6 +342,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _currentIndex = widget.initialIndex;
     _isFullScreen = false;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -347,6 +350,19 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       DeviceOrientation.portraitUp,
     ]);
     _initController(_currentIndex);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_controller != null && _controller!.value.isPlaying) {
+        AppWakelockManager.enable('tag_video');
+      }
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      AppWakelockManager.disable('tag_video');
+    }
   }
 
   void _toggleFullScreen() {
@@ -481,6 +497,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       }
 
       await controller.play();
+      AppWakelockManager.enable('tag_video');
       AnalyticsService.instance.track(AnalyticsEventName.videoPlay, properties: {
         'video_id': _getCurrentVideoId(),
         'video_duration_seconds': controller.value.duration.inSeconds,
@@ -509,6 +526,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   void _videoListener() {
     if (_controller != null && _controller!.value.isInitialized) {
       final value = _controller!.value;
+      AppWakelockManager.set('tag_video', value.isPlaying);
       final currentItem =
           (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
               ? widget.videos[_currentIndex]
@@ -575,6 +593,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    AppWakelockManager.disable('tag_video');
     _controlsTimer?.cancel();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([

@@ -55,8 +55,8 @@ class BaseUrls {
   static const String appConfig = "/api/v1/app-config/all";
 
   /// Python Dev Apis
-  // static const String baseUrlAwsDev = "https://api.chotanews.com";
-  static const String baseUrlAwsDev = "https://apidev.chotanews.com";
+  static const String baseUrlAwsDev = "https://api.chotanews.com";
+  // static const String baseUrlAwsDev = "https://apidev.chotanews.com";
   static const String showAlertSubscribeApi = "/api/show-alerts/subscribe";
 
   ///Login login
@@ -93,7 +93,7 @@ class BaseUrls {
   static const String getAllLanguages = "/languages";
 
   ///Bookmarks Apis
-  static const String devBaseUrl = "https://apidev.chotanews.com";
+  static const String devBaseUrl = baseUrlAwsDev;
   static const String bookmarkApi = "/bookmark";
   static const String bookmarksListApi = "/bookmarks";
   static const String getAllBookMarks = "/bookmark";

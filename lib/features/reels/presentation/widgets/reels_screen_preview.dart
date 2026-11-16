@@ -1,4 +1,3 @@
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'dart:async';
 import 'package:chotanews/features/home/presentation/widgets/infocus_bar_widget.dart';
 import 'dart:developer';
@@ -27,6 +26,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 
 class ReelPreviewScreen extends StatefulWidget {
   final int initialIndex;
@@ -137,13 +137,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen>
   }
 
   void _setWakelock({required bool enabled}) {
-    try {
-      if (enabled) {
-        WakelockPlus.enable();
-      } else {
-        WakelockPlus.disable();
-      }
-    } catch (_) {}
+    AppWakelockManager.set('reels', enabled);
   }
 
   @override
@@ -153,6 +147,17 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen>
     final bool isActiveNow = _isScreenActive();
     if (_wasRouteActive && !isActiveNow) {
       _pauseAllControllers();
+    } else if (!_wasRouteActive && isActiveNow) {
+      final int curIdx = _currentIndexNotifier.value;
+      final net = _networkControllers[curIdx];
+      final yt = _youtubeControllers[curIdx];
+      if (net != null && net.value.isInitialized) {
+        net.play();
+        _setWakelock(enabled: true);
+      } else if (yt != null) {
+        yt.play();
+        _setWakelock(enabled: true);
+      }
     }
     _wasRouteActive = isActiveNow;
   }
@@ -306,6 +311,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen>
 
     // Play new active controller only while this route and tab are active.
     if (_isScreenActive()) {
+      bool startedPlayback = false;
       final nextNet = _networkControllers[newIndex];
       if (nextNet != null && nextNet.value.isInitialized) {
         final pos = nextNet.value.position;
@@ -315,6 +321,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen>
           nextNet.seekTo(Duration.zero);
         }
         nextNet.play();
+        startedPlayback = true;
       }
       final nextYt = _youtubeControllers[newIndex];
       if (nextYt != null) {
@@ -322,7 +329,9 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen>
           nextYt.seekTo(Duration.zero);
         }
         nextYt.play();
+        startedPlayback = true;
       }
+      _setWakelock(enabled: startedPlayback);
     }
 
     // Trigger preloader for next upcoming reels
@@ -824,6 +833,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
         });
       }
     }
+
+    AppWakelockManager.set('reels', nowPlaying);
 
     _feedbackTimer?.cancel();
     final IconData updatedIcon =

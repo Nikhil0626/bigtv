@@ -23,6 +23,7 @@ import 'zip_leaderboard_screen.dart';
 import 'zip_level_selection_screen.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/utils/local_data.dart';
 import '../../../../services/game_share_helper.dart';
 
 class ZipGameplayScreen extends StatefulWidget {
@@ -55,6 +56,8 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
   bool? _cachedIsPersonalBest;
   bool? _cachedHasNext;
   LevelDefinition? _cachedNextLevel;
+  int? _cachedRank;
+  int? _cachedStreak;
 
   @override
   void initState() {
@@ -100,6 +103,31 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
         final today = DateTime.now().toIso8601String().substring(0, 10);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('puzzle_completed_zip_$today', true);
+
+        // Also submit to unified PuzzleApiService if profile is already valid
+        try {
+          if (!mounted) return;
+          final profileProvider = context.read<ProfileProvider>();
+          final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+          final userId = (await getUserid()) ?? prefs.getString('userId') ?? 'guest';
+
+          final res = await PuzzleApiService.submitGame(
+            gameSlug: 'zip',
+            playerId: userId,
+            durationMs: game.elapsedMilliseconds > 0 ? game.elapsedMilliseconds : 30000,
+            score: 100,
+            displayName: profile.hasValidName ? profile.name : 'Player',
+            avatarUrl: profile.photoUrl.isNotEmpty ? profile.photoUrl : null,
+          );
+          if (mounted) {
+            final rank = res['rank'] ?? 1;
+            final streak = res['streak'] != null ? res['streak']['currentStreak'] ?? 1 : 1;
+            setState(() {
+              _cachedRank = rank;
+              _cachedStreak = streak;
+            });
+          }
+        } catch (_) {}
       } catch (e) {
         debugPrint('Daily completion submit error: $e');
       }
@@ -169,7 +197,16 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
           },
           onReturnHome: () {
             Navigator.pop(dialogCtx);
-            _handleDashboardTap(game);
+            if (widget.isDailyPuzzle) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ZipLevelSelectionScreen(),
+                ),
+              );
+            } else {
+              Navigator.pop(context);
+            }
           },
           onNextLevel: () async {
             Navigator.pop(dialogCtx);
@@ -218,11 +255,12 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
     if (profile.hasValidName) {
       // User has ALREADY updated their name in profile or any game!
       // Do not show popup; use that name directly and fire sync
+      _hasHandledCompletionFlow = true;
       _fireBackgroundSync(game, displayName: profile.name, photoUrl: profile.photoUrl);
       onProceed();
     } else {
       final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId') ?? 'guest';
+      final userId = (await getUserid()) ?? prefs.getString('userId') ?? 'guest';
       if (!mounted) return;
       await showDialog(
         context: context,
@@ -232,6 +270,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
           initialPhotoUrl: profile.photoUrl,
           userId: userId,
           onProfileSaved: (savedName, savedPhoto) async {
+            _hasHandledCompletionFlow = true;
             _fireBackgroundSync(
               game,
               displayName: savedName,
@@ -245,7 +284,8 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
   }
 
   Future<void> _shareCurrentGame(ZipGameProvider game) async {
-    if (widget.isDailyPuzzle && !_hasHandledCompletionFlow) {
+    final bool isFinished = game.isCompleted || widget.isViewOnly;
+    if (isFinished && !_hasHandledCompletionFlow) {
       await _ensureProfileAndProceed(
         game,
         onProceed: () => _performShare(game),
@@ -281,8 +321,8 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
       gameSlug: 'zip',
       gameTitle: 'Zip Puzzle',
       formattedTime: formattedTime,
-      rank: _cachedDailyResult?.rank,
-      streak: _cachedDailyResult?.streak.currentStreak,
+      rank: _cachedRank ?? _cachedDailyResult?.rank,
+      streak: _cachedStreak ?? _cachedDailyResult?.streak.currentStreak,
       screenshotFile: screenshotXFile,
     );
   }
@@ -295,7 +335,8 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
   }
 
   Future<void> _handleDashboardTap(ZipGameProvider game) async {
-    if (widget.isDailyPuzzle && !_hasHandledCompletionFlow) {
+    final bool isFinished = game.isCompleted || widget.isViewOnly;
+    if (isFinished && !_hasHandledCompletionFlow) {
       await _ensureProfileAndProceed(
         game,
         onProceed: () {
@@ -339,15 +380,23 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
     required String photoUrl,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId') ?? 'guest';
+    final userId = (await getUserid()) ?? prefs.getString('userId') ?? 'guest';
     final duration = game.elapsedMilliseconds > 0
         ? game.elapsedMilliseconds
         : (widget.initialElapsedMs ?? 30000);
+
+    ProfileProvider? profileProvider;
+    try {
+      if (mounted) {
+        profileProvider = context.read<ProfileProvider>();
+      }
+    } catch (_) {}
 
     try {
       GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
+        profileProvider: profileProvider,
       );
     } catch (_) {}
 
@@ -386,13 +435,13 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
 
           final isUndoEnabled = game.currentPath.isNotEmpty && !game.isCompleted;
           final bool isFinished = game.isCompleted || widget.isViewOnly;
-          final bool canDirectPop = (!widget.isDailyPuzzle || !isFinished) || _hasHandledCompletionFlow;
+          final bool canDirectPop = !isFinished || _hasHandledCompletionFlow;
 
           return PopScope(
             canPop: canDirectPop,
             onPopInvokedWithResult: (didPop, _) {
               if (didPop) return;
-              if (widget.isDailyPuzzle && isFinished && !_hasHandledCompletionFlow) {
+              if (isFinished && !_hasHandledCompletionFlow) {
                 _handleDoneOrBack(game, isDone: false);
               } else {
                 Navigator.pop(context);
@@ -408,7 +457,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                   padding: EdgeInsets.all(8.w),
                   child: InkWell(
                     onTap: () {
-                      if (widget.isDailyPuzzle && isFinished && !_hasHandledCompletionFlow) {
+                      if (isFinished && !_hasHandledCompletionFlow) {
                         _handleDoneOrBack(game, isDone: false);
                       } else {
                         Navigator.pop(context);
