@@ -1022,7 +1022,7 @@ class _ReelsCardViewState extends State<ReelsCardView>
                   children: [
                     ClipRect(
                       child: FittedBox(
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                         child: SizedBox(
                           width: vWidth,
                           height: vHeight,
