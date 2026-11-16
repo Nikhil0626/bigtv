@@ -86,6 +86,10 @@ class _SudokuGameplayScreenState extends State<SudokuGameplayScreen> {
               ),
             );
           },
+          onDashboard: () {
+            Navigator.pop(dialogCtx);
+            Navigator.pop(context);
+          },
         );
       },
     );

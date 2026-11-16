@@ -246,25 +246,27 @@ void _initBackgroundServices() async {
           final uriStr = uri.toString();
 
           // Verify with native Android activity whether this was a real deep link launch
-          try {
-            const channel = MethodChannel("com.chotanews/whatsapp");
-            final details = await channel.invokeMethod<Map<dynamic, dynamic>>("getLaunchIntentDetails");
-            if (details != null) {
-              final String? action = details["action"]?.toString();
-              final String? data = details["data"]?.toString();
-              final bool isLauncher = details["isLauncher"] == true;
-              final bool isFromHistory = details["isFromHistory"] == true;
+          if (Platform.isAndroid) {
+            try {
+              const channel = MethodChannel("com.chotanews/whatsapp");
+              final details = await channel.invokeMethod<Map<dynamic, dynamic>>("getLaunchIntentDetails");
+              if (details != null) {
+                final String? action = details["action"]?.toString();
+                final String? data = details["data"]?.toString();
+                final bool isLauncher = details["isLauncher"] == true;
+                final bool isFromHistory = details["isFromHistory"] == true;
 
-              if (isLauncher || isFromHistory || data == null || action != "android.intent.action.VIEW") {
-                debugPrint("AppLinks initial link ignored: launch was from launcher/history (action=$action, data=$data)");
-                try {
-                  await channel.invokeMethod("clearInitialIntent");
-                } catch (_) {}
-                return;
+                if (isLauncher || isFromHistory || data == null || action != "android.intent.action.VIEW") {
+                  debugPrint("AppLinks initial link ignored: launch was from launcher/history (action=$action, data=$data)");
+                  try {
+                    await channel.invokeMethod("clearInitialIntent");
+                  } catch (_) {}
+                  return;
+                }
               }
+            } catch (e) {
+              debugPrint("Could not query native launch intent details: $e");
             }
-          } catch (e) {
-            debugPrint("Could not query native launch intent details: $e");
           }
 
           final prefs = await SharedPreferences.getInstance();
@@ -272,7 +274,9 @@ void _initBackgroundServices() async {
           if (consumedLink == uriStr) {
             debugPrint("AppLinks initial link already consumed in previous session, ignoring: $uri");
             try {
-              const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+              if (Platform.isAndroid) {
+                const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+              }
             } catch (_) {}
             return;
           }

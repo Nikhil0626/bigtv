@@ -10,6 +10,7 @@ class SudokuCompletionDialog extends StatelessWidget {
   final VoidCallback onNextLevel;
   final VoidCallback onReplay;
   final VoidCallback onViewLeaderboard;
+  final VoidCallback? onDashboard;
 
   const SudokuCompletionDialog({
     super.key,
@@ -20,6 +21,7 @@ class SudokuCompletionDialog extends StatelessWidget {
     required this.onNextLevel,
     required this.onReplay,
     required this.onViewLeaderboard,
+    this.onDashboard,
   });
 
   @override
@@ -160,7 +162,7 @@ class SudokuCompletionDialog extends StatelessWidget {
                     label: const Text(
                       'Share My Score',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF10B981),
                       ),
@@ -177,34 +179,50 @@ class SudokuCompletionDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
+                // Dashboard Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onDashboard ?? () => Navigator.pop(context),
+                    icon: const Icon(Icons.dashboard_rounded, color: Colors.white, size: 18),
+                    label: const Text(
+                      'Dashboard',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
                 // Action Buttons
                 if (hasNextLevel) ...[
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: OutlinedButton.icon(
                       onPressed: onNextLevel,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorTokens.primaryRed,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColorTokens.primaryRed,
+                        side: const BorderSide(color: AppColorTokens.primaryRed, width: 1.2),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 0,
                       ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Next Level',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward_rounded, size: 20),
-                        ],
+                      icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                      label: const Text(
+                        'Next Level',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),

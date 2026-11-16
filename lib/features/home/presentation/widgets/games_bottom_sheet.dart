@@ -51,7 +51,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         try {
-          context.read<DailyPuzzleProvider>().init(gameId: 'zip');
+          context.read<DailyPuzzleProvider>().preloadAllGamesStreak();
         } catch (_) {}
       }
     });
@@ -61,11 +61,31 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
     _gamesFuture = _apiClient.getActiveGames();
   }
 
-  Future<bool> _isGameCompletedToday(String slug) async {
+  Future<bool> _isGameCompletedToday(DailyPuzzleProvider dailyProvider, String slug) async {
     try {
+      final clean = slug.toLowerCase().contains('sudoku')
+          ? 'sudoku'
+          : (slug.toLowerCase().contains('patch') ? 'patch' : 'zip');
+
+      // 1. If dailyProvider has streak data, check server streak calendar
+      final streak = dailyProvider.getStreakCalendarForGame(clean);
+      if (streak != null) {
+        for (final day in streak.last7Days) {
+          if (day.isToday) {
+            return day.completed || dailyProvider.getLastSubmissionForGame(clean) != null;
+          }
+        }
+      }
+
+      // 2. Check in-memory submission in this session
+      if (dailyProvider.getLastSubmissionForGame(clean) != null) {
+        return true;
+      }
+
+      // 3. Fallback to local storage
       final prefs = await SharedPreferences.getInstance();
       final today = DateTime.now().toIso8601String().substring(0, 10);
-      return prefs.getBool('puzzle_completed_${slug}_$today') ?? false;
+      return prefs.getBool('puzzle_completed_${clean}_$today') ?? false;
     } catch (_) {
       return false;
     }
@@ -115,11 +135,8 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
       Widget targetScreen;
 
       if (slug.contains('sudoku') || gameType == 'sudoku') {
-        // Trigger background sync for sudoku state
         dailyProvider.init(gameId: 'sudoku');
-
-        final isCompleted = (dailyProvider.gameId == 'sudoku' && dailyProvider.isTodayCompleted) ||
-            (await _isGameCompletedToday('sudoku'));
+        final isCompleted = await _isGameCompletedToday(dailyProvider, 'sudoku');
 
         if (isCompleted) {
           targetScreen = SudokuDashboardScreen(playerId: userId);
@@ -127,11 +144,8 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
           targetScreen = SudokuGameScreen(playerId: userId);
         }
       } else if (slug.contains('patch') || gameType == 'patch' || gameType == 'patches') {
-        // Trigger background sync for patch state
         dailyProvider.init(gameId: 'patch');
-
-        final isCompleted = (dailyProvider.gameId == 'patch' && dailyProvider.isTodayCompleted) ||
-            (await _isGameCompletedToday('patch'));
+        final isCompleted = await _isGameCompletedToday(dailyProvider, 'patch');
 
         if (isCompleted) {
           targetScreen = PatchDashboardScreen(playerId: userId);
@@ -139,11 +153,8 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
           targetScreen = PatchGameScreen(playerId: userId);
         }
       } else if (slug.contains('zip') || gameType == 'zip') {
-        // Trigger background sync for zip state
         dailyProvider.init(gameId: 'zip');
-
-        final isCompleted = (dailyProvider.gameId == 'zip' && dailyProvider.isTodayCompleted) ||
-            (await _isGameCompletedToday('zip'));
+        final isCompleted = await _isGameCompletedToday(dailyProvider, 'zip');
 
         if (isCompleted) {
           targetScreen = const ZipLevelSelectionScreen();

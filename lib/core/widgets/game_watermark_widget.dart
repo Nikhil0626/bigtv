@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Renders a subtle, non-intrusive watermark overlay on top of a completed game board
-/// using the level's `logoUrl` (or falls back to the BigTV logo asset).
+/// Renders a watermark/background overlay on top of a completed game board
+/// ONLY when the API returns an image URL (`logoUrl`).
+/// If no API image is returned (or if loading fails), renders nothing (no static fallback).
 class GameWatermarkWidget extends StatelessWidget {
   final String? logoUrl;
   final double? size;
@@ -22,12 +23,10 @@ class GameWatermarkWidget extends StatelessWidget {
         ? logoUrl!.trim()
         : null;
 
-    final fallbackAsset = Image.asset(
-      'assets/images/BigTvPostLogo.png',
-      width: size,
-      height: size,
-      fit: fit,
-    );
+    // If static / no API image returned, remove completely
+    if (cleanUrl == null) {
+      return const SizedBox.shrink();
+    }
 
     return IgnorePointer(
       child: Center(
@@ -35,15 +34,13 @@ class GameWatermarkWidget extends StatelessWidget {
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOut,
           opacity: opacity,
-          child: cleanUrl != null
-              ? Image.network(
-                  cleanUrl,
-                  width: size,
-                  height: size,
-                  fit: fit,
-                  errorBuilder: (_, __, ___) => fallbackAsset,
-                )
-              : fallbackAsset,
+          child: Image.network(
+            cleanUrl,
+            width: size,
+            height: size,
+            fit: fit,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
         ),
       ),
     );

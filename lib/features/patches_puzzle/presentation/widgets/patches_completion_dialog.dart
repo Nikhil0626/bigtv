@@ -10,6 +10,7 @@ class PatchesCompletionDialog extends StatelessWidget {
   final VoidCallback onNextLevel;
   final VoidCallback onReplay;
   final VoidCallback onViewLeaderboard;
+  final VoidCallback? onDashboard;
 
   const PatchesCompletionDialog({
     super.key,
@@ -20,6 +21,7 @@ class PatchesCompletionDialog extends StatelessWidget {
     required this.onNextLevel,
     required this.onReplay,
     required this.onViewLeaderboard,
+    this.onDashboard,
   });
 
   @override
@@ -113,7 +115,8 @@ class PatchesCompletionDialog extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColorTokens.success.withValues(alpha: 0.2),
+                            color:
+                                AppColorTokens.success.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Row(
@@ -151,18 +154,20 @@ class PatchesCompletionDialog extends StatelessWidget {
                         formattedTime: formattedTime,
                       );
                     },
-                    icon: const Icon(Icons.share_rounded, size: 18, color: Color(0xFF10B981)),
+                    icon: const Icon(Icons.share_rounded,
+                        size: 18, color: Color(0xFF10B981)),
                     label: const Text(
                       'Share My Score',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF10B981),
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF10B981),
-                      side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                      side: const BorderSide(
+                          color: Color(0xFF10B981), width: 1.5),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -172,30 +177,59 @@ class PatchesCompletionDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // Action Buttons
-                if (hasNextLevel)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: onNextLevel,
-                      icon: const Icon(Icons.arrow_forward_rounded,
-                          color: Colors.white),
-                      label: const Text(
-                        'Next Level',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorTokens.primaryRed,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                // Dashboard Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onDashboard ?? () => Navigator.pop(context),
+                    icon: const Icon(Icons.dashboard_rounded,
+                        color: Colors.white, size: 18),
+                    label: const Text(
+                      'Dashboard',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
-                const SizedBox(height: 8),
+                ),
+                const SizedBox(height: 10),
+
+                // Action Buttons
+                  if (hasNextLevel) ...[
+                    SizedBox(
+                      width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: onNextLevel,
+                          icon:
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
+                          label: const Text(
+                            'Next Level',
+                            style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColorTokens.primaryRed,
+                            side: const BorderSide(
+                                color: AppColorTokens.primaryRed, width: 1.2),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
 
                 Row(
                   children: [

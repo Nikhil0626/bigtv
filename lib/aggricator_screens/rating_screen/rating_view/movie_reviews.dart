@@ -6,6 +6,7 @@ import 'package:chotanews/features/auth/presentation/providers/authentication_pr
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 import 'package:chotanews/services/movie_review_share_helper.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/date_format.dart';
 import 'package:flutter/material.dart';
@@ -684,6 +685,7 @@ class _MovieRatingsState extends State<MovieRatings> {
         _isTrailerBuffering = false;
         _showTrailerControls = false;
       });
+      AppWakelockManager.enable('movie_trailer');
       return;
     }
 
@@ -703,6 +705,7 @@ class _MovieRatingsState extends State<MovieRatings> {
         return;
       }
       await controller.play();
+      AppWakelockManager.enable('movie_trailer');
       setState(() {
         _isTrailerBuffering = false;
       });
@@ -712,6 +715,7 @@ class _MovieRatingsState extends State<MovieRatings> {
   }
 
   void _stopTrailer({bool updateState = true}) {
+    AppWakelockManager.disable('movie_trailer');
     final yt = _trailerYtController;
     final bool shouldRestorePortrait =
         _wasInFullScreen || (yt?.value.isFullScreen ?? false);

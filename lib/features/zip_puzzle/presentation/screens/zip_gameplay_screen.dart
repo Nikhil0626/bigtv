@@ -23,6 +23,7 @@ import 'zip_leaderboard_screen.dart';
 import 'zip_level_selection_screen.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/utils/local_data.dart';
 import '../../../../services/game_share_helper.dart';
 
 class ZipGameplayScreen extends StatefulWidget {
@@ -55,6 +56,8 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
   bool? _cachedIsPersonalBest;
   bool? _cachedHasNext;
   LevelDefinition? _cachedNextLevel;
+  int? _cachedRank;
+  int? _cachedStreak;
 
   @override
   void initState() {
@@ -100,6 +103,31 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
         final today = DateTime.now().toIso8601String().substring(0, 10);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('puzzle_completed_zip_$today', true);
+
+        // Also submit to unified PuzzleApiService if profile is already valid
+        try {
+          if (!mounted) return;
+          final profileProvider = context.read<ProfileProvider>();
+          final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+          final userId = (await getUserid()) ?? prefs.getString('userId') ?? 'guest';
+
+          final res = await PuzzleApiService.submitGame(
+            gameSlug: 'zip',
+            playerId: userId,
+            durationMs: game.elapsedMilliseconds > 0 ? game.elapsedMilliseconds : 30000,
+            score: 100,
+            displayName: profile.hasValidName ? profile.name : 'Player',
+            avatarUrl: profile.photoUrl.isNotEmpty ? profile.photoUrl : null,
+          );
+          if (mounted) {
+            final rank = res['rank'] ?? 1;
+            final streak = res['streak'] != null ? res['streak']['currentStreak'] ?? 1 : 1;
+            setState(() {
+              _cachedRank = rank;
+              _cachedStreak = streak;
+            });
+          }
+        } catch (_) {}
       } catch (e) {
         debugPrint('Daily completion submit error: $e');
       }
@@ -217,7 +245,57 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
     );
   }
 
+  Future<void> _ensureProfileAndProceed(
+    ZipGameProvider game, {
+    required VoidCallback onProceed,
+  }) async {
+    final profileProvider = context.read<ProfileProvider>();
+    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+
+    if (profile.hasValidName) {
+      // User has ALREADY updated their name in profile or any game!
+      // Do not show popup; use that name directly and fire sync
+      _hasHandledCompletionFlow = true;
+      _fireBackgroundSync(game, displayName: profile.name, photoUrl: profile.photoUrl);
+      onProceed();
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = (await getUserid()) ?? prefs.getString('userId') ?? 'guest';
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => GameProfilePromptDialog(
+          initialName: '',
+          initialPhotoUrl: profile.photoUrl,
+          userId: userId,
+          onProfileSaved: (savedName, savedPhoto) async {
+            _hasHandledCompletionFlow = true;
+            _fireBackgroundSync(
+              game,
+              displayName: savedName,
+              photoUrl: savedPhoto,
+            );
+            onProceed();
+          },
+        ),
+      );
+    }
+  }
+
   Future<void> _shareCurrentGame(ZipGameProvider game) async {
+    final bool isFinished = game.isCompleted || widget.isViewOnly;
+    if (isFinished && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        game,
+        onProceed: () => _performShare(game),
+      );
+    } else {
+      await _performShare(game);
+    }
+  }
+
+  Future<void> _performShare(ZipGameProvider game) async {
     final formattedTime = widget.isViewOnly && widget.initialElapsedMs != null
         ? '${(widget.initialElapsedMs! / 1000).toStringAsFixed(1)}s'
         : (game.currentPath.isNotEmpty ? game.formattedTime : null);
@@ -243,40 +321,39 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
       gameSlug: 'zip',
       gameTitle: 'Zip Puzzle',
       formattedTime: formattedTime,
-      rank: _cachedDailyResult?.rank,
-      streak: _cachedDailyResult?.streak.currentStreak,
+      rank: _cachedRank ?? _cachedDailyResult?.rank,
+      streak: _cachedStreak ?? _cachedDailyResult?.streak.currentStreak,
       screenshotFile: screenshotXFile,
     );
   }
 
   Future<void> _handleDoneOrBack(ZipGameProvider game, {required bool isDone}) async {
-    final profileProvider = context.read<ProfileProvider>();
-    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+    await _ensureProfileAndProceed(
+      game,
+      onProceed: _navigateAfterDoneOrBack,
+    );
+  }
 
-    if (profile.hasValidName) {
-      // User has ALREADY updated their name in profile or any game!
-      // Navigate immediately with 0ms delay!
-      _navigateAfterDoneOrBack();
-      _fireBackgroundSync(game, displayName: profile.name, photoUrl: profile.photoUrl);
+  Future<void> _handleDashboardTap(ZipGameProvider game) async {
+    final bool isFinished = game.isCompleted || widget.isViewOnly;
+    if (isFinished && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        game,
+        onProceed: () {
+          _hasHandledCompletionFlow = true;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ZipLevelSelectionScreen(),
+            ),
+          );
+        },
+      );
     } else {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId') ?? 'guest';
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => GameProfilePromptDialog(
-          initialName: '',
-          initialPhotoUrl: profile.photoUrl,
-          userId: userId,
-          onProfileSaved: (savedName, savedPhoto) async {
-            _navigateAfterDoneOrBack();
-            _fireBackgroundSync(
-              game,
-              displayName: savedName,
-              photoUrl: savedPhoto,
-            );
-          },
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ZipLevelSelectionScreen(),
         ),
       );
     }
@@ -303,15 +380,23 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
     required String photoUrl,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId') ?? 'guest';
+    final userId = (await getUserid()) ?? prefs.getString('userId') ?? 'guest';
     final duration = game.elapsedMilliseconds > 0
         ? game.elapsedMilliseconds
         : (widget.initialElapsedMs ?? 30000);
+
+    ProfileProvider? profileProvider;
+    try {
+      if (mounted) {
+        profileProvider = context.read<ProfileProvider>();
+      }
+    } catch (_) {}
 
     try {
       GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
+        profileProvider: profileProvider,
       );
     } catch (_) {}
 
@@ -350,13 +435,13 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
 
           final isUndoEnabled = game.currentPath.isNotEmpty && !game.isCompleted;
           final bool isFinished = game.isCompleted || widget.isViewOnly;
-          final bool canDirectPop = (!widget.isDailyPuzzle || !isFinished) || _hasHandledCompletionFlow;
+          final bool canDirectPop = !isFinished || _hasHandledCompletionFlow;
 
           return PopScope(
             canPop: canDirectPop,
             onPopInvokedWithResult: (didPop, _) {
               if (didPop) return;
-              if (widget.isDailyPuzzle && isFinished && !_hasHandledCompletionFlow) {
+              if (isFinished && !_hasHandledCompletionFlow) {
                 _handleDoneOrBack(game, isDone: false);
               } else {
                 Navigator.pop(context);
@@ -372,7 +457,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                   padding: EdgeInsets.all(8.w),
                   child: InkWell(
                     onTap: () {
-                      if (widget.isDailyPuzzle && isFinished && !_hasHandledCompletionFlow) {
+                      if (isFinished && !_hasHandledCompletionFlow) {
                         _handleDoneOrBack(game, isDone: false);
                       } else {
                         Navigator.pop(context);
@@ -774,7 +859,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
             SizedBox(height: 8.h),
             Wrap(
               alignment: WrapAlignment.end,
-              spacing: 6.w,
+              spacing: 8.w,
               runSpacing: 4.h,
               children: [
                 OutlinedButton.icon(
@@ -782,64 +867,24 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                     foregroundColor: const Color(0xFF10B981),
                     side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  icon: Icon(Icons.share_rounded, size: 13.sp, color: const Color(0xFF10B981)),
-                  label: const Text('Share', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.share_rounded, size: 14.sp, color: const Color(0xFF10B981)),
+                  label: const Text('Share', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   onPressed: () => _shareCurrentGame(game),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () {
-                    if (widget.isDailyPuzzle) {
-                      _handleDoneOrBack(game, isDone: true);
-                    } else {
-                      _showCompletionDialog(game);
-                    }
-                  },
-                  child: const Text('Done', style: TextStyle(fontSize: 11)),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    side: const BorderSide(color: Colors.green, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () {
-                    if (widget.isDailyPuzzle) {
-                      _handleDoneOrBack(game, isDone: false);
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Back', style: TextStyle(fontSize: 11)),
-                ),
-                ElevatedButton(
+                ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ZipLevelSelectionScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Dashboard', style: TextStyle(fontSize: 11)),
+                  onPressed: () => _handleDashboardTap(game),
+                  icon: Icon(Icons.dashboard_rounded, size: 14.sp, color: Colors.white),
+                  label: const Text('Dashboard', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

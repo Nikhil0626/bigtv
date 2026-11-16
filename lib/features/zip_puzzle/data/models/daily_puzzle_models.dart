@@ -100,9 +100,18 @@ class DailyGameData {
 
   factory DailyGameData.fromJson(Map<String, dynamic> json) {
     final rawLogo = json['logoUrl'] ??
+        json['imageUrl'] ??
+        json['image'] ??
         json['completionImageUrl'] ??
         json['backgroundImageUrl'] ??
-        (json['content'] is Map ? json['content']['backgroundImage'] : null);
+        (json['content'] is Map
+            ? (json['content']['logoUrl'] ??
+                json['content']['imageUrl'] ??
+                json['content']['image'] ??
+                json['content']['completionImageUrl'] ??
+                json['content']['backgroundImageUrl'] ??
+                json['content']['backgroundImage'])
+            : null);
 
     return DailyGameData(
       gameId: json['gameId']?.toString() ?? json['slug']?.toString() ?? 'zip',

@@ -85,6 +85,10 @@ class _PatchesGameplayScreenState extends State<PatchesGameplayScreen> {
               ),
             );
           },
+          onDashboard: () {
+            Navigator.pop(dialogCtx);
+            Navigator.pop(context);
+          },
         );
       },
     );

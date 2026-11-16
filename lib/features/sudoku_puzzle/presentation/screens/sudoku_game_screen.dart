@@ -16,6 +16,7 @@ import '../../../../services/game_share_helper.dart';
 import '../../../../core/widgets/game_watermark_widget.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
 import 'sudoku_dashboard_screen.dart';
 
 class SudokuCellValidation {
@@ -324,33 +325,91 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
       'duration_ms': duration,
     });
 
-    PuzzleApiService.submitGame(
-      gameSlug: 'sudoku',
-      playerId: widget.playerId,
-      durationMs: duration > 0 ? duration : 30000,
-      score: 100,
-    ).then((res) {
-      final today = DateTime.now().toIso8601String().substring(0, 10);
-      SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_sudoku_$today', true));
+    final profileProvider = context.read<ProfileProvider>();
+    GameProfileManager.getUnifiedProfile(profileProvider: profileProvider).then((profile) {
+      final name = profile.hasValidName ? profile.name : null;
+      final photo = profile.photoUrl.isNotEmpty ? profile.photoUrl : null;
 
-      if (!mounted) return;
-      final rank = res['rank'] ?? 1;
-      final streak = res['streak'] != null ? res['streak']['currentStreak'] ?? 1 : 1;
-      AnalyticsService.instance.track(AnalyticsEventName.gameScoreRecorded, properties: {
-        'game_id': 'sudoku',
-        'score': 100,
-        'rank': rank,
-      });
+      PuzzleApiService.submitGame(
+        gameSlug: 'sudoku',
+        playerId: widget.playerId,
+        durationMs: duration > 0 ? duration : 30000,
+        score: 100,
+        displayName: name,
+        avatarUrl: photo,
+      ).then((res) {
+        final today = DateTime.now().toIso8601String().substring(0, 10);
+        SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_sudoku_$today', true));
 
-      setState(() {
-        _cachedDurationMs = duration;
-        _cachedRank = rank;
-        _cachedStreak = streak;
+        try {
+          if (mounted) {
+            context.read<DailyPuzzleProvider>().loadStreakCalendar();
+          }
+        } catch (_) {}
+
+        if (!mounted) return;
+        final rank = res['rank'] ?? 1;
+        final streak = res['streak'] != null ? res['streak']['currentStreak'] ?? 1 : 1;
+        AnalyticsService.instance.track(AnalyticsEventName.gameScoreRecorded, properties: {
+          'game_id': 'sudoku',
+          'score': 100,
+          'rank': rank,
+        });
+
+        setState(() {
+          _cachedDurationMs = duration;
+          _cachedRank = rank;
+          _cachedStreak = streak;
+        });
       });
     });
   }
 
+  Future<void> _ensureProfileAndProceed({
+    required VoidCallback onProceed,
+  }) async {
+    final profileProvider = context.read<ProfileProvider>();
+    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+
+    if (profile.hasValidName) {
+      // User has ALREADY updated their name in profile or any game!
+      // Do not show popup; use that name directly and fire sync
+      _hasHandledCompletionFlow = true;
+      _fireBackgroundSync(displayName: profile.name, photoUrl: profile.photoUrl);
+      onProceed();
+    } else {
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => GameProfilePromptDialog(
+          initialName: '',
+          initialPhotoUrl: profile.photoUrl,
+          userId: widget.playerId,
+          onProfileSaved: (savedName, savedPhoto) async {
+            _hasHandledCompletionFlow = true;
+            _fireBackgroundSync(
+              displayName: savedName,
+              photoUrl: savedPhoto,
+            );
+            onProceed();
+          },
+        ),
+      );
+    }
+  }
+
   Future<void> _shareCurrentGame() async {
+    if ((_isCompleted || widget.isViewOnly) && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        onProceed: _performShare,
+      );
+    } else {
+      await _performShare();
+    }
+  }
+
+  Future<void> _performShare() async {
     final duration = _cachedDurationMs ?? _stopwatch.elapsedMilliseconds;
     final formattedTime = '${(duration / 1000).toStringAsFixed(1)}s';
 
@@ -382,30 +441,29 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
   }
 
   Future<void> _handleDoneOrBack({required bool isDone}) async {
-    final profileProvider = context.read<ProfileProvider>();
-    final profile = await GameProfileManager.getUnifiedProfile(profileProvider: profileProvider);
+    await _ensureProfileAndProceed(
+      onProceed: _navigateAfterDoneOrBack,
+    );
+  }
 
-    if (profile.hasValidName) {
-      // User has ALREADY updated their name in profile or any game!
-      // Navigate immediately with 0ms delay!
-      _navigateAfterDoneOrBack();
-      _fireBackgroundSync(displayName: profile.name, photoUrl: profile.photoUrl);
+  Future<void> _handleDashboardTap() async {
+    if ((_isCompleted || widget.isViewOnly) && !_hasHandledCompletionFlow) {
+      await _ensureProfileAndProceed(
+        onProceed: () {
+          _hasHandledCompletionFlow = true;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SudokuDashboardScreen(playerId: widget.playerId),
+            ),
+          );
+        },
+      );
     } else {
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => GameProfilePromptDialog(
-          initialName: '',
-          initialPhotoUrl: profile.photoUrl,
-          userId: widget.playerId,
-          onProfileSaved: (savedName, savedPhoto) async {
-            _navigateAfterDoneOrBack();
-            _fireBackgroundSync(
-              displayName: savedName,
-              photoUrl: savedPhoto,
-            );
-          },
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SudokuDashboardScreen(playerId: widget.playerId),
         ),
       );
     }
@@ -431,11 +489,18 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
     required String photoUrl,
   }) {
     final duration = _cachedDurationMs ?? _stopwatch.elapsedMilliseconds;
+    ProfileProvider? profileProvider;
+    try {
+      if (mounted) {
+        profileProvider = context.read<ProfileProvider>();
+      }
+    } catch (_) {}
 
     try {
       GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
+        profileProvider: profileProvider,
       );
     } catch (_) {}
 
@@ -900,7 +965,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
             SizedBox(height: 8.h),
             Wrap(
               alignment: WrapAlignment.end,
-              spacing: 6.w,
+              spacing: 8.w,
               runSpacing: 4.h,
               children: [
                 OutlinedButton.icon(
@@ -908,52 +973,24 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                     foregroundColor: const Color(0xFF10B981),
                     side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  icon: Icon(Icons.share_rounded, size: 13.sp, color: const Color(0xFF10B981)),
-                  label: const Text('Share', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.share_rounded, size: 14.sp, color: const Color(0xFF10B981)),
+                  label: const Text('Share', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   onPressed: _shareCurrentGame,
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => _handleDoneOrBack(isDone: true),
-                  child: const Text('Done', style: TextStyle(fontSize: 11)),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    side: const BorderSide(color: Colors.green, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => _handleDoneOrBack(isDone: false),
-                  child: const Text('Back', style: TextStyle(fontSize: 11)),
-                ),
-                ElevatedButton(
+                ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     visualDensity: VisualDensity.compact,
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SudokuDashboardScreen(playerId: widget.playerId),
-                      ),
-                    );
-                  },
-                  child: const Text('Dashboard', style: TextStyle(fontSize: 11)),
+                  onPressed: _handleDashboardTap,
+                  icon: Icon(Icons.dashboard_rounded, size: 14.sp, color: Colors.white),
+                  label: const Text('Dashboard', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

@@ -47,9 +47,14 @@ class SudokuLevel {
     final rawSolution = content['solution'] as List? ?? [];
 
     final rawLogo = json['logoUrl'] ??
+        json['imageUrl'] ??
+        json['image'] ??
         json['completionImageUrl'] ??
         json['backgroundImageUrl'] ??
+        json['backgroundImage'] ??
         content['logoUrl'] ??
+        content['imageUrl'] ??
+        content['image'] ??
         content['completionImageUrl'] ??
         content['backgroundImageUrl'] ??
         content['backgroundImage'];

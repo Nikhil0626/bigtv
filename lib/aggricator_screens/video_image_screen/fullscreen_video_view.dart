@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:provider/provider.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'video_provider.dart';
 
 class FullscreenVideoView extends StatefulWidget {
@@ -19,6 +20,8 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
   @override
   void initState() {
     super.initState();
+    AppWakelockManager.set('fullscreen_video', widget.controller.value.isPlaying);
+    widget.controller.addListener(_onVideoStateChanged);
     // Force landscape mode
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
@@ -28,8 +31,14 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
+  void _onVideoStateChanged() {
+    AppWakelockManager.set('fullscreen_video', widget.controller.value.isPlaying);
+  }
+
   @override
   void dispose() {
+    widget.controller.removeListener(_onVideoStateChanged);
+    AppWakelockManager.disable('fullscreen_video');
     _showControlsNotifier.dispose();
     // Failsafe in case of swipe back
     SystemChrome.setPreferredOrientations([
