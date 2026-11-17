@@ -2274,7 +2274,8 @@ class HomeProvider extends ChangeNotifier {
 
   bool get hasPendingDeepLink =>
       pendingDeepLinkUri != null ||
-      (pendingDeepLink != null && pendingDeepLink!.isNotEmpty);
+      (pendingDeepLink != null && pendingDeepLink!.isNotEmpty) ||
+      pendingPushPayload != null;
   bool get isRoutingDeepLink => _isRoutingDeepLink;
 
   String? _lastIncomingDeepLinkStr;
@@ -3097,7 +3098,15 @@ class HomeProvider extends ChangeNotifier {
               targetReviewId,
               isAds: true,
               isLink: isFromNotification,
-            );
+            ).then((_) {
+              if (getAllPostList.isEmpty) {
+                getAllPost(isGetAllPost: true);
+              }
+            }).catchError((_) {
+              if (getAllPostList.isEmpty) {
+                getAllPost(isGetAllPost: true);
+              }
+            });
           }
         } else {
           mainNavigatorKey.currentState?.push(
@@ -3182,7 +3191,15 @@ class HomeProvider extends ChangeNotifier {
               targetPollId,
               isAds: true,
               isLink: isFromNotification,
-            );
+            ).then((_) {
+              if (getAllPostList.isEmpty) {
+                getAllPost(isGetAllPost: true);
+              }
+            }).catchError((_) {
+              if (getAllPostList.isEmpty) {
+                getAllPost(isGetAllPost: true);
+              }
+            });
           }
         } else {
           mainNavigatorKey.currentState?.push(
@@ -3280,21 +3297,23 @@ class HomeProvider extends ChangeNotifier {
           }
         });
 
-        // Fetch post in background to populate getSinglePostList and log analytics event
+        // Fetch post with top network priority; defer getAllPost until it completes
         getIndividualPost(targetPostId, isAds: true, isLink: isFromNotification)
             .then((_) {
           isHomeLoading = false;
           notifyListeners();
+          // Populate home feed in background while user reads article
+          if (getAllPostList.isEmpty) {
+            getAllPost(isGetAllPost: true);
+          }
         }).catchError((e) {
           debugPrint("Error fetching individual post in deep link: $e");
           isHomeLoading = false;
           notifyListeners();
+          if (getAllPostList.isEmpty) {
+            getAllPost(isGetAllPost: true);
+          }
         });
-
-        // Ensure home news feed is populated in background so tapping back has news cards ready
-        if (getAllPostList.isEmpty) {
-          getAllPost(isGetAllPost: true);
-        }
 
         // Tell native Android to clear its launch intent data so it doesn't replay on next open
         if (Platform.isAndroid) {
@@ -3308,6 +3327,9 @@ class HomeProvider extends ChangeNotifier {
       }
 
       log("Deep link not matched to specific handler: $uri");
+      if (getAllPostList.isEmpty) {
+        getAllPost(isGetAllPost: true);
+      }
     } finally {
       _isRoutingDeepLink = false;
     }
