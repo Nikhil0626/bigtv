@@ -136,6 +136,8 @@ class GameProfileManager {
     required String name,
     required String photoUrl,
     ProfileProvider? profileProvider,
+    bool updateBackend = true,
+    bool showToastOnBackendUpdate = false,
   }) async {
     final cleanName = name.trim();
     final cleanPhoto = photoUrl.trim();
@@ -165,14 +167,14 @@ class GameProfileManager {
       await SudokuPuzzleRepository().setPlayerDisplayName(cleanName);
     } catch (_) {}
 
-    // Update ProfileProvider in memory and call postProfile()
-    if (profileProvider != null) {
+    // Update ProfileProvider in memory and call postProfile() if updateBackend is true
+    if (updateBackend && profileProvider != null) {
       profileProvider.nameController.text = cleanName;
       if (cleanPhoto.isNotEmpty) {
         profileProvider.uploadImageUrl = cleanPhoto;
       }
       try {
-        await profileProvider.postProfile();
+        await profileProvider.postProfile(showToast: showToastOnBackendUpdate);
       } catch (e) {
         debugPrint('Error posting unified profile to backend: $e');
       }
@@ -271,6 +273,8 @@ class _GameProfilePromptDialogState extends State<GameProfilePromptDialog> {
         name: name,
         photoUrl: finalPhotoUrl,
         profileProvider: profileProvider,
+        updateBackend: true,
+        showToastOnBackendUpdate: false,
       );
 
       // 3. Notify caller with saved details
@@ -537,6 +541,8 @@ class _GameProfilePromptDialogState extends State<GameProfilePromptDialog> {
                               name: enteredName,
                               photoUrl: _photoUrl,
                               profileProvider: context.read<ProfileProvider>(),
+                              updateBackend: true,
+                              showToastOnBackendUpdate: false,
                             );
                           } catch (_) {}
                           await widget.onProfileSaved(enteredName, _photoUrl);

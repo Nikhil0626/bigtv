@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/core/widgets/game_profile_prompt_dialog.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/utils/local_data.dart';
 
@@ -134,11 +135,13 @@ class ProfileProvider extends ChangeNotifier {
     return null;
   }
 
-  Future getProfile() async {
-    isMainLoading = true;
-    notifyListeners();
+  Future getProfile({bool showLoading = true}) async {
+    if (showLoading) {
+      isMainLoading = true;
+      notifyListeners();
+    }
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString("userId") ?? preferences.getString("loginId");
+    String? userId = (await getUserid()) ?? preferences.getString("userId") ?? preferences.getString("loginId");
     Map<String, dynamic> body = {
       "user_id": userId ?? "",
     };
@@ -156,6 +159,23 @@ class ProfileProvider extends ChangeNotifier {
 
           final rawDob = profile['dob'];
           _parseAndPopulateDob(rawDob);
+
+          final String fetchedName = profile['name']?.toString().trim() ?? "";
+          final String fetchedPhoto = profile['photo']?.toString().trim() ?? "";
+
+          if (GameProfileManager.isValidPlayerName(fetchedName)) {
+            await preferences.setString("userName", fetchedName);
+            await preferences.setString("game_profile_name", fetchedName);
+            await preferences.setString("zip_puzzle_v1_player_name", fetchedName);
+            await preferences.setString("patches_puzzle_v1_player_name", fetchedName);
+            await preferences.setString("sudoku_player_display_name", fetchedName);
+            log("Stored profile name from Profile API to local storage: $fetchedName");
+          }
+          if (fetchedPhoto.isNotEmpty) {
+            await preferences.setString("userPhoto", fetchedPhoto);
+            await preferences.setString("userImage", fetchedPhoto);
+            await preferences.setString("game_profile_photo", fetchedPhoto);
+          }
 
           // Extract User ID from Profile API and store into local storage
           final dynamic data = response.data;
@@ -192,17 +212,21 @@ class ProfileProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Unexpected error while fetching profile: ${e.toString()} ---- ${st.toString()}");
     } finally {
-      isMainLoading = false;
-      notifyListeners();
+      if (showLoading) {
+        isMainLoading = false;
+        notifyListeners();
+      }
     }
   }
 
   bool isProfileUpdate = false;
 
-  Future postProfile() async {
+  Future postProfile({bool showToast = true}) async {
     final String name = nameController.text.trim();
     if (name.isEmpty) {
-      CustomToast.showErrorToast(msg: "Please enter your name");
+      if (showToast) {
+        CustomToast.showErrorToast(msg: "Please enter your name");
+      }
       return;
     }
 
@@ -217,7 +241,9 @@ class ProfileProvider extends ChangeNotifier {
 
     if (hasAnyDobField) {
       if (!hasAllDobFields) {
-        CustomToast.showErrorToast(msg: "Please enter complete date of birth");
+        if (showToast) {
+          CustomToast.showErrorToast(msg: "Please enter complete date of birth");
+        }
         return;
       }
 
@@ -229,22 +255,30 @@ class ProfileProvider extends ChangeNotifier {
           day < 1 || day > 31 ||
           month < 1 || month > 12 ||
           year < 1900 || year > DateTime.now().year) {
-        CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+        if (showToast) {
+          CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+        }
         return;
       }
 
       try {
         final date = DateTime(year, month, day);
         if (date.year != year || date.month != month || date.day != day) {
-          CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+          if (showToast) {
+            CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+          }
           return;
         }
         if (date.isAfter(DateTime.now())) {
-          CustomToast.showErrorToast(msg: "Date of birth cannot be in the future");
+          if (showToast) {
+            CustomToast.showErrorToast(msg: "Date of birth cannot be in the future");
+          }
           return;
         }
       } catch (_) {
-        CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+        if (showToast) {
+          CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+        }
         return;
       }
 
@@ -293,6 +327,15 @@ class ProfileProvider extends ChangeNotifier {
           profileData['profile']['photo'] = uploadImageUrl.toString();
         }
         preferences.setString("userName", name);
+        preferences.setString("game_profile_name", name);
+        preferences.setString("zip_puzzle_v1_player_name", name);
+        preferences.setString("patches_puzzle_v1_player_name", name);
+        preferences.setString("sudoku_player_display_name", name);
+        if (uploadImageUrl.toString().isNotEmpty) {
+          preferences.setString("userPhoto", uploadImageUrl.toString());
+          preferences.setString("userImage", uploadImageUrl.toString());
+          preferences.setString("game_profile_photo", uploadImageUrl.toString());
+        }
         final dynamic updatedUserId = response.data is Map
             ? (response.data['user_id'] ??
                 response.data['id'] ??
@@ -308,13 +351,17 @@ class ProfileProvider extends ChangeNotifier {
           await preferences.setString('userId', cleanUserId);
           GlobalVariables().userId = cleanUserId;
         }
-        CustomToast.showSuccessToast(msg: "Profile data updated");
+        if (showToast) {
+          CustomToast.showSuccessToast(msg: "Profile data updated");
+        }
         log("Profile updated successfully: ${response.data}");
       } else {
         final errorMsg = response.data is Map && response.data['detail'] != null
             ? response.data['detail'].toString()
             : "Failed to update profile";
-        CustomToast.showErrorToast(msg: errorMsg);
+        if (showToast) {
+          CustomToast.showErrorToast(msg: errorMsg);
+        }
         log("Failed to update profile: ${response.statusCode}");
       }
     } on DioException catch (e, st) {
@@ -322,10 +369,14 @@ class ProfileProvider extends ChangeNotifier {
       if (e.response?.data is Map && e.response?.data['detail'] != null) {
         errorMsg = e.response!.data['detail'].toString();
       }
-      CustomToast.showErrorToast(msg: errorMsg);
+      if (showToast) {
+        CustomToast.showErrorToast(msg: errorMsg);
+      }
       log("Dio error while updating profile: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      CustomToast.showErrorToast(msg: "Profile data not updated");
+      if (showToast) {
+        CustomToast.showErrorToast(msg: "Profile data not updated");
+      }
       log("Unexpected error while updating profile: ${e.toString()} ---- ${st.toString()}");
     } finally {
       isProfileUpdate = false;

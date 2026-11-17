@@ -8,6 +8,7 @@ import 'package:chotanews/features/auth/presentation/providers/authentication_pr
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/reels/data/models/reels_model.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
+import 'package:chotanews/services/reel_share_helper.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -398,6 +399,18 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen>
     _networkControllers.clear();
     _youtubeControllers.clear();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ReelPreviewScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialIndex != oldWidget.initialIndex && _pageController.hasClients) {
+      final reelsList = context.read<ReelsProviders>().getAllReelsList;
+      final target = widget.initialIndex.clamp(0, reelsList.isEmpty ? 0 : reelsList.length - 1);
+      _pageController.jumpToPage(target);
+      _currentIndexNotifier.value = target;
+      _preloadControllers(target, reelsList);
+    }
   }
 
   @override
@@ -1478,11 +1491,8 @@ class _ReelsCardViewState extends State<ReelsCardView>
                           Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
                       final String title = widget.reelCard.title.trim();
-                      final String videoUrl = widget.reelCard.videoUrl.trim();
-                      final String fallbackUrl =
-                          "https://www.bigtv24x7.com/posts?postId=${widget.reelCard.id}";
                       final String shareLink =
-                          videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
+                          ReelShareHelper.getReelShareUrl(widget.reelCard.id);
                       final String shareText =
                           title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
 

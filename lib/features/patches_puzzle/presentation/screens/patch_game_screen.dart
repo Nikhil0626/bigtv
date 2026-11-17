@@ -721,18 +721,12 @@ class _PatchGameScreenState extends State<PatchGameScreen>
     required String photoUrl,
   }) {
     final duration = _cachedDurationMs ?? _currentElapsedMs;
-    ProfileProvider? profileProvider;
-    try {
-      if (mounted) {
-        profileProvider = context.read<ProfileProvider>();
-      }
-    } catch (_) {}
-
+    // Sync locally to unified and individual game keys WITHOUT hitting backend profile API!
     try {
       GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
-        profileProvider: profileProvider,
+        updateBackend: false,
       );
     } catch (_) {}
 

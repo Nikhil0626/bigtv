@@ -11,6 +11,7 @@ import 'package:chotanews/services/video_position_service.dart';
 import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/game_share_helper.dart';
 import 'package:chotanews/services/live_tv_share_helper.dart';
+import 'package:chotanews/services/reel_share_helper.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 
@@ -282,5 +283,47 @@ void main() {
         expect(fallbackSubject, equals('Watch BIGTV Live 24x7'));
       },
     );
+
+    group('ReelShareHelper Tests', () {
+      test('getReelShareUrl returns canonical deep link when reelId is valid', () {
+        expect(
+          ReelShareHelper.getReelShareUrl('64b522b7-6efe-4e99-ba75-52078ba4b54f'),
+          equals('https://app.bigtv24x7.com/reels?reelId=64b522b7-6efe-4e99-ba75-52078ba4b54f'),
+        );
+        expect(
+          ReelShareHelper.getReelShareUrl(12345),
+          equals('https://app.bigtv24x7.com/reels?reelId=12345'),
+        );
+      });
+
+      test('getReelShareUrl returns base /reels link when reelId is missing or empty', () {
+        expect(ReelShareHelper.getReelShareUrl(null), equals('https://app.bigtv24x7.com/reels'));
+        expect(ReelShareHelper.getReelShareUrl(''), equals('https://app.bigtv24x7.com/reels'));
+        expect(ReelShareHelper.getReelShareUrl('   '), equals('https://app.bigtv24x7.com/reels'));
+        expect(ReelShareHelper.getReelShareUrl(0), equals('https://app.bigtv24x7.com/reels'));
+        expect(ReelShareHelper.getReelShareUrl('0'), equals('https://app.bigtv24x7.com/reels'));
+        expect(ReelShareHelper.getReelShareUrl('null'), equals('https://app.bigtv24x7.com/reels'));
+      });
+
+      test('getShareText formats text with title and canonical URL', () {
+        expect(
+          ReelShareHelper.getShareText(
+            title: 'Amazing Reel Title',
+            reelId: '64b522b7-6efe-4e99-ba75-52078ba4b54f',
+          ),
+          equals(
+            'Amazing Reel Title\n\nhttps://app.bigtv24x7.com/reels?reelId=64b522b7-6efe-4e99-ba75-52078ba4b54f',
+          ),
+        );
+
+        expect(
+          ReelShareHelper.getShareText(
+            title: '',
+            reelId: '64b522b7-6efe-4e99-ba75-52078ba4b54f',
+          ),
+          equals('https://app.bigtv24x7.com/reels?reelId=64b522b7-6efe-4e99-ba75-52078ba4b54f'),
+        );
+      });
+    });
   });
 }

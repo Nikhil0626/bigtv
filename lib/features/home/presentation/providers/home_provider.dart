@@ -2538,9 +2538,36 @@ class HomeProvider extends ChangeNotifier {
       }
 
       // 5. REELS DEEP LINK
+      // Handles:
+      // https://app.bigtv24x7.com/reels?reelId=64b522b7-6efe-4e99-ba75-52078ba4b54f
+      // https://app.bigtv24x7.com/reels?postId=...
+      // https://app.bigtv24x7.com/reels?id=...
+      // https://app.bigtv24x7.com/reels
       if (path.contains('reels') || path.contains('reel') || path.contains('shorts')) {
-        log("Routing to Reels deep link");
+        log("Routing to Reels deep link: $uri");
         popToRoot();
+
+        final String? targetReelId = queryParams['reelId'] ??
+            queryParams['reel_id'] ??
+            queryParams['postId'] ??
+            queryParams['post_id'] ??
+            queryParams['id'] ??
+            (uri.pathSegments.length >= 2 && uri.pathSegments.last.toLowerCase() != 'reels'
+                ? uri.pathSegments.last
+                : null);
+
+        if (mainNavigatorKey.currentContext != null &&
+            targetReelId != null &&
+            targetReelId.isNotEmpty) {
+          try {
+            final reelsProvider =
+                mainNavigatorKey.currentContext!.read<ReelsProviders>();
+            reelsProvider.setTargetReelId(targetReelId);
+          } catch (e) {
+            log("Error setting targetReelId in ReelsProviders: $e");
+          }
+        }
+
         switchTab(2);
         return;
       }

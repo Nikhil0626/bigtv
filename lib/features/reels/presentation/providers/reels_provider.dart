@@ -17,6 +17,28 @@ class ReelsProviders extends ChangeNotifier {
   List<String> isLikeList = [];
   bool isMuted = false;
   String? reelsLanguage;
+  int _targetReelIndex = 0;
+  int get targetReelIndex => _targetReelIndex;
+  String? _pendingTargetReelId;
+  String? get pendingTargetReelId => _pendingTargetReelId;
+
+  void setTargetReelId(String reelId) {
+    final cleanId = reelId.trim();
+    if (cleanId.isEmpty) return;
+    _pendingTargetReelId = cleanId;
+    if (getAllReelsList.isNotEmpty) {
+      final idx = getAllReelsList.indexWhere((r) => r.id.toString() == cleanId);
+      if (idx != -1) {
+        _targetReelIndex = idx;
+        notifyListeners();
+      }
+    }
+  }
+
+  void setTargetIndex(int index) {
+    _targetReelIndex = index;
+    notifyListeners();
+  }
   final Set<VoidCallback> _pauseListeners = <VoidCallback>{};
   int _pauseEpoch = 0;
 
@@ -117,6 +139,15 @@ class ReelsProviders extends ChangeNotifier {
         getAllReelsList = rawList
             .map((e) => ReelsModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList();
+
+        if (_pendingTargetReelId != null && _pendingTargetReelId!.isNotEmpty) {
+          final idx = getAllReelsList.indexWhere(
+            (r) => r.id.toString() == _pendingTargetReelId,
+          );
+          if (idx != -1) {
+            _targetReelIndex = idx;
+          }
+        }
       }
     } on DioException catch (e, st) {
       log("dio error --- ${e.toString()} ---- ${st.toString()}");

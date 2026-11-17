@@ -3,6 +3,7 @@ import 'package:chotanews/core/theme/theme_extensions.dart';
 
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
@@ -50,6 +51,12 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       requestNotificationPermission();
       homeProvider?.getMobileNumber();
       homeProvider?.loadLanguage();
+      // While opening the app, hit the profile API, get the data and store locally
+      try {
+        Provider.of<ProfileProvider>(context, listen: false).getProfile(showLoading: false);
+      } catch (e) {
+        debugPrint("Error fetching profile on app open: $e");
+      }
       _sendDeviceDetails();
       _checkAndShowFirstOpenEpaperPopup();
       homeProvider?.processPendingDeepLink();

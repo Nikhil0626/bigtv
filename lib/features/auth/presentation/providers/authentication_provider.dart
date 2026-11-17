@@ -7,6 +7,7 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 
 import 'package:chotanews/features/auth/data/repositories/authentication_repo.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
@@ -220,6 +221,9 @@ class AuthenticationProvider extends ChangeNotifier {
         phoneController.text = "";
         try {
           Provider.of<ReelsProviders>(context, listen: false).loadCachedLikedReels();
+        } catch (_) {}
+        try {
+          Provider.of<ProfileProvider>(context, listen: false).getProfile(showLoading: false);
         } catch (_) {}
         notifyListeners();
       }
