@@ -48,6 +48,18 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     });
   }
 
+  void _handleBack(BuildContext context, AuthenticationProvider provider) {
+    if (provider.isGuest) {
+      provider.updateLoginStatus(NewAppLoginStatus.login);
+      return;
+    }
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      provider.updateLoginStatus(NewAppLoginStatus.login);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -55,52 +67,91 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     return Consumer<AuthenticationProvider>(
       builder: (context, provider, child) {
         if (provider.isLanguageLoading && provider.getAllLanguageList.isEmpty) {
-          return const Scaffold(
-            backgroundColor: Color(0xFFFBFBFC),
-            body: Center(child: AppLoadingScreen()),
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              _handleBack(context, provider);
+            },
+            child: Scaffold(
+              backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: Padding(
+                  padding: EdgeInsets.all(8.w),
+                  child: InkWell(
+                    onTap: () => _handleBack(context, provider),
+                    borderRadius: BorderRadius.circular(20.r),
+                    child: Container(
+                      padding: EdgeInsets.all(7.5.w),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E2026) : Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.35)
+                                : Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 15.sp,
+                        color: isDark ? Colors.white : const Color(0xFF181A20),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              body: const Center(child: AppLoadingScreen()),
+            ),
           );
         }
 
         final List<LanguageModel> languages = provider.getAllLanguageList;
         final bool useFallbacks = languages.isEmpty;
 
-        return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
-          body: Stack(
-            children: [
-              // Background top right wave design
-              Positioned(
-                top: 0,
-                right: 0,
-                width: MediaQuery.of(context).size.width,
-                height: 350.h,
-                child: CustomPaint(
-                  painter: TopRightWavePainter(isDark: isDark),
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            _handleBack(context, provider);
+          },
+          child: Scaffold(
+            backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+            body: Stack(
+              children: [
+                // Background top right wave design
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  width: MediaQuery.of(context).size.width,
+                  height: 350.h,
+                  child: CustomPaint(
+                    painter: TopRightWavePainter(isDark: isDark),
+                  ),
                 ),
-              ),
 
-              SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // TOP ROW: Back button & Pill badge [🌐 LANGUAGE]
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    provider.updateLoginStatus(NewAppLoginStatus.otp);
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(20.r),
+                SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // TOP ROW: Back button & Pill badge [🌐 LANGUAGE]
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                  onTap: () => _handleBack(context, provider),
+                                  borderRadius: BorderRadius.circular(20.r),
                                 child: Container(
                                   padding: EdgeInsets.all(7.5.w),
                                   decoration: BoxDecoration(
@@ -246,13 +297,15 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              Text(
-                                "Choose language",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 15.5.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: isDark ? Colors.white : const Color(0xFF181A20),
+                              Expanded(
+                                child: Text(
+                                  "Choose language",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 15.5.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark ? Colors.white : const Color(0xFF181A20),
+                                  ),
                                 ),
                               ),
                               Text(
@@ -468,8 +521,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               ),
             ],
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 }

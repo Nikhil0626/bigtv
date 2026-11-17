@@ -34,6 +34,7 @@ class AuthenticationProvider extends ChangeNotifier {
   final TextEditingController otpController = TextEditingController();
   bool isLoginLoading = false;
   bool isBlockedUser = true;
+  bool isGuest = false;
   bool isVerifyLoading = false;
   String? errorMessage;
   bool isButtonEnabled = false;
@@ -87,6 +88,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   void updateLoginStatus(NewAppLoginStatus status) {
     newAppLoginStatus = status;
+    saveLoginState();
     notifyListeners();
   }
 
@@ -124,6 +126,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future sendOtp(BuildContext context) async {
+    isGuest = false;
     isLoginLoading = true;
     notifyListeners();
     log("ButtonClicked __${phoneController.text}");
@@ -169,6 +172,7 @@ class AuthenticationProvider extends ChangeNotifier {
   Future verifyOtp(
     context,
   ) async {
+    isGuest = false;
     errorMessage = '';
     isVerifyLoading = true;
     isButtonEnabled = false;
@@ -675,6 +679,10 @@ class AuthenticationProvider extends ChangeNotifier {
   Future<NewAppLoginStatus> getLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? status = prefs.getString('loginState');
+    String? loginType = prefs.getString('loginType');
+    if (loginType == 'skip') {
+      isGuest = true;
+    }
 
     if (status != null) {
       return NewAppLoginStatus.values.firstWhere((e) => e.toString() == status, orElse: () => NewAppLoginStatus.none);
@@ -685,6 +693,7 @@ class AuthenticationProvider extends ChangeNotifier {
   void continueAsGuest(
     BuildContext context,
   ) async {
+    isGuest = true;
     final canPop = Navigator.canPop(context);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginType", "skip");
@@ -713,6 +722,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   void setLogOutStatus(context, bool isLogout) async {
+    isGuest = false;
     newAppLoginStatus = isLogout ? NewAppLoginStatus.skip : NewAppLoginStatus.login;
     AnalyticsService.instance.track(AnalyticsEventName.logout);
     AnalyticsService.instance.setUser(null);

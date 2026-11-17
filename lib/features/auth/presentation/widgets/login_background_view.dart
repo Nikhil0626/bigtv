@@ -45,22 +45,32 @@ class LoginBackgroundView extends StatelessWidget {
           );
         }
 
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          backgroundColor: context.theme.scaffoldBackgroundColor,
-          body: SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                    child: IntrinsicHeight(
-                      child: _buildAuthLayout(context, authenticationProvider),
+        final bool isOtp = authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp;
+        return PopScope(
+          canPop: !isOtp,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            if (isOtp) {
+              authenticationProvider.updateLoginStatus(NewAppLoginStatus.login);
+            }
+          },
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            backgroundColor: context.theme.scaffoldBackgroundColor,
+            body: SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(
+                        child: _buildAuthLayout(context, authenticationProvider),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         );
