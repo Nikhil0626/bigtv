@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/events/presentation/screens/my_tickets_screen.dart';
@@ -9,6 +10,11 @@ import 'package:dio/dio.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/utils/app_toasts.dart';
+import 'package:provider/provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
+import 'package:chotanews/main.dart';
 
 class _IndianPhoneNumberFormatter extends TextInputFormatter {
   @override
@@ -43,6 +49,8 @@ class FolkNightBookingScreen extends StatefulWidget {
   final String eventDateStr;
   final String eventLocation;
   final String eventImageUrl;
+  final List<dynamic>? initialCoupons;
+  final List<dynamic>? initialTickets;
 
   const FolkNightBookingScreen({
     super.key,
@@ -51,6 +59,8 @@ class FolkNightBookingScreen extends StatefulWidget {
     this.eventDateStr = "24 Oct • 6:00 PM",
     this.eventLocation = "Hyderabad • Open Air Auditorium",
     this.eventImageUrl = "",
+    this.initialCoupons,
+    this.initialTickets,
   });
 
   @override
@@ -62,8 +72,9 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
       widget.eventId.isNotEmpty ? widget.eventId : "e4d962de-5393-4541-a792-4c23f1429f9c";
   bool isLoading = true;
   List<dynamic> tickets = [];
+  List<dynamic> coupons = [];
 
-  String _selectedZoneKey = "VIP";
+  String _selectedZoneKey = "FANPIT";
   String? selectedTicketId;
   int selectedTicketCount = 1;
 
@@ -153,12 +164,75 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialCoupons != null && widget.initialCoupons!.isNotEmpty) {
+      coupons = List<dynamic>.from(widget.initialCoupons!);
+    }
+    if (widget.initialTickets != null && widget.initialTickets!.isNotEmpty) {
+      tickets = List<dynamic>.from(widget.initialTickets!);
+      final defaultChoice = _findTicket("FANPIT") ?? _findTicket("VIP") ?? tickets.first;
+      selectedTicketId = defaultChoice['id']?.toString();
+      _syncZoneFromTicketName(defaultChoice['name']?.toString() ?? '');
+      isLoading = false;
+    }
     fetchTickets();
     _loadPrefilledUserDetails();
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  bool _hasCleanedUp = false;
+
+  void _cleanupAndRestoreHome([HomeProvider? provider]) {
+    if (_hasCleanedUp) return;
+    _hasCleanedUp = true;
+
+    if (Platform.isAndroid) {
+      try {
+        const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+      } catch (_) {}
+    }
+
+    try {
+      HomeProvider? hp = provider;
+      if (hp == null && mounted) {
+        try {
+          hp = context.read<HomeProvider>();
+        } catch (_) {}
+      }
+      hp ??= mainNavigatorKey.currentContext?.read<HomeProvider>();
+
+      if (hp != null) {
+        hp.handleReturnFromFolkNight();
+      }
+    } catch (e) {
+      debugPrint("Error in _cleanupAndRestoreHome in FolkNightBookingScreen: $e");
+    }
+  }
+
+  void _handleBack() {
+    HomeProvider? hp;
+    try {
+      hp = context.read<HomeProvider>();
+    } catch (_) {}
+
+    _cleanupAndRestoreHome(hp);
+
+    final nav = Navigator.of(context);
+    final mainNav = mainNavigatorKey.currentState;
+
+    if (nav.canPop()) {
+      nav.pop();
+    } else if (mainNav != null && mainNav.canPop()) {
+      mainNav.pop();
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeView()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -169,6 +243,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _couponCtrl.dispose();
+    _cleanupAndRestoreHome();
     super.dispose();
   }
 
@@ -271,11 +346,27 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
 
   dynamic _findTicket(String? query) {
     if (query == null || query.isEmpty) return null;
+    final qUpper = query.toUpperCase();
     for (final t in tickets) {
       if (t != null && t is Map) {
         final id = (t['id'] ?? '').toString();
         final name = (t['name'] ?? '').toString().toUpperCase();
-        if (id == query || name == query.toUpperCase() || name.contains(query.toUpperCase())) {
+        if (id == query || name == qUpper) {
+          return t;
+        }
+        if ((qUpper.contains("FANPIT") || qUpper.contains("VIP")) &&
+            (name.contains("FANPIT") || name.contains("FAN PIT") || name.contains("VIP"))) {
+          return t;
+        }
+        if ((qUpper.contains("EARLY") || qUpper.contains("BIRD") || qUpper.contains("PLATINUM")) &&
+            (name.contains("EARLY") || name.contains("BIRD") || name.contains("PLATINUM"))) {
+          return t;
+        }
+        if ((qUpper.contains("REGULAR") || qUpper.contains("GOLD") || qUpper.contains("SILVER")) &&
+            (name.contains("REGULAR") || name.contains("SILVER") || name.contains("GOLD"))) {
+          return t;
+        }
+        if (name.contains(qUpper) || qUpper.contains(name)) {
           return t;
         }
       }
@@ -284,7 +375,9 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   }
 
   Future<void> fetchTickets() async {
-    setState(() => isLoading = true);
+    if (tickets.isEmpty) {
+      setState(() => isLoading = true);
+    }
     try {
       final url = 'https://api.pravasamedia.com/api/v1/events/$effectiveEventId/ticket-types?includeInactive=true';
       debugPrint("Fetching tickets from API: $url");
@@ -296,7 +389,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
             .where((t) => t is Map && (t['isActive'] == null || t['isActive'] == true))
             .toList();
 
-        // Sort by price descending (VIP highest to lowest)
+        // Sort by price descending (Fanpit/VIP highest to lowest)
         validTickets.sort((a, b) {
           final pA = (a['price'] as num?) ?? 0;
           final pB = (b['price'] as num?) ?? 0;
@@ -306,7 +399,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
         setState(() {
           tickets = validTickets;
           if (tickets.isNotEmpty) {
-            final defaultChoice = _findTicket("VIP") ?? tickets.first;
+            final defaultChoice = _findTicket("FANPIT") ?? _findTicket("VIP") ?? tickets.first;
             selectedTicketId = defaultChoice['id']?.toString();
             _syncZoneFromTicketName(defaultChoice['name']?.toString() ?? '');
           } else {
@@ -319,12 +412,34 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
           selectedTicketId = null;
         });
       }
+
+      // Fetch event coupons
+      try {
+        final evRes = await Dio().get('https://api.pravasamedia.com/api/v1/events/$effectiveEventId');
+        if (evRes.statusCode == 200 && evRes.data['success'] == true) {
+          final evData = evRes.data['data'];
+          if (evData != null && evData['coupons'] is List) {
+            final activeCoupons = (evData['coupons'] as List)
+                .where((c) => c is Map && (c['isActive'] == null || c['isActive'] == true))
+                .toList();
+            if (mounted) {
+              setState(() {
+                coupons = activeCoupons;
+              });
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint("Error fetching event coupons: $e");
+      }
     } catch (e) {
       debugPrint("❌ Error fetching tickets: $e");
-      setState(() {
-        tickets = [];
-        selectedTicketId = null;
-      });
+      if (tickets.isEmpty) {
+        setState(() {
+          tickets = [];
+          selectedTicketId = null;
+        });
+      }
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -334,14 +449,12 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
 
   void _syncZoneFromTicketName(String name) {
     final upper = name.toUpperCase();
-    if (upper.contains("VIP")) {
-      _selectedZoneKey = "VIP";
-    } else if (upper.contains("PLATINUM")) {
-      _selectedZoneKey = "PLATINUM";
-    } else if (upper.contains("GOLD")) {
-      _selectedZoneKey = "GOLD";
-    } else if (upper.contains("SILVER")) {
-      _selectedZoneKey = "SILVER";
+    if (upper.contains("FANPIT") || upper.contains("FAN PIT") || upper.contains("VIP")) {
+      _selectedZoneKey = "FANPIT";
+    } else if (upper.contains("EARLY") || upper.contains("BIRD") || upper.contains("PLATINUM")) {
+      _selectedZoneKey = "EARLY BIRD";
+    } else if (upper.contains("REGULAR") || upper.contains("GOLD") || upper.contains("SILVER")) {
+      _selectedZoneKey = "REGULAR";
     }
   }
 
@@ -758,7 +871,12 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     int grandTotal = totalTickets > 0 ? (ticketsTotal - discountAmount) + bookingFee : 0;
     if (grandTotal < 0) grandTotal = 0;
 
-    return Scaffold(
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        _cleanupAndRestoreHome();
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: AppColorTokens.primaryRed,
@@ -770,7 +888,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: _handleBack,
         ),
         title: Text(
           "Book Tickets",
@@ -898,15 +1016,19 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
                             )
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  grandTotal > 0
-                                      ? "Continue to payment • ₹$grandTotal"
-                                      : "Select tickets",
-                                  style: TextStyle(
-                                    color: grandTotal > 0 ? Colors.white : Colors.grey.shade600,
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold,
+                                Flexible(
+                                  child: Text(
+                                    grandTotal > 0
+                                        ? "Continue to payment • ₹$grandTotal"
+                                        : "Select tickets",
+                                    style: TextStyle(
+                                      color: grandTotal > 0 ? Colors.white : Colors.grey.shade600,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 if (grandTotal > 0) ...[
@@ -920,6 +1042,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
                 ),
               ],
             ),
+    ),
     );
   }
 
@@ -1090,8 +1213,44 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
               },
             ),
           ),
+          SizedBox(height: 8.h),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12.w,
+            runSpacing: 6.h,
+            children: [
+              _buildLegendDot(const Color(0xFFE11D48), "Fanpit (Rows 1-2)"),
+              _buildLegendDot(const Color(0xFF7C3AED), "Early Bird (Rows 3-4)"),
+              _buildLegendDot(const Color(0xFF0284C7), "Regular (Rows 5-7)"),
+            ],
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLegendDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8.w,
+          height: 8.w,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: 5.w),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF64748B),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1107,14 +1266,12 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     if (dist < 40.0) return; // Top above stage
 
     String clickedZone;
-    if (dist < 120.0) {
-      clickedZone = "VIP";
-    } else if (dist < 170.0) {
-      clickedZone = "PLATINUM";
-    } else if (dist < 220.0) {
-      clickedZone = "GOLD";
+    if (dist < 125.0) {
+      clickedZone = "FANPIT";
+    } else if (dist < 182.0) {
+      clickedZone = "EARLY BIRD";
     } else {
-      clickedZone = "SILVER";
+      clickedZone = "REGULAR";
     }
 
     _selectZone(clickedZone);
@@ -1173,12 +1330,14 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
               children: [
                 Icon(Icons.info_outline, color: const Color(0xFF64748B), size: 18.sp),
                 SizedBox(width: 8.w),
-                Text(
-                  "No ticket types available for this event.",
-                  style: TextStyle(
-                    color: const Color(0xFF64748B),
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    "No ticket types available for this event.",
+                    style: TextStyle(
+                      color: const Color(0xFF64748B),
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -1191,62 +1350,65 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Ticket category",
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF0F172A),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                "Select Ticket Category",
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              "${tickets.length} Categories",
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 10.h),
-        GridView.builder(
+        SizedBox(height: 12.h),
+        ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: tickets.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10.w,
-            mainAxisSpacing: 10.h,
-            childAspectRatio: 2.1,
-          ),
+          separatorBuilder: (_, __) => SizedBox(height: 10.h),
           itemBuilder: (context, index) {
             final t = tickets[index] as Map;
             final String id = (t['id'] ?? '').toString();
             final String name = (t['name'] ?? 'Ticket').toString();
+            final String desc = (t['description'] ?? '').toString().trim();
             final int actualPrice = (t['price'] as num?)?.toInt() ?? 0;
             final isSelected = selectedTicketId == id;
 
             final upper = name.toUpperCase();
-            Color swatch;
-            Color borderColor;
-            if (upper.contains("VIP")) {
-              swatch = const Color(0xFFFCA5A5);
-              borderColor = const Color(0xFFF87171);
-            } else if (upper.contains("PLATINUM")) {
-              swatch = const Color(0xFFDDD6FE);
-              borderColor = const Color(0xFF818CF8);
-            } else if (upper.contains("GOLD")) {
-              swatch = const Color(0xFFFEF08A);
-              borderColor = const Color(0xFFFBBF24);
-            } else if (upper.contains("SILVER")) {
-              swatch = const Color(0xFFE2E8F0);
-              borderColor = const Color(0xFF94A3B8);
+            Color primaryColor;
+            Color lightBgColor;
+            String badgeText;
+            IconData tierIcon;
+
+            if (upper.contains("FANPIT") || upper.contains("FAN PIT") || upper.contains("VIP")) {
+              primaryColor = const Color(0xFFE11D48); // Rose red
+              lightBgColor = const Color(0xFFFFF1F2);
+              badgeText = "ROWS 1-2 • FRONT STAGE";
+              tierIcon = Icons.stars_rounded;
+            } else if (upper.contains("EARLY") || upper.contains("BIRD") || upper.contains("PLATINUM")) {
+              primaryColor = const Color(0xFF7C3AED); // Electric Purple
+              lightBgColor = const Color(0xFFF5F3FF);
+              badgeText = "ROWS 3-4 • BEST VALUE";
+              tierIcon = Icons.local_fire_department_rounded;
             } else {
-              final defaultSwatches = [
-                const Color(0xFFFCA5A5),
-                const Color(0xFFDDD6FE),
-                const Color(0xFFFEF08A),
-                const Color(0xFFE2E8F0),
-              ];
-              final defaultBorders = [
-                const Color(0xFFF87171),
-                const Color(0xFF818CF8),
-                const Color(0xFFFBBF24),
-                const Color(0xFF94A3B8),
-              ];
-              swatch = defaultSwatches[index % defaultSwatches.length];
-              borderColor = defaultBorders[index % defaultBorders.length];
+              primaryColor = const Color(0xFF0284C7); // Sky / Teal
+              lightBgColor = const Color(0xFFF0F9FF);
+              badgeText = "ROWS 5-7 • GENERAL";
+              tierIcon = Icons.confirmation_num_outlined;
             }
 
             return GestureDetector(
@@ -1257,25 +1419,25 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
                 });
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFFFF1F2) : Colors.white,
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: isSelected ? lightBgColor : Colors.white,
+                  borderRadius: BorderRadius.circular(14.r),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFFE11D48) : const Color(0xFFE2E8F0),
-                    width: isSelected ? 1.5 : 1.0,
+                    color: isSelected ? primaryColor : const Color(0xFFE2E8F0),
+                    width: isSelected ? 1.8 : 1.0,
                   ),
                   boxShadow: [
                     if (isSelected)
                       BoxShadow(
-                        color: const Color(0xFFE11D48).withValues(alpha: 0.12),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+                        color: primaryColor.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       )
                     else
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
+                        color: Colors.black.withValues(alpha: 0.03),
                         blurRadius: 4,
                         offset: const Offset(0, 1),
                       ),
@@ -1283,63 +1445,107 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
                 ),
                 child: Row(
                   children: [
+                    // Leading Icon / Pill
                     Container(
-                      width: 22.w,
-                      height: 22.w,
+                      width: 40.w,
+                      height: 40.w,
                       decoration: BoxDecoration(
-                        color: swatch,
-                        borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(
-                          color: borderColor.withValues(alpha: 0.6),
-                          width: 1.0,
-                        ),
+                        color: isSelected ? primaryColor : primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Icon(
+                        tierIcon,
+                        color: isSelected ? Colors.white : primaryColor,
+                        size: 20.sp,
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    SizedBox(width: 12.w),
+                    // Ticket info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0F172A),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 6.w,
+                            runSpacing: 4.h,
+                            children: [
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF0F172A),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  badgeText,
+                                  style: TextStyle(
+                                    fontSize: 8.5.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: primaryColor,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            "₹$actualPrice",
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected ? const Color(0xFFE11D48) : const Color(0xFF64748B),
+                          if (desc.isNotEmpty) ...[
+                            SizedBox(height: 3.h),
+                            Text(
+                              desc,
+                              style: TextStyle(
+                                fontSize: 11.5.sp,
+                                color: const Color(0xFF64748B),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
-                    Container(
-                      width: 18.w,
-                      height: 18.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isSelected ? const Color(0xFFE11D48) : Colors.transparent,
-                        border: Border.all(
-                          color: isSelected ? const Color(0xFFE11D48) : const Color(0xFF94A3B8),
-                          width: isSelected ? 1.5 : 1.2,
+                    SizedBox(width: 10.w),
+                    // Price & Radio Selection
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "₹$actualPrice",
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: isSelected ? primaryColor : const Color(0xFF0F172A),
+                          ),
                         ),
-                      ),
-                      child: isSelected
-                          ? Icon(
-                              Icons.check,
-                              size: 12.sp,
-                              color: Colors.white,
-                            )
-                          : null,
+                        SizedBox(height: 4.h),
+                        Container(
+                          width: 20.w,
+                          height: 20.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isSelected ? primaryColor : Colors.transparent,
+                            border: Border.all(
+                              color: isSelected ? primaryColor : const Color(0xFFCBD5E1),
+                              width: isSelected ? 2.0 : 1.5,
+                            ),
+                          ),
+                          child: isSelected
+                              ? Icon(
+                                  Icons.check,
+                                  size: 13.sp,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1510,6 +1716,9 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   }
 
   Widget _buildCouponSection() {
+    final appliedCode = _couponCtrl.text.trim().toUpperCase();
+    final hasDiscount = discountAmount > 0;
+
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
@@ -1526,13 +1735,36 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Have a Coupon?",
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Have a Coupon?",
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+              if (hasDiscount)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      discountAmount = 0;
+                      _couponCtrl.clear();
+                      _couponError = null;
+                    });
+                  },
+                  child: Text(
+                    "Remove",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFE11D48),
+                    ),
+                  ),
+                ),
+            ],
           ),
           SizedBox(height: 10.h),
           Row(
@@ -1576,10 +1808,168 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
               ),
             ],
           ),
+          if (hasDiscount) ...[
+            SizedBox(height: 10.h),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(6.r),
+                border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 16),
+                  SizedBox(width: 6.w),
+                  Expanded(
+                    child: Text(
+                      "'$appliedCode' applied! You save ₹$discountAmount",
+                      style: TextStyle(
+                        color: const Color(0xFF047857),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (coupons.isNotEmpty) ...[
+            SizedBox(height: 14.h),
+            Row(
+              children: [
+                Icon(Icons.discount_outlined, size: 14.sp, color: Colors.grey.shade600),
+                SizedBox(width: 4.w),
+                Text(
+                  "Available Coupons",
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            SizedBox(
+              height: 48.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: coupons.length,
+                separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                itemBuilder: (context, index) {
+                  final coupon = coupons[index];
+                  final code = (coupon['code'] ?? '').toString().toUpperCase();
+                  final discountType = (coupon['discountType'] ?? '').toString().toUpperCase();
+                  final discountValue = (coupon['discountValue'] as num?) ?? 0;
+                  final minOrder = (coupon['minOrderAmount'] as num?) ?? 0;
+                  final maxDiscount = (coupon['maxDiscount'] as num?) ?? 0;
+                  final isCurrentApplied = hasDiscount && appliedCode == code;
+
+                  String discountLabel;
+                  if (discountType == 'PERCENTAGE') {
+                    discountLabel = "$discountValue% OFF";
+                    if (maxDiscount > 0) {
+                      discountLabel += " up to ₹$maxDiscount";
+                    }
+                  } else {
+                    discountLabel = "₹$discountValue FLAT OFF";
+                  }
+
+                  String conditionLabel = minOrder > 0 ? "Min ₹$minOrder" : "No min";
+
+                  return Container(
+                    width: 175.w,
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: isCurrentApplied ? const Color(0xFFF0FDF4) : const Color(0xFFFFF1F2),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: isCurrentApplied
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFFDA4AF),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                code,
+                                style: TextStyle(
+                                  fontSize: 11.5.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: isCurrentApplied
+                                      ? const Color(0xFF047857)
+                                      : const Color(0xFFBE123C),
+                                  letterSpacing: 0.4,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 1.h),
+                              Text(
+                                "$discountLabel • $conditionLabel",
+                                style: TextStyle(
+                                  fontSize: 9.sp,
+                                  color: const Color(0xFF64748B),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        GestureDetector(
+                          onTap: () {
+                            if (isCurrentApplied) {
+                              setState(() {
+                                discountAmount = 0;
+                                _couponCtrl.clear();
+                                _couponError = null;
+                              });
+                            } else {
+                              _couponCtrl.text = code;
+                              _applyCoupon();
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: isCurrentApplied
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFE11D48),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              isCurrentApplied ? "APPLIED" : "APPLY",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9.5.sp,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+              },
+            ),
+          ),
         ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   Widget _buildOrderSummarySection(
     dynamic selectedTicket,
@@ -1624,14 +2014,17 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Total",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
+              Expanded(
+                child: Text(
+                  "Total",
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
                 ),
               ),
+              SizedBox(width: 8.w),
               Text(
                 "₹$grandTotal",
                 style: TextStyle(
@@ -1647,9 +2040,11 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
             children: [
               Icon(Icons.mail_outline, size: 14.sp, color: Colors.grey.shade600),
               SizedBox(width: 6.w),
-              Text(
-                "Your tickets will be sent by email",
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12.sp),
+              Expanded(
+                child: Text(
+                  "Your tickets will be sent by email",
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12.sp),
+                ),
               ),
             ],
           ),
@@ -1737,10 +2132,14 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 14.sp, color: isDiscount ? Colors.green : Colors.grey.shade800),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14.sp, color: isDiscount ? Colors.green : Colors.grey.shade800),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          SizedBox(width: 8.w),
           Text(
             value,
             style: TextStyle(
@@ -1756,10 +2155,12 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
 }
 
 /// Custom Amphitheater Painter with Prominent Realistic Stadium Pod Seats
-class _AmphitheaterSeatingCanvas extends CustomPainter {
+typedef _AmphitheaterSeatingCanvas = AmphitheaterSeatingCanvas;
+
+class AmphitheaterSeatingCanvas extends CustomPainter {
   final String selectedZoneKey;
 
-  _AmphitheaterSeatingCanvas({
+  AmphitheaterSeatingCanvas({
     required this.selectedZoneKey,
   });
 
@@ -1769,36 +2170,38 @@ class _AmphitheaterSeatingCanvas extends CustomPainter {
     final cy = -10.0;
     final center = Offset(cx, cy);
 
-    final isVipSelected = selectedZoneKey == "VIP";
-    final isPlatSelected = selectedZoneKey == "PLATINUM";
-    final isGoldSelected = selectedZoneKey == "GOLD";
-    final isSilverSelected = selectedZoneKey == "SILVER";
+    final isFanpitSelected = selectedZoneKey == "FANPIT" || selectedZoneKey == "VIP";
+    final isEarlyBirdSelected = selectedZoneKey == "EARLY BIRD" || selectedZoneKey == "PLATINUM";
+    final isRegularSelected = selectedZoneKey == "REGULAR" || selectedZoneKey == "GOLD" || selectedZoneKey == "SILVER";
 
     const startAngle = math.pi * 0.16;
     const sweepAngle = math.pi * 0.68;
     const aisleHalfAngle = 0.055;
 
     // Radius ranges with generous breathing space
-    final vipIn = 66.0;
-    final vipOut = 118.0;
-    final platIn = 119.0;
-    final platOut = 168.0;
-    final goldIn = 169.0;
-    final goldOut = 218.0;
-    final silverIn = 219.0;
-    final silverOut = 264.0;
+    final fanpitIn = 66.0;
+    final fanpitOut = 118.0;
+    final earlyBirdIn = 122.0;
+    final earlyBirdOut = 174.0;
+    final regularIn = 178.0;
+    final regularOut = 260.0;
 
     // 1. Draw subtle background zone highlight arcs if selected
-    if (isVipSelected) _drawZoneHighlight(canvas, center, vipIn, vipOut, startAngle, sweepAngle, const Color(0xFFFCA5A5));
-    if (isPlatSelected) _drawZoneHighlight(canvas, center, platIn, platOut, startAngle, sweepAngle, const Color(0xFFDDD6FE));
-    if (isGoldSelected) _drawZoneHighlight(canvas, center, goldIn, goldOut, startAngle, sweepAngle, const Color(0xFFFEF08A));
-    if (isSilverSelected) _drawZoneHighlight(canvas, center, silverIn, silverOut, startAngle, sweepAngle, const Color(0xFFE2E8F0));
+    if (isFanpitSelected) {
+      _drawZoneHighlight(canvas, center, fanpitIn, fanpitOut, startAngle, sweepAngle, const Color(0xFFFCA5A5));
+    }
+    if (isEarlyBirdSelected) {
+      _drawZoneHighlight(canvas, center, earlyBirdIn, earlyBirdOut, startAngle, sweepAngle, const Color(0xFFDDD6FE));
+    }
+    if (isRegularSelected) {
+      _drawZoneHighlight(canvas, center, regularIn, regularOut, startAngle, sweepAngle, const Color(0xFFBAE6FD));
+    }
 
     // 2. Draw Center Aisle with ladder rungs
-    _drawCenterAisle(canvas, center, vipIn - 4, silverOut + 4, aisleHalfAngle);
+    _drawCenterAisle(canvas, center, fanpitIn - 4, regularOut + 4, aisleHalfAngle);
 
     // 3. Draw Large Stadium Pod Seats for each Zone
-    // VIP ZONE (2 Rows)
+    // FANPIT ZONE (First 2 Rows closest to stage)
     _drawZoneSeats(
       canvas: canvas,
       center: center,
@@ -1806,55 +2209,41 @@ class _AmphitheaterSeatingCanvas extends CustomPainter {
       sweepAngle: sweepAngle,
       aisleHalfAngle: aisleHalfAngle,
       rowRadii: [80.0, 104.0],
-      fillColor: isVipSelected ? const Color(0xFFF87171) : const Color(0xFFFFA4A4),
-      strokeColor: isVipSelected ? const Color(0xFFB91C1C) : const Color(0xFFEF4444),
-      isSelected: isVipSelected,
+      fillColor: isFanpitSelected ? const Color(0xFFF87171) : const Color(0xFFFFA4A4),
+      strokeColor: isFanpitSelected ? const Color(0xFFB91C1C) : const Color(0xFFEF4444),
+      isSelected: isFanpitSelected,
     );
 
-    // PLATINUM ZONE (2 Rows)
+    // EARLY BIRD ZONE (Second Rows 3 & 4)
     _drawZoneSeats(
       canvas: canvas,
       center: center,
       startAngle: startAngle,
       sweepAngle: sweepAngle,
       aisleHalfAngle: aisleHalfAngle,
-      rowRadii: [130.0, 154.0],
-      fillColor: isPlatSelected ? const Color(0xFFA78BFA) : const Color(0xFFDDD6FE),
-      strokeColor: isPlatSelected ? const Color(0xFF6D28D9) : const Color(0xFF8B5CF6),
-      isSelected: isPlatSelected,
+      rowRadii: [134.0, 158.0],
+      fillColor: isEarlyBirdSelected ? const Color(0xFFA78BFA) : const Color(0xFFDDD6FE),
+      strokeColor: isEarlyBirdSelected ? const Color(0xFF6D28D9) : const Color(0xFF8B5CF6),
+      isSelected: isEarlyBirdSelected,
     );
 
-    // GOLD ZONE (2 Rows)
+    // REGULAR ZONE (Outer Rows 5, 6, 7)
     _drawZoneSeats(
       canvas: canvas,
       center: center,
       startAngle: startAngle,
       sweepAngle: sweepAngle,
       aisleHalfAngle: aisleHalfAngle,
-      rowRadii: [180.0, 204.0],
-      fillColor: isGoldSelected ? const Color(0xFFFACC15) : const Color(0xFFFEF08A),
-      strokeColor: isGoldSelected ? const Color(0xFFB45309) : const Color(0xFFF59E0B),
-      isSelected: isGoldSelected,
-    );
-
-    // SILVER ZONE (2 Rows)
-    _drawZoneSeats(
-      canvas: canvas,
-      center: center,
-      startAngle: startAngle,
-      sweepAngle: sweepAngle,
-      aisleHalfAngle: aisleHalfAngle,
-      rowRadii: [230.0, 252.0],
-      fillColor: isSilverSelected ? const Color(0xFFCBD5E1) : const Color(0xFFE2E8F0),
-      strokeColor: isSilverSelected ? const Color(0xFF334155) : const Color(0xFF64748B),
-      isSelected: isSilverSelected,
+      rowRadii: [190.0, 214.0, 238.0],
+      fillColor: isRegularSelected ? const Color(0xFF38BDF8) : const Color(0xFFBAE6FD),
+      strokeColor: isRegularSelected ? const Color(0xFF0369A1) : const Color(0xFF0284C7),
+      isSelected: isRegularSelected,
     );
 
     // 4. Draw Zone Labels on Central Aisle
-    _drawAisleLabel(canvas, center, (vipIn + vipOut) / 2, "VIP", const Color(0xFFB91C1C));
-    _drawAisleLabel(canvas, center, (platIn + platOut) / 2, "PLATINUM", const Color(0xFF6D28D9));
-    _drawAisleLabel(canvas, center, (goldIn + goldOut) / 2, "GOLD", const Color(0xFFB45309));
-    _drawAisleLabel(canvas, center, (silverIn + silverOut) / 2, "SILVER", const Color(0xFF334155));
+    _drawAisleLabel(canvas, center, (fanpitIn + fanpitOut) / 2, "FANPIT", const Color(0xFFB91C1C));
+    _drawAisleLabel(canvas, center, (earlyBirdIn + earlyBirdOut) / 2, "EARLY BIRD", const Color(0xFF6D28D9));
+    _drawAisleLabel(canvas, center, (regularIn + regularOut) / 2, "REGULAR", const Color(0xFF0369A1));
   }
 
   void _drawZoneHighlight(
@@ -2049,7 +2438,7 @@ class _AmphitheaterSeatingCanvas extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AmphitheaterSeatingCanvas oldDelegate) {
+  bool shouldRepaint(covariant AmphitheaterSeatingCanvas oldDelegate) {
     return oldDelegate.selectedZoneKey != selectedZoneKey;
   }
 }

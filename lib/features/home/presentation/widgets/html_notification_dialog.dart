@@ -99,6 +99,15 @@ class _HtmlNotificationDialogState extends State<HtmlNotificationDialog> {
       
       // If it's an in-app deep link or internal article/page
       final lowerUrl = url.toLowerCase();
+      final bool isEventsLink = lowerUrl.contains('events') ||
+          lowerUrl.contains('folknight') ||
+          lowerUrl.contains('folk') ||
+          uri.queryParameters.containsKey('eventId');
+
+      if (isEventsLink && mounted && !context.read<HomeProvider>().folkNight) {
+        log("Events link tapped in HTML notification but folkNight is disabled. Ignoring.");
+        return;
+      }
       final bool isInternalLink = lowerUrl.contains('bigtv24x7.com') ||
           lowerUrl.contains('bigtvlive.com') ||
           lowerUrl.contains('chotanews') ||

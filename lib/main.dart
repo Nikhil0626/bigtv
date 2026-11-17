@@ -241,6 +241,13 @@ void _initBackgroundServices() async {
 
     try {
       final appLinks = AppLinks();
+      String? consumedInitialLinkInProcess;
+
+      // Clean up any legacy persistent key that could block valid cold start launches
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.remove('last_consumed_initial_deep_link');
+      }).catchError((_) {});
+
       appLinks.getInitialLink().then((uri) async {
         if (uri != null) {
           final uriStr = uri.toString();
@@ -269,26 +276,18 @@ void _initBackgroundServices() async {
             }
           }
 
-          final prefs = await SharedPreferences.getInstance();
-          final consumedLink = prefs.getString('last_consumed_initial_deep_link');
-          if (consumedLink == uriStr) {
-            debugPrint("AppLinks initial link already consumed in previous session, ignoring: $uri");
-            try {
-              if (Platform.isAndroid) {
-                const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
-              }
-            } catch (_) {}
+          if (consumedInitialLinkInProcess == uriStr) {
+            debugPrint("AppLinks initial link already consumed in current process, ignoring duplicate: $uri");
             return;
           }
           debugPrint("AppLinks initial link accepted: $uri");
-          await prefs.setString('last_consumed_initial_deep_link', uriStr);
+          consumedInitialLinkInProcess = uriStr;
           _handleBackgroundDeepLink(uri);
         }
       });
       appLinks.uriLinkStream.listen((uri) async {
         debugPrint("AppLinks stream link: $uri");
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('last_consumed_initial_deep_link', uri.toString());
+        consumedInitialLinkInProcess = uri.toString();
         _handleBackgroundDeepLink(uri);
       });
     } catch (e) {
@@ -407,6 +406,17 @@ class _MyAppState extends State<MyApp> {
               routes: {
                 '/': (context) => SplashScreen(),
                 '/settings': (context) => SettingsView(),
+              },
+              onGenerateRoute: (settings) {
+                debugPrint("MaterialApp onGenerateRoute: ${settings.name}");
+                return null;
+              },
+              onUnknownRoute: (settings) {
+                debugPrint("MaterialApp onUnknownRoute: ${settings.name}");
+                return MaterialPageRoute(
+                  settings: settings,
+                  builder: (context) => const SizedBox.shrink(),
+                );
               },
               debugShowCheckedModeBanner: false,
             );

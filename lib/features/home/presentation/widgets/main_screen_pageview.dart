@@ -167,7 +167,6 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                           child: (homeProvider.isHomeLoading ||
                                   homeProvider.hasPendingDeepLink ||
                                   homeProvider.isRoutingDeepLink ||
-                                  homeProvider.isComeFromLinkOrNotification ||
                                   !homeProvider.isInitialHomeLoaded)
                               ? const HomeShimmer()
                               : widget.isAiTags

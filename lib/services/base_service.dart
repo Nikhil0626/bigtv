@@ -50,8 +50,8 @@ class BaseService {
     Map<String, dynamic>? headers,
   }) async {
     dio.options.baseUrl = baseUrl ?? BaseUrls.baseUrlAwsDev;
-    dio.options.connectTimeout = const Duration(seconds: 60);
-    dio.options.receiveTimeout = const Duration(seconds: 60);
+    dio.options.connectTimeout = const Duration(seconds: 10);
+    dio.options.receiveTimeout = const Duration(seconds: 10);
     dio.options.contentType = contentType ?? 'application/json';
     dio.options.headers = {
       "Authorization": token1 != null ? "Bearer $token1" : "",

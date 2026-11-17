@@ -65,8 +65,9 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     homeProvider?.subscribeToPushCallbacks();
     homeProvider?.selectedIndex = 1;
     homeProvider?.homePageController = PageController(initialPage: 1);
-    if (homeProvider?.getAllPostList.isEmpty == true ||
-        (homeProvider?.postsLanguage != null && homeProvider?.postsLanguage != homeProvider?.langCode)) {
+    if ((homeProvider?.getAllPostList.isEmpty == true ||
+        (homeProvider?.postsLanguage != null && homeProvider?.postsLanguage != homeProvider?.langCode)) &&
+        homeProvider?.isFetchingAllPosts != true) {
       homeProvider?.getAllPost(isGetAllPost: true);
     }
     super.initState();

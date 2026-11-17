@@ -6,21 +6,38 @@ import 'package:dio/dio.dart';
 
 
 class HomeRepo extends BaseService{
-  Future getSinglePost(body,queryParams) async{
-    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "${BaseUrls.getPostById}/$queryParams",method: RequestType.get,queryParameters: body);
-    if (response.statusCode == 200 && response.data != null && response.data['status'] == 'success') {
-      return response;
-    }
+  Future getSinglePost(body, queryParams) async {
+    Response? response;
+    try {
+      final res = await makeRequest(
+        baseUrl: BaseUrls.baseUrlAwsDev,
+        url: "${BaseUrls.getPostById}/$queryParams",
+        method: RequestType.get,
+        queryParameters: body,
+      );
+      if (res is Response) {
+        response = res;
+        if (response.statusCode == 200 &&
+            response.data != null &&
+            response.data['status'] == 'success') {
+          return response;
+        }
+      }
+    } catch (_) {}
+
     // Fallback to production if post is not found on dev
     try {
-      Response prodResponse = await makeRequest(
+      final prodRes = await makeRequest(
         baseUrl: "https://api.chotanews.com",
         url: "${BaseUrls.getPostById}/$queryParams",
         method: RequestType.get,
         queryParameters: body,
       );
-      if (prodResponse.statusCode == 200 && prodResponse.data != null) {
-        return prodResponse;
+      if (prodRes is Response) {
+        if (prodRes.statusCode == 200 && prodRes.data != null) {
+          return prodRes;
+        }
+        response ??= prodRes;
       }
     } catch (_) {}
     return response;

@@ -4,6 +4,26 @@ import 'package:chotanews/features/events/presentation/widgets/folk_night_floati
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
+
+class _MockConfigHomeProvider extends HomeProvider {
+  bool getAppConfigCalled = false;
+  bool getAllPostCalled = false;
+  bool mockFolkNightValue = false;
+
+  @override
+  Future<void> getAppConfig() async {
+    getAppConfigCalled = true;
+    folkNight = mockFolkNightValue;
+  }
+
+  @override
+  Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+    getAllPostCalled = true;
+    isHomeLoading = false;
+    notifyListeners();
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -147,6 +167,74 @@ void main() {
 
       expect(homeProvider.isFolkNightDismissed, isFalse);
       expect(find.text('Folk Night'), findsOneWidget);
+    });
+
+    testWidgets('Folk Night deep link hits config API; if folkNight is false, lands on home screen and hits allpost', (tester) async {
+      final homeProvider = _MockConfigHomeProvider();
+      homeProvider.mockFolkNightValue = false;
+      homeProvider.folkNight = true; // initially set, should be updated by getAppConfig
+      homeProvider.eventsEnable = true;
+      homeProvider.isHomeScreen = true;
+      homeProvider.selectedIndex = 0;
+      homeProvider.isComeFromLinkOrNotification = true;
+      homeProvider.isHomeLoading = true;
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(360, 690),
+          minTextAdapt: true,
+          builder: (context, _) => MaterialApp(
+            navigatorKey: mainNavigatorKey,
+            home: const Scaffold(body: Text('Base Screen')),
+          ),
+        ),
+      );
+
+      final uri = Uri.parse('https://app.bigtv24x7.com/events?eventId=test-123');
+      await homeProvider.routeDeepLink(uri);
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Config API was called
+      expect(homeProvider.getAppConfigCalled, isTrue);
+      // folkNight evaluated to false
+      expect(homeProvider.folkNight, isFalse);
+      // Lands directly on Home Screen Tab 1
+      expect(homeProvider.selectedIndex, 1);
+      // Link/loading states reset
+      expect(homeProvider.isHomeLoading, isFalse);
+      expect(homeProvider.isComeFromLinkOrNotification, isFalse);
+      // All posts API triggered
+      expect(homeProvider.getAllPostCalled, isTrue);
+      // Does not push FolkNightEventScreen
+      expect(find.text('Base Screen'), findsOneWidget);
+    });
+
+    testWidgets('Folk Night deep link hits config API; if folkNight is true, routes to FolkNightEventScreen', (tester) async {
+      final homeProvider = _MockConfigHomeProvider();
+      homeProvider.mockFolkNightValue = true;
+      homeProvider.folkNight = false; // initially false, will become true from getAppConfig
+      homeProvider.eventsEnable = true;
+      homeProvider.isHomeScreen = true;
+      homeProvider.selectedIndex = 0;
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(360, 690),
+          minTextAdapt: true,
+          builder: (context, _) => MaterialApp(
+            navigatorKey: mainNavigatorKey,
+            home: const Scaffold(body: Text('Base Screen')),
+          ),
+        ),
+      );
+
+      final uri = Uri.parse('https://app.bigtv24x7.com/events?eventId=test-123');
+      await homeProvider.routeDeepLink(uri);
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(homeProvider.getAppConfigCalled, isTrue);
+      expect(homeProvider.folkNight, isTrue);
+      expect(homeProvider.selectedIndex, 1);
     });
   });
 }

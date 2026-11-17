@@ -1352,6 +1352,19 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
   Future<void> launchURL(Uri uri) async {
     final String urlStr = uri.toString().toLowerCase();
+    final bool isEventsLink = urlStr.contains('events') ||
+        urlStr.contains('folknight') ||
+        urlStr.contains('folk') ||
+        uri.queryParameters.containsKey('eventId');
+
+    if (isEventsLink && context.mounted) {
+      final homeProvider = context.read<HomeProvider>();
+      if (!homeProvider.folkNight) {
+        log("Events link tapped but folkNight config is false. Not opening link: $uri");
+        return;
+      }
+    }
+
     if (urlStr.contains('bigtv24x7.com') ||
         urlStr.contains('bigtvlive.com') ||
         urlStr.contains('livebigtv') ||

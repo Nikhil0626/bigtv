@@ -18,9 +18,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _StubNotificationHomeProvider extends HomeProvider {
   Completer<void>? fetchCompleter;
   String? requestedPostId;
+  bool getAllPostCalled = false;
+  bool isGetAllPostFlag = false;
 
   @override
-  Future<void> getIndividualPost(
+  Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+    getAllPostCalled = true;
+    isGetAllPostFlag = isGetAllPost;
+  }
+
+  @override
+  Future<bool> getIndividualPost(
     dynamic postId, {
     bool isAds = false,
     bool isLink = false,
@@ -41,6 +49,34 @@ class _StubNotificationHomeProvider extends HomeProvider {
     };
     isPostLoading = false;
     notifyListeners();
+    return true;
+  }
+}
+
+class _FailingPostHomeProvider extends HomeProvider {
+  bool getAllPostCalled = false;
+  bool isGetAllPostFlag = false;
+
+  @override
+  Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+    getAllPostCalled = true;
+    isGetAllPostFlag = isGetAllPost;
+    isHomeLoading = false;
+    notifyListeners();
+  }
+
+  @override
+  Future<bool> getIndividualPost(
+    dynamic postId, {
+    bool isAds = false,
+    bool isLink = false,
+  }) async {
+    clearSinglePost();
+    isPostError = true;
+    isPostLoading = false;
+    getSinglePostList = {};
+    notifyListeners();
+    return false;
   }
 }
 
@@ -233,6 +269,154 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets(
+      'Tapping back on IndividualPostView1 when opened via notification triggers getAllPost(isGetAllPost: true)',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final homeProvider = _StubNotificationHomeProvider()
+      ..getAllPostList = [
+        {'id': 1, 'title': 'Existing post 1'},
+        {'id': 2, 'title': 'Existing post 2'},
+      ];
+
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(360, 690),
+        builder: (_, __) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+            ChangeNotifierProvider<VideoProvider>(
+              create: (_) => VideoProvider(),
+            ),
+            ChangeNotifierProvider<BookmarksProvider>(
+              create: (_) => BookmarksProvider(),
+            ),
+            ChangeNotifierProvider<AuthenticationProvider>(
+              create: (_) => AuthenticationProvider(),
+            ),
+          ],
+          child: MaterialApp(
+            home: Builder(
+              builder: (navContext) => Scaffold(
+                body: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      navContext,
+                      MaterialPageRoute(
+                        builder: (_) => const IndividualPostView1(
+                          postId: '200',
+                          isComeFrom: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Open Post'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Open post
+    await tester.tap(find.text('Open Post'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byType(IndividualPostView1), findsOneWidget);
+
+    // Tap back button
+    final backIcon = find.byIcon(Icons.arrow_back);
+    expect(backIcon, findsOneWidget);
+    await tester.tap(backIcon);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(homeProvider.getAllPostCalled, isTrue);
+    expect(homeProvider.isGetAllPostFlag, isTrue);
+    expect(homeProvider.isComeFromLinkOrNotification, isFalse);
+    expect(homeProvider.isBottomEnable, isTrue);
+    expect(homeProvider.selectedIndex, equals(1));
+  });
+
+  testWidgets(
+      'When individual page API fails, immediately navigates back to home screen and hits allpost API',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final homeProvider = _FailingPostHomeProvider();
+
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(360, 690),
+        builder: (_, __) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+            ChangeNotifierProvider<VideoProvider>(
+              create: (_) => VideoProvider(),
+            ),
+            ChangeNotifierProvider<BookmarksProvider>(
+              create: (_) => BookmarksProvider(),
+            ),
+            ChangeNotifierProvider<AuthenticationProvider>(
+              create: (_) => AuthenticationProvider(),
+            ),
+          ],
+          child: MaterialApp(
+            home: Builder(
+              builder: (navContext) => Scaffold(
+                body: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      navContext,
+                      MaterialPageRoute(
+                        builder: (_) => const IndividualPostView1(
+                          postId: '9999',
+                          isComeFrom: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Open Failing Post'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Open failing post
+    await tester.tap(find.text('Open Failing Post'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+
+    // When API fails, it should immediately navigate back to the home screen
+    expect(find.text('Open Failing Post'), findsOneWidget);
+    expect(find.byType(IndividualPostView1), findsNothing);
+
+    // Should have triggered getAllPost on HomeProvider to show data
+    expect(homeProvider.getAllPostCalled, isTrue);
+    expect(homeProvider.isGetAllPostFlag, isTrue);
+    expect(homeProvider.selectedIndex, equals(1));
+    expect(homeProvider.isComeFromLinkOrNotification, isFalse);
   });
 }
 

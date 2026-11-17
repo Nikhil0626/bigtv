@@ -103,7 +103,7 @@
         </dict>
     </array>
 
-    <!-- Facebook Queries -->
+    <!-- Facebook & Payment App Queries -->
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>fbapi</string>
@@ -111,6 +111,14 @@
         <string>fb-messenger-share-api</string>
         <string>fbshareextension</string>
         <string>whatsapp</string>
+
+        <!-- UPI Intent Apps for Razorpay on iOS -->
+        <string>tez</string>        <!-- Google Pay (iOS URL scheme is 'tez') -->
+        <string>phonepe</string>    <!-- PhonePe -->
+        <string>paytmmp</string>    <!-- Paytm -->
+        <string>bhim</string>       <!-- BHIM UPI -->
+        <string>credpay</string>    <!-- CRED -->
+        <string>upi</string>        <!-- Universal UPI fallback -->
     </array>
 
     <!-- Flutter -->

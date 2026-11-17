@@ -18,6 +18,7 @@ import 'package:chotanews/features/home/presentation/screens/epaper_detail_scree
 import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/tag_video_player_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
+import 'package:chotanews/features/events/presentation/screens/folk_night_booking_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/html_notification_dialog.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
@@ -59,8 +60,6 @@ import 'package:chotanews/features/home/presentation/screens/editorial_screen.da
 import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'package:chotanews/utils/local_data.dart';
 
-
-
 class HomeProvider extends ChangeNotifier {
   final HomeRepo? _homeRepoOverride;
 
@@ -81,8 +80,6 @@ class HomeProvider extends ChangeNotifier {
   List getAllSurveyDataList = [];
   List getImageAdsList = [];
 
-
-
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
   int selectedIndex = 1; // 0: Search, 1: Home, 2: Bigtv daily, 3: Marrini
@@ -91,8 +88,11 @@ class HomeProvider extends ChangeNotifier {
   String webUrl = '';
   bool isHomeLoading = false;
   bool isInitialHomeLoaded = false;
+  bool _isFetchingAllPosts = false;
+  bool get isFetchingAllPosts => _isFetchingAllPosts;
   bool isPlaying = false;
   bool isPostLoading = false;
+  bool isPostError = false;
   bool isMuted = false;
   bool isImageAdClose = false;
   late YoutubePlayerController controller;
@@ -112,9 +112,11 @@ class HomeProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     eventsEnable = prefs.getBool("eventsEnable") ?? true;
     cricketEnable = prefs.getBool("cricketEnable") ?? true;
+    folkNight = prefs.getBool("folkNight") ?? false;
     EventRepo.eventsEnable = eventsEnable;
     final newCode = prefs.getString("selectedLanguageCode") ?? "te";
-    final langChanged = langCode != newCode || (postsLanguage != null && postsLanguage != newCode);
+    final langChanged = langCode != newCode ||
+        (postsLanguage != null && postsLanguage != newCode);
     if (langChanged) {
       if (editorialPosts.isNotEmpty) {
         editorialPosts = [];
@@ -141,7 +143,8 @@ class HomeProvider extends ChangeNotifier {
   }
 
   void setLangCode(String code) {
-    final langChanged = langCode != code || (postsLanguage != null && postsLanguage != code);
+    final langChanged =
+        langCode != code || (postsLanguage != null && postsLanguage != code);
     if (langChanged) {
       if (editorialPosts.isNotEmpty) {
         editorialPosts = [];
@@ -197,6 +200,7 @@ class HomeProvider extends ChangeNotifier {
   void clearSinglePost() {
     getSinglePostList = {};
     isPostLoading = true;
+    isPostError = false;
     notifyListeners();
   }
 
@@ -220,10 +224,13 @@ class HomeProvider extends ChangeNotifier {
   String? liveTvFormattedWatchCount;
   bool liveTvWatchCountEnabled = true;
 
-  static const String teluguLiveStreamUrl = "https://api.pravasamedia.com/live/bigtv/index.m3u8";
-  static const String malayalamLiveStreamUrl = "https://api.pravasamedia.com/live/bigtv_malayalam/index.m3u8";
+  static const String teluguLiveStreamUrl =
+      "https://api.pravasamedia.com/live/bigtv/index.m3u8";
+  static const String malayalamLiveStreamUrl =
+      "https://api.pravasamedia.com/live/bigtv_malayalam/index.m3u8";
 
-  Future<Map<String, dynamic>?> fetchLiveTvStream({String? targetLangCode}) async {
+  Future<Map<String, dynamic>?> fetchLiveTvStream(
+      {String? targetLangCode}) async {
     isLiveTvLoading = true;
     notifyListeners();
 
@@ -232,7 +239,9 @@ class HomeProvider extends ChangeNotifier {
     if (activeLang.isEmpty) {
       try {
         final prefs = await SharedPreferences.getInstance();
-        activeLang = (prefs.getString("selectedLanguageCode") ?? "te").trim().toLowerCase();
+        activeLang = (prefs.getString("selectedLanguageCode") ?? "te")
+            .trim()
+            .toLowerCase();
       } catch (_) {
         activeLang = "te";
       }
@@ -325,7 +334,9 @@ class HomeProvider extends ChangeNotifier {
             responseData = jsonDecode(responseData);
           } catch (_) {}
         }
-        if (responseData != null && responseData is Map && responseData['success'] == true) {
+        if (responseData != null &&
+            responseData is Map &&
+            responseData['success'] == true) {
           var dataList = responseData['data'];
           Map<String, dynamic>? configMap;
           if (dataList is List && dataList.isNotEmpty) {
@@ -350,28 +361,36 @@ class HomeProvider extends ChangeNotifier {
             webEnable = parseBool(configMap['webEnable'], defaultValue: true);
             folkNight = parseBool(configMap['folkNight'], defaultValue: false);
             cricketEnable = parseBool(configMap['cricket'], defaultValue: true);
-            eventsEnable = parseBool(configMap['eventsEnable'], defaultValue: true);
-            bannersEnable = parseBool(configMap['bannersEnable'], defaultValue: true);
-            languageEnable = parseBool(configMap['language'], defaultValue: true);
+            eventsEnable =
+                parseBool(configMap['eventsEnable'], defaultValue: true);
+            bannersEnable =
+                parseBool(configMap['bannersEnable'], defaultValue: true);
+            languageEnable =
+                parseBool(configMap['language'], defaultValue: true);
             aiTagEnable = parseBool(configMap['aitag'], defaultValue: true);
             videosEnable = parseBool(configMap['videos'], defaultValue: true);
             epaperEnable = parseBool(configMap['epaper'], defaultValue: true);
-            liveTvVideosEnable = parseBool(configMap['livetvvideos'], defaultValue: true);
-            englishLanguageEnable = parseBool(configMap['englishLanguage'], defaultValue: true);
-            liveTvCountEnable = parseBool(configMap['livetvcount'], defaultValue: true);
+            liveTvVideosEnable =
+                parseBool(configMap['livetvvideos'], defaultValue: true);
+            englishLanguageEnable =
+                parseBool(configMap['englishLanguage'], defaultValue: true);
+            liveTvCountEnable =
+                parseBool(configMap['livetvcount'], defaultValue: true);
             reelsEnable = parseBool(configMap['reels'], defaultValue: true);
 
             EventRepo.eventsEnable = eventsEnable;
             SharedPreferences.getInstance().then((sp) {
               sp.setBool('eventsEnable', eventsEnable);
               sp.setBool('cricketEnable', cricketEnable);
+              sp.setBool('folkNight', folkNight);
             }).catchError((_) {});
 
             log("AppConfig updated: folkNight=$folkNight, cricketEnable=$cricketEnable, eventsEnable=$eventsEnable, liveTvVideosEnable=$liveTvVideosEnable, aiTagEnable=$aiTagEnable, englishLanguageEnable=$englishLanguageEnable, liveTvCountEnable=$liveTvCountEnable");
 
             if (!cricketEnable) {
               _removeCricketWebView();
-              if (homePostsList.isNotEmpty && getAllPostList.indexWhere((e) => isHomePostGrid(e)) == -1) {
+              if (homePostsList.isNotEmpty &&
+                  getAllPostList.indexWhere((e) => isHomePostGrid(e)) == -1) {
                 _placeHomePostGridAtFirstPosition();
               }
             } else if (getAllPostList.isNotEmpty) {
@@ -466,9 +485,20 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getIndividualPost(dynamic postId, {bool isAds = false, bool isLink = false}) async {
+  String? _fetchingPostId;
+
+  Future<bool> getIndividualPost(dynamic postId,
+      {bool isAds = false, bool isLink = false}) async {
+    final requestedIdStr = postId?.toString().trim() ?? "";
+    if (isPostLoading && _fetchingPostId == requestedIdStr && requestedIdStr.isNotEmpty) {
+      debugPrint("getIndividualPost: already fetching $requestedIdStr, skipping duplicate");
+      return true;
+    }
+    _fetchingPostId = requestedIdStr;
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    log("getIndividualPost $postId");
+    debugPrint("getIndividualPost: $postId (isAds: $isAds, isLink: $isLink)");
+    isPostError = false;
     if (isAds == true) {
       clearSinglePost();
     } else {
@@ -477,18 +507,36 @@ class HomeProvider extends ChangeNotifier {
       }
     }
     isPostLoading = true;
+    notifyListeners();
     String userId = preferences.getString("userId") ?? "0";
     Map<String, dynamic> body = {"user_id": userId, "isBigTv": "true"};
     try {
-      Response response = await HomeRepo().getSinglePost(body, postId);
-      log(response.data.toString());
-      if (response.statusCode == 200) {
+      Response? response = await HomeRepo().getSinglePost(body, postId);
+      debugPrint("getSinglePost response statusCode: ${response?.statusCode}");
+      if (response != null && response.statusCode == 200 && response.data != null) {
+        dynamic resData = response.data;
+        if (resData is String) {
+          try {
+            resData = json.decode(resData);
+          } catch (_) {}
+        }
+        dynamic rawPost;
+        if (resData is Map) {
+          rawPost =
+              resData['data'] ?? (resData['title'] != null ? resData : null);
+        }
+
+        if (rawPost == null || (rawPost is Map && rawPost.isEmpty)) {
+          isPostError = true;
+          return false;
+        }
+
         if (isAds == false) {
-          getAllPostList.add(response.data['data']);
+          getAllPostList.add(rawPost);
           Future.delayed(
             const Duration(milliseconds: 100),
-                () {
-              if (!isAds) {
+            () {
+              if (!isAds && getAllPostList.isEmpty) {
                 getAllPost(isGetAllPost: true);
               }
               if (isLink) {
@@ -496,7 +544,7 @@ class HomeProvider extends ChangeNotifier {
                   "platform": Platform.isIOS ? "iOS" : "Android",
                   "comeFrom": "Notification",
                   "postId": postId.toString(),
-                  "postTitle": response.data['data']['title'] ?? "",
+                  "postTitle": (rawPost is Map ? rawPost['title'] : "") ?? "",
                   "createAt": DateTime.now().toString()
                 }, "opened_via_notification");
               } else {
@@ -504,14 +552,16 @@ class HomeProvider extends ChangeNotifier {
                   "platform": Platform.isIOS ? "iOS" : "Android",
                   "comeFrom": "Deeplink",
                   "postId": postId.toString(),
-                  "postTitle": response.data['data']['title'] ?? "",
+                  "postTitle": (rawPost is Map ? rawPost['title'] : "") ?? "",
                   "createAt": DateTime.now().toString()
                 }, "opened_via_deeplink");
               }
             },
           );
         } else {
-          getSinglePostList = response.data['data'];
+          if (rawPost is Map) {
+            getSinglePostList = Map<String, dynamic>.from(rawPost);
+          }
           if (isLink) {
             EventRepo().addEvent({
               "platform": Platform.isIOS ? "iOS" : "Android",
@@ -530,28 +580,39 @@ class HomeProvider extends ChangeNotifier {
             }, "opened_via_deeplink");
           }
         }
+        return true;
+      } else {
+        isPostError = true;
+        return false;
       }
     } on DioException catch (e, st) {
-      log("Get News Api catch error $e", stackTrace: st);
-      Future.delayed(
-        const Duration(milliseconds: 300),
-            () {
-          getAllPost(isGetAllPost: true);
-        },
-      );
-      isPostLoading = false;
-      notifyListeners();
+      debugPrint("Get News Api catch error $e: $st");
+      isPostError = true;
+      if (getAllPostList.isEmpty) {
+        Future.delayed(
+          const Duration(milliseconds: 300),
+          () {
+            getAllPost(isGetAllPost: true);
+          },
+        );
+      }
+      return false;
     } catch (e, st) {
-      log("Get News Api catch error $e", stackTrace: st);
-      Future.delayed(
-        const Duration(milliseconds: 300),
-            () {
-          getAllPost(isGetAllPost: true);
-        },
-      );
-      isPostLoading = false;
-      notifyListeners();
+      debugPrint("Get News Api catch error $e: $st");
+      isPostError = true;
+      if (getAllPostList.isEmpty) {
+        Future.delayed(
+          const Duration(milliseconds: 300),
+          () {
+            getAllPost(isGetAllPost: true);
+          },
+        );
+      }
+      return false;
     } finally {
+      if (_fetchingPostId == requestedIdStr) {
+        _fetchingPostId = null;
+      }
       isPostLoading = false;
       isReload = false;
       notifyListeners();
@@ -569,6 +630,7 @@ class HomeProvider extends ChangeNotifier {
       pageController = PageController(initialPage: 0, keepPage: false);
     }
   }
+
   String? allPostLastId = "0";
   bool isLoadingMore = false;
   bool hasMorePosts = true;
@@ -609,11 +671,36 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+  Future<void> getAllPost(
+      {String postIds = "0", bool isGetAllPost = false}) async {
     isFolkNightDismissed = false;
     final bool isPagination = postIds != "0";
     final bool isRefreshingFeed = isReload && !isPagination;
-    final List previousPosts = isRefreshingFeed ? List.from(getAllPostList) : const [];
+
+    if (!isPagination && _isFetchingAllPosts && !isRefreshingFeed) {
+      log("getAllPost: fetch already in-flight, skipping duplicate call");
+      return;
+    }
+    if (!isPagination) {
+      _isFetchingAllPosts = true;
+    }
+
+    final List previousPosts =
+        isRefreshingFeed ? List.from(getAllPostList) : const [];
+
+    // Watchdog to guarantee isHomeLoading and _isFetchingAllPosts never freeze indefinitely
+    Timer? fetchWatchdog;
+    if (!isPagination) {
+      fetchWatchdog = Timer(const Duration(seconds: 6), () {
+        if (_isFetchingAllPosts || isHomeLoading) {
+          debugPrint("Safety watchdog: resetting stuck getAllPost loading state");
+          _isFetchingAllPosts = false;
+          isHomeLoading = false;
+          isInitialHomeLoaded = true;
+          notifyListeners();
+        }
+      });
+    }
 
     try {
       if (!isPagination) {
@@ -640,6 +727,7 @@ class HomeProvider extends ChangeNotifier {
         }
         allPostLastId = "0";
         hasMorePosts = true;
+        notifyListeners();
       } else {
         isLoadingMore = true;
         notifyListeners();
@@ -658,12 +746,20 @@ class HomeProvider extends ChangeNotifier {
 
       String categoriesStr = preferences.getString("categoriesId") ?? "";
       List<int> categoriesIdList = categoriesStr.isNotEmpty
-          ? categoriesStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
+          ? categoriesStr
+              .split(',')
+              .map((e) => int.tryParse(e.trim()))
+              .whereType<int>()
+              .toList()
           : [];
 
       String locationStr = preferences.getString("locationIds") ?? "";
       List<int> locationIdList = locationStr.isNotEmpty
-          ? locationStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
+          ? locationStr
+              .split(',')
+              .map((e) => int.tryParse(e.trim()))
+              .whereType<int>()
+              .toList()
           : [];
 
       Map<String, dynamic> body = {
@@ -719,9 +815,14 @@ class HomeProvider extends ChangeNotifier {
       // Extract homepost items from response and prepend them to the feed (only on initial load)
       List homePosts = [];
       if (!isPagination) {
-        if (responseData is Map && responseData['homepost'] != null && responseData['homepost'] is List) {
+        if (responseData is Map &&
+            responseData['homepost'] != null &&
+            responseData['homepost'] is List) {
           homePosts = responseData['homepost'];
-        } else if (data.isNotEmpty && data[0] is Map && data[0]['homepost'] != null && data[0]['homepost'] is List) {
+        } else if (data.isNotEmpty &&
+            data[0] is Map &&
+            data[0]['homepost'] != null &&
+            data[0]['homepost'] is List) {
           final raw = data[0]['homepost'];
           if (raw is List) {
             homePosts = raw;
@@ -752,11 +853,14 @@ class HomeProvider extends ChangeNotifier {
         } else {
           try {
             final fetched = await _homeRepo.getMoreFollowTags(queryParams: {
-              if (deviceId != null && deviceId.isNotEmpty) "device_id": deviceId,
+              if (deviceId != null && deviceId.isNotEmpty)
+                "device_id": deviceId,
               if (userId > 0) "userId": userId,
               "lang": langCode,
             });
-            if (fetched.statusCode == 200 && fetched.data is List && (fetched.data as List).isNotEmpty) {
+            if (fetched.statusCode == 200 &&
+                fetched.data is List &&
+                (fetched.data as List).isNotEmpty) {
               moreFollowList = fetched.data as List;
               moreFollowTagsList = moreFollowList;
             }
@@ -771,7 +875,10 @@ class HomeProvider extends ChangeNotifier {
             .map((e) => e['id'].toString())
             .toSet();
         if (homePostIds.isNotEmpty) {
-          data.removeWhere((e) => e is Map && e['id'] != null && homePostIds.contains(e['id'].toString()));
+          data.removeWhere((e) =>
+              e is Map &&
+              e['id'] != null &&
+              homePostIds.contains(e['id'].toString()));
         }
       }
 
@@ -839,8 +946,13 @@ class HomeProvider extends ChangeNotifier {
               e['moreFollowTags'] != null));
 
       // Insert top-level morefollow items from API if not already present in feed
-      if (!hasMoreFollow && isGetAllPost == false && postIds == "0" && getAllPostList.isNotEmpty && moreFollowList.isNotEmpty) {
-        final insertIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
+      if (!hasMoreFollow &&
+          isGetAllPost == false &&
+          postIds == "0" &&
+          getAllPostList.isNotEmpty &&
+          moreFollowList.isNotEmpty) {
+        final insertIdx =
+            getAllPostList.length >= 3 ? 3 : getAllPostList.length;
         getAllPostList.insert(insertIdx, {
           'id': -998,
           'type': 'morefollow',
@@ -872,22 +984,28 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     } on DioException catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
-      if (isRefreshingFeed && previousPosts.isNotEmpty && getAllPostList.isEmpty) {
+      if (isRefreshingFeed &&
+          previousPosts.isNotEmpty &&
+          getAllPostList.isEmpty) {
         getAllPostList = List.from(previousPosts);
       }
     } catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
-      if (isRefreshingFeed && previousPosts.isNotEmpty && getAllPostList.isEmpty) {
+      if (isRefreshingFeed &&
+          previousPosts.isNotEmpty &&
+          getAllPostList.isEmpty) {
         getAllPostList = List.from(previousPosts);
       }
     } finally {
-      isReload = false;
+      fetchWatchdog?.cancel();
       if (!isPagination) {
+        _isFetchingAllPosts = false;
         isHomeLoading = false;
         isInitialHomeLoaded = true;
       } else {
         isLoadingMore = false;
       }
+      isReload = false;
       notifyListeners();
       if (!isPagination) {
         try {
@@ -1062,7 +1180,8 @@ class HomeProvider extends ChangeNotifier {
     return reviews;
   }
 
-  static const String cricketWebUrl = "https://nikhil0626.github.io/bigtv_cricket-_web/";
+  static const String cricketWebUrl =
+      "https://nikhil0626.github.io/bigtv_cricket-_web/";
 
   void _removeCricketWebView() {
     getAllPostList.removeWhere((e) =>
@@ -1113,7 +1232,8 @@ class HomeProvider extends ChangeNotifier {
 
     Map<String, dynamic> cricketItem;
     if (existingIdx != -1) {
-      cricketItem = Map<String, dynamic>.from(getAllPostList.removeAt(existingIdx));
+      cricketItem =
+          Map<String, dynamic>.from(getAllPostList.removeAt(existingIdx));
     } else {
       cricketItem = {
         'id': 777701,
@@ -1132,7 +1252,8 @@ class HomeProvider extends ChangeNotifier {
 
   void _placeMovieReviewAtThirdPosition() {
     if (getAllPostList.isEmpty) return;
-    final existingReviewIdx = getAllPostList.indexWhere((e) => isMovieReviewPost(e));
+    final existingReviewIdx =
+        getAllPostList.indexWhere((e) => isMovieReviewPost(e));
 
     // Only reposition if movie review is already present in allpost response
     if (existingReviewIdx != -1) {
@@ -1282,7 +1403,8 @@ class HomeProvider extends ChangeNotifier {
   Future<void> getAllPostsByAiId(dynamic postId) async {
     isFolkNightDismissed = false;
     final bool isRefreshingFeed = isReload;
-    final List previousPosts = isRefreshingFeed ? List.from(getAllPostList) : const [];
+    final List previousPosts =
+        isRefreshingFeed ? List.from(getAllPostList) : const [];
 
     try {
       isBookMark = [];
@@ -1352,7 +1474,8 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> getAllAiTags() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String currentCode = preferences.getString("selectedLanguageCode") ?? langCode;
+    String currentCode =
+        preferences.getString("selectedLanguageCode") ?? langCode;
     final currentLang = (currentCode == 'ml') ? 'ml' : 'te';
     videoTagsLanguage = currentLang;
     getAllAiTagsList = [];
@@ -1382,10 +1505,12 @@ class HomeProvider extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      
+
       var responseData = response.data;
       if (responseData is String) {
-        try { responseData = jsonDecode(responseData); } catch (_) {}
+        try {
+          responseData = jsonDecode(responseData);
+        } catch (_) {}
       }
       List data = [];
       if (responseData is List) {
@@ -1401,11 +1526,13 @@ class HomeProvider extends ChangeNotifier {
           }
         }
       }
-      
+
       getAllAiTagsList = data.map((e) {
-        Map<String, dynamic> item = Map<String, dynamic>.from(e is Map ? e : {});
+        Map<String, dynamic> item =
+            Map<String, dynamic>.from(e is Map ? e : {});
         item['aitagid'] = item['id'] ?? item['aitagid'];
-        item['slug'] = item['slug'] ?? item['name'] ?? item['aitagname'] ?? item['id'];
+        item['slug'] =
+            item['slug'] ?? item['name'] ?? item['aitagname'] ?? item['id'];
         item['aitagname'] = item['name'] ?? item['aitagname'] ?? item['slug'];
         item['thumbnailUrl'] = item['thumbnailUrl'] ??
             item['thumbnail_url'] ??
@@ -1416,15 +1543,17 @@ class HomeProvider extends ChangeNotifier {
             item['desc'] ??
             item['title'] ??
             item['aitagname'];
-        if (item['aitagnameTranslations'] != null && item['aitagnameTranslations'][currentCode] != null) {
+        if (item['aitagnameTranslations'] != null &&
+            item['aitagnameTranslations'][currentCode] != null) {
           item['aitagname'] = item['aitagnameTranslations'][currentCode];
         }
-        if (item['descriptionTranslations'] != null && item['descriptionTranslations'][currentCode] != null) {
+        if (item['descriptionTranslations'] != null &&
+            item['descriptionTranslations'][currentCode] != null) {
           item['description'] = item['descriptionTranslations'][currentCode];
         }
         return item;
       }).toList();
-      
+
       log("Tags loaded (liveTvVideos: $liveTvVideosEnable, aiTag: $aiTagEnable): ${getAllAiTagsList.length} items for lang: $currentLang");
     } on DioException catch (e, st) {
       log("Get Tags Api catch error $e", stackTrace: st);
@@ -1448,7 +1577,8 @@ class HomeProvider extends ChangeNotifier {
       final s = (map['slug'] ?? '').toString().trim().toLowerCase();
       final n = (map['name'] ?? '').toString().trim().toLowerCase();
       final a = (map['aitagname'] ?? '').toString().trim().toLowerCase();
-      final id = (map['id'] ?? map['aitagid'] ?? '').toString().trim().toLowerCase();
+      final id =
+          (map['id'] ?? map['aitagid'] ?? '').toString().trim().toLowerCase();
 
       if (searchId.isNotEmpty && id == searchId) {
         return map;
@@ -1466,49 +1596,111 @@ class HomeProvider extends ChangeNotifier {
 
     // Direct fallback dictionary for show tags
     if (searchName == 'suprabatham' || searchName == 'sb') {
-      return {'slug': 'SB', 'name': 'Suprabatham', 'aitagname': 'Suprabatham', 'id': '6c750528-160a-4963-9642-d63d7594c2e8'};
+      return {
+        'slug': 'SB',
+        'name': 'Suprabatham',
+        'aitagname': 'Suprabatham',
+        'id': '6c750528-160a-4963-9642-d63d7594c2e8'
+      };
     }
-    if (searchName == '50 reports' || searchName == '50reports' || searchName == '50rp' || searchName == '50%20reports') {
-      return {'slug': '50RP', 'name': '50 Reports', 'aitagname': '50 Reports', 'id': '485c4748-dc43-4231-85f6-f241b04a51b2'};
+    if (searchName == '50 reports' ||
+        searchName == '50reports' ||
+        searchName == '50rp' ||
+        searchName == '50%20reports') {
+      return {
+        'slug': '50RP',
+        'name': '50 Reports',
+        'aitagname': '50 Reports',
+        'id': '485c4748-dc43-4231-85f6-f241b04a51b2'
+      };
     }
-    if (searchName == 'big show' || searchName == 'bigshow' || searchName == 'big%20show') {
-      return {'slug': 'bigshow', 'name': 'Big Show', 'aitagname': 'Big Show', 'id': 'f927304a-2239-4fae-92dd-204c02764da1'};
+    if (searchName == 'big show' ||
+        searchName == 'bigshow' ||
+        searchName == 'big%20show') {
+      return {
+        'slug': 'bigshow',
+        'name': 'Big Show',
+        'aitagname': 'Big Show',
+        'id': 'f927304a-2239-4fae-92dd-204c02764da1'
+      };
     }
     if (searchName == 'dna') {
-      return {'slug': 'DNA', 'name': 'DNA', 'aitagname': 'DNA', 'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'};
+      return {
+        'slug': 'DNA',
+        'name': 'DNA',
+        'aitagname': 'DNA',
+        'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'
+      };
     }
-    if (searchName == 'news' || searchName == 'epaper' || searchName == 'newspaper') {
-      return {'slug': 'NEWS', 'name': 'News Paper', 'aitagname': 'News Paper', 'id': 'epaper-news-tag'};
+    if (searchName == 'news' ||
+        searchName == 'epaper' ||
+        searchName == 'newspaper') {
+      return {
+        'slug': 'NEWS',
+        'name': 'News Paper',
+        'aitagname': 'News Paper',
+        'id': 'epaper-news-tag'
+      };
     }
 
     if (searchId == '6c750528-160a-4963-9642-d63d7594c2e8') {
-      return {'slug': 'SB', 'name': 'Suprabatham', 'aitagname': 'Suprabatham', 'id': '6c750528-160a-4963-9642-d63d7594c2e8'};
+      return {
+        'slug': 'SB',
+        'name': 'Suprabatham',
+        'aitagname': 'Suprabatham',
+        'id': '6c750528-160a-4963-9642-d63d7594c2e8'
+      };
     }
     if (searchId == '485c4748-dc43-4231-85f6-f241b04a51b2') {
-      return {'slug': '50RP', 'name': '50 Reports', 'aitagname': '50 Reports', 'id': '485c4748-dc43-4231-85f6-f241b04a51b2'};
+      return {
+        'slug': '50RP',
+        'name': '50 Reports',
+        'aitagname': '50 Reports',
+        'id': '485c4748-dc43-4231-85f6-f241b04a51b2'
+      };
     }
     if (searchId == 'f927304a-2239-4fae-92dd-204c02764da1') {
-      return {'slug': 'bigshow', 'name': 'Big Show', 'aitagname': 'Big Show', 'id': 'f927304a-2239-4fae-92dd-204c02764da1'};
+      return {
+        'slug': 'bigshow',
+        'name': 'Big Show',
+        'aitagname': 'Big Show',
+        'id': 'f927304a-2239-4fae-92dd-204c02764da1'
+      };
     }
     if (searchId == '77e02f18-f278-4334-ad74-9bfbd22d0af4') {
-      return {'slug': 'DNA', 'name': 'DNA', 'aitagname': 'DNA', 'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'};
+      return {
+        'slug': 'DNA',
+        'name': 'DNA',
+        'aitagname': 'DNA',
+        'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'
+      };
     }
 
     return null;
   }
 
-  Future<void> fetchVideosByTagSlug(String slug, {String? displayTitle, String? thumbnailUrl}) async {
+  Future<void> fetchVideosByTagSlug(String slug,
+      {String? displayTitle, String? thumbnailUrl}) async {
     final slugUpper = slug.trim().toUpperCase();
-    if (slugUpper == 'NEWS' || slugUpper == 'EPAPER' || slugUpper == 'NEWSPAPER') {
+    if (slugUpper == 'NEWS' ||
+        slugUpper == 'EPAPER' ||
+        slugUpper == 'NEWSPAPER') {
       mainNavigatorKey.currentState?.push(
         MaterialPageRoute(builder: (context) => const EpaperScreen()),
       );
       return;
     }
     final resolved = resolveVideoTag(showOrSlug: slug);
-    final effectiveSlug = resolved != null ? (resolved['slug']?.toString() ?? slug) : slug;
-    final effectiveTitle = displayTitle ?? (resolved != null ? (resolved['aitagname'] ?? resolved['name'] ?? slug) : slug);
-    final effectiveThumbnail = thumbnailUrl ?? (resolved != null ? (resolved['thumbnailUrl'] ?? resolved['thumbnail'])?.toString() : null);
+    final effectiveSlug =
+        resolved != null ? (resolved['slug']?.toString() ?? slug) : slug;
+    final effectiveTitle = displayTitle ??
+        (resolved != null
+            ? (resolved['aitagname'] ?? resolved['name'] ?? slug)
+            : slug);
+    final effectiveThumbnail = thumbnailUrl ??
+        (resolved != null
+            ? (resolved['thumbnailUrl'] ?? resolved['thumbnail'])?.toString()
+            : null);
 
     currentTagSlug = effectiveSlug;
     currentTagTitle = effectiveTitle;
@@ -1535,10 +1727,13 @@ class HomeProvider extends ChangeNotifier {
         'segregated': 'false',
       };
       final encodedSlug = Uri.encodeComponent(effectiveSlug);
-      Response response = await HomeRepo().getTagVideos(encodedSlug, queryParameters: queryParams);
+      Response response = await HomeRepo()
+          .getTagVideos(encodedSlug, queryParameters: queryParams);
       var responseData = response.data;
       if (responseData is String) {
-        try { responseData = jsonDecode(responseData); } catch (_) {}
+        try {
+          responseData = jsonDecode(responseData);
+        } catch (_) {}
       }
       List data = [];
       if (responseData is List) {
@@ -1558,10 +1753,14 @@ class HomeProvider extends ChangeNotifier {
       // If empty and effectiveSlug differed from original slug, try fallback to original slug
       if (data.isEmpty && effectiveSlug != slug) {
         try {
-          Response fallbackRes = await HomeRepo().getTagVideos(Uri.encodeComponent(slug), queryParameters: queryParams);
+          Response fallbackRes = await HomeRepo().getTagVideos(
+              Uri.encodeComponent(slug),
+              queryParameters: queryParams);
           var fallbackData = fallbackRes.data;
           if (fallbackData is String) {
-            try { fallbackData = jsonDecode(fallbackData); } catch (_) {}
+            try {
+              fallbackData = jsonDecode(fallbackData);
+            } catch (_) {}
           }
           List fallbackList = [];
           if (fallbackData is List) {
@@ -1596,7 +1795,8 @@ class HomeProvider extends ChangeNotifier {
   Future<int?> incrementTagVideoView(String slug, String videoId) async {
     try {
       final encodedSlug = Uri.encodeComponent(slug);
-      Response response = await HomeRepo().updateTagVideoView(encodedSlug, videoId);
+      Response response =
+          await HomeRepo().updateTagVideoView(encodedSlug, videoId);
       log("Update Tag Video View response [${response.statusCode}]: ${response.data}");
       if (response.statusCode == 200 || response.statusCode == 201) {
         var data = response.data;
@@ -1607,7 +1807,9 @@ class HomeProvider extends ChangeNotifier {
         }
         if (data != null && data is Map) {
           final resData = data['data'];
-          if (resData != null && resData is Map && resData.containsKey('views')) {
+          if (resData != null &&
+              resData is Map &&
+              resData.containsKey('views')) {
             final viewsRaw = resData['views'];
             if (viewsRaw is int) return viewsRaw;
             if (viewsRaw is String) return int.tryParse(viewsRaw);
@@ -1663,7 +1865,9 @@ class HomeProvider extends ChangeNotifier {
   int get currentPageIndex => _currentPageIndex;
 
   int get activePostIndex {
-    if (pageController != null && pageController!.hasClients && pageController!.positions.isNotEmpty) {
+    if (pageController != null &&
+        pageController!.hasClients &&
+        pageController!.positions.isNotEmpty) {
       try {
         final page = pageController!.page;
         if (page != null) {
@@ -1683,9 +1887,21 @@ class HomeProvider extends ChangeNotifier {
 
   bool isHomePostGrid(dynamic article) {
     if (article is! Map) return false;
-    final type = article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
-    final subType = article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
-    final postType = article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final type = article['type']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
+    final subType = article['subType']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
+    final postType = article['post_type']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
     return type == 'homepostgrid' ||
         subType == 'homepostgrid' ||
         postType == 'homepostgrid' ||
@@ -1699,9 +1915,21 @@ class HomeProvider extends ChangeNotifier {
 
   bool isShowAlertPost(dynamic article) {
     if (article is! Map) return false;
-    final type = article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
-    final subType = article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
-    final postType = article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final type = article['type']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
+    final subType = article['subType']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
+    final postType = article['post_type']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
     return type.contains('showalert') ||
         subType.contains('showalert') ||
         postType.contains('showalert') ||
@@ -1723,9 +1951,21 @@ class HomeProvider extends ChangeNotifier {
 
   bool isBulletinPost(dynamic article) {
     if (article is! Map) return false;
-    final type = article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
-    final subType = article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
-    final postType = article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final type = article['type']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
+    final subType = article['subType']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
+    final postType = article['post_type']
+            ?.toString()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ??
+        '';
     return type.contains('bulletin') ||
         subType.contains('bulletin') ||
         postType.contains('bulletin') ||
@@ -1757,12 +1997,14 @@ class HomeProvider extends ChangeNotifier {
     if (article is! Map) return false;
     final type = article['type']?.toString().toLowerCase().trim() ?? '';
     final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
-    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
-    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
-            ?.toString()
-            .toLowerCase()
-            .trim() ??
-        '';
+    final postType =
+        article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category =
+        (article['category_name'] ?? article['category'] ?? article['slug'])
+                ?.toString()
+                .toLowerCase()
+                .trim() ??
+            '';
 
     if (subType == 'polls' || subType == 'poll') return true;
     if (type == 'polls' || type == 'poll') return true;
@@ -1786,29 +2028,73 @@ class HomeProvider extends ChangeNotifier {
     if (article is! Map) return false;
     final type = article['type']?.toString().toLowerCase().trim() ?? '';
     final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
-    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
-    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
-            ?.toString()
-            .toLowerCase()
-            .trim() ??
-        '';
+    final postType =
+        article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category =
+        (article['category_name'] ?? article['category'] ?? article['slug'])
+                ?.toString()
+                .toLowerCase()
+                .trim() ??
+            '';
 
-    if (subType == 'reviews' || subType == 'review' || subType == 'moviereview' || subType == 'moviereviews') return true;
-    if (type == 'reviews' || type == 'review' || type == 'moviereview' || type == 'moviereviews') return true;
-    if (postType == 'reviews' || postType == 'review' || postType == 'moviereview' || postType == 'moviereviews') return true;
-    if (category == 'reviews' || category == 'review' || category == 'moviereview') return true;
+    if (subType == 'reviews' ||
+        subType == 'review' ||
+        subType == 'moviereview' ||
+        subType == 'moviereviews') return true;
+    if (type == 'reviews' ||
+        type == 'review' ||
+        type == 'moviereview' ||
+        type == 'moviereviews') return true;
+    if (postType == 'reviews' ||
+        postType == 'review' ||
+        postType == 'moviereview' ||
+        postType == 'moviereviews') return true;
+    if (category == 'reviews' ||
+        category == 'review' ||
+        category == 'moviereview') return true;
 
-    if (article['ratings'] != null || article['movie_rating'] != null || article['rating'] != null) {
-      if (article['platformRatings'] != null || article['platform_ratings'] != null) return true;
+    if (article['ratings'] != null ||
+        article['movie_rating'] != null ||
+        article['rating'] != null) {
+      if (article['platformRatings'] != null ||
+          article['platform_ratings'] != null) return true;
     }
     return false;
   }
 
-
-
   bool _isSubscribed = false;
   bool isComeFromLinkOrNotification = false;
   String? postId = "0";
+
+  void handleReturnFromFolkNight() {
+    debugPrint(
+        "handleReturnFromFolkNight: navigating to home screen and hitting allpost API");
+    handleReturnFromNotificationPost(forceRefresh: true);
+  }
+
+  void handleReturnFromNotificationPost({bool forceRefresh = false}) {
+    debugPrint(
+        "handleReturnFromNotificationPost: resetting link/notification state (forceRefresh: $forceRefresh)");
+    isBottomEnable = true;
+    isComeFromLinkOrNotification = false;
+    isHomeLoading = false;
+    _isRoutingDeepLink = false;
+    pendingDeepLink = null;
+    pendingDeepLinkUri = null;
+    selectedIndex = 1;
+    onItemTapped(1);
+    if (homePageController.hasClients) {
+      try {
+        homePageController.jumpToPage(1);
+      } catch (_) {}
+    }
+    if (forceRefresh || getAllPostList.isEmpty || !isInitialHomeLoaded) {
+      _isFetchingAllPosts = false;
+      getAllPost(isGetAllPost: true);
+    } else {
+      notifyListeners();
+    }
+  }
 
   void subscribeToPushCallbacks() {
     if (_isSubscribed) return;
@@ -1826,7 +2112,7 @@ class HomeProvider extends ChangeNotifier {
 
   String? _extractPostIdSafely(Map<String, dynamic>? payload) {
     if (payload == null) return "0";
-    
+
     String? foundId;
     void search(Map m) {
       m.forEach((k, v) {
@@ -1837,7 +2123,9 @@ class HomeProvider extends ChangeNotifier {
             keyLower == 'articleid' ||
             keyLower == 'article_id') {
           foundId = v.toString();
-        } else if (keyLower == 'id' && int.tryParse(v.toString()) != null && v.toString() != "0") {
+        } else if (keyLower == 'id' &&
+            int.tryParse(v.toString()) != null &&
+            v.toString() != "0") {
           foundId = v.toString();
         } else if (v is Map) {
           search(v);
@@ -1848,18 +2136,19 @@ class HomeProvider extends ChangeNotifier {
         }
       });
     }
-    
+
     // Check WebEngage array style customData directly or inside 'data'
     try {
       List? customDataList;
-      var customData = payload['customData'] ?? (payload['data'] != null ? payload['data']['customData'] : null);
+      var customData = payload['customData'] ??
+          (payload['data'] != null ? payload['data']['customData'] : null);
       if (customData is String) {
         try {
           var decoded = jsonDecode(customData);
           if (decoded is List) {
             customDataList = decoded;
           } else if (decoded is Map) {
-             search(decoded); // In case it's a map not list
+            search(decoded); // In case it's a map not list
           }
         } catch (e) {
           log("Error decoding WebEngage customData JSON string: $e");
@@ -1867,7 +2156,7 @@ class HomeProvider extends ChangeNotifier {
       } else if (customData is List) {
         customDataList = customData;
       }
-      
+
       if (customDataList != null) {
         for (var item in customDataList) {
           if (item is Map) {
@@ -1876,7 +2165,8 @@ class HomeProvider extends ChangeNotifier {
                 keyLower == 'post_id' ||
                 keyLower == 'articleid' ||
                 keyLower == 'article_id' ||
-                (keyLower == 'id' && int.tryParse(item['value']?.toString() ?? '') != null)) {
+                (keyLower == 'id' &&
+                    int.tryParse(item['value']?.toString() ?? '') != null)) {
               return item['value'].toString();
             }
             // iOS WebEngage might just put the value in the first item without a key
@@ -1894,7 +2184,8 @@ class HomeProvider extends ChangeNotifier {
     return foundId ?? "0";
   }
 
-  void handleNotificationTap(Map<String, dynamic>? messagePayload, {String? deepLink}) async {
+  void handleNotificationTap(Map<String, dynamic>? messagePayload,
+      {String? deepLink}) async {
     log("Notification tapped with payload: $messagePayload, deepLink: $deepLink");
 
     // Check if payload contains rich HTML content (e.g. Breaking News or announcement popup)
@@ -1965,9 +2256,12 @@ class HomeProvider extends ChangeNotifier {
 
     // Fallback: extract postId from payload
     final String? extractedPostId = _extractPostIdSafely(messagePayload);
-    if (extractedPostId != null && extractedPostId != "0" && extractedPostId.isNotEmpty) {
+    if (extractedPostId != null &&
+        extractedPostId != "0" &&
+        extractedPostId.isNotEmpty) {
       await routeDeepLink(
-        Uri.parse("https://app.bigtv24x7.com/individualPage?postId=$extractedPostId"),
+        Uri.parse(
+            "https://app.bigtv24x7.com/individualPage?postId=$extractedPostId"),
         isFromNotification: true,
       );
     }
@@ -1979,12 +2273,29 @@ class HomeProvider extends ChangeNotifier {
   Uri? pendingDeepLinkUri;
 
   bool get hasPendingDeepLink =>
-      pendingDeepLinkUri != null || (pendingDeepLink != null && pendingDeepLink!.isNotEmpty);
+      pendingDeepLinkUri != null ||
+      (pendingDeepLink != null && pendingDeepLink!.isNotEmpty);
   bool get isRoutingDeepLink => _isRoutingDeepLink;
 
+  String? _lastIncomingDeepLinkStr;
+  DateTime? _lastIncomingDeepLinkTime;
+
   void handleIncomingDeepLink(Uri uri) {
+    final now = DateTime.now();
+    final uriStr = uri.toString();
+    if (_lastIncomingDeepLinkStr == uriStr &&
+        _lastIncomingDeepLinkTime != null &&
+        now.difference(_lastIncomingDeepLinkTime!).inMilliseconds < 1500) {
+      debugPrint(
+          "Dropping duplicate handleIncomingDeepLink within 1.5s: $uriStr");
+      return;
+    }
+    _lastIncomingDeepLinkStr = uriStr;
+    _lastIncomingDeepLinkTime = now;
+
     debugPrint("handleIncomingDeepLink: $uri (isHomeScreen: $isHomeScreen)");
-    AnalyticsService.instance.track(AnalyticsEventName.deepLinkOpen, properties: {
+    AnalyticsService.instance
+        .track(AnalyticsEventName.deepLinkOpen, properties: {
       'destination': uri.path,
       'source': uri.queryParameters['source'] ?? 'deep_link',
       'url': uri.toString(),
@@ -1992,7 +2303,8 @@ class HomeProvider extends ChangeNotifier {
     if (uri.queryParameters.containsKey('campaign_id') ||
         uri.queryParameters.containsKey('utm_campaign') ||
         uri.queryParameters.containsKey('campaign')) {
-      AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+      AnalyticsService.instance
+          .track(AnalyticsEventName.campaignEntry, properties: {
         'campaign_id': uri.queryParameters['campaign_id'] ??
             uri.queryParameters['utm_campaign'] ??
             uri.queryParameters['campaign'],
@@ -2007,6 +2319,20 @@ class HomeProvider extends ChangeNotifier {
       isComeFromLinkOrNotification = true;
       isHomeLoading = true;
       notifyListeners();
+
+      // Watchdog: Ensure isHomeLoading is never permanently stuck if HomeView mount or routing delays
+      Timer(const Duration(seconds: 4), () {
+        if (isHomeLoading) {
+          debugPrint(
+              "Safety watchdog: resetting stuck isHomeLoading from pending deep link");
+          isHomeLoading = false;
+          if (getAllPostList.isEmpty && !_isFetchingAllPosts) {
+            getAllPost(isGetAllPost: true);
+          } else {
+            notifyListeners();
+          }
+        }
+      });
       return;
     }
 
@@ -2015,7 +2341,9 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> processPendingDeepLink() async {
     final uriToProcess = pendingDeepLinkUri ??
-        (pendingDeepLink != null && pendingDeepLink!.isNotEmpty ? Uri.tryParse(pendingDeepLink!) : null);
+        (pendingDeepLink != null && pendingDeepLink!.isNotEmpty
+            ? Uri.tryParse(pendingDeepLink!)
+            : null);
     pendingDeepLinkUri = null;
     pendingDeepLink = null;
     if (uriToProcess != null) {
@@ -2042,7 +2370,6 @@ class HomeProvider extends ChangeNotifier {
   DateTime? _lastDeepLinkTime;
   bool _isRoutingDeepLink = false;
 
-
   Future<void> routeDeepLink(Uri uri, {bool isFromNotification = false}) async {
     // If HomeView is not mounted yet, queue for when HomeView is ready
     if (!isHomeScreen) {
@@ -2057,6 +2384,7 @@ class HomeProvider extends ChangeNotifier {
 
     if (_isRoutingDeepLink) {
       log("Already routing a deep link, skipping duplicate: $uriString");
+      isHomeLoading = false;
       return;
     }
 
@@ -2064,6 +2392,7 @@ class HomeProvider extends ChangeNotifier {
         _lastDeepLinkTime != null &&
         now.difference(_lastDeepLinkTime!).inMilliseconds < 2500) {
       log("Duplicate deep link within 2.5s ignored: $uriString");
+      isHomeLoading = false;
       return;
     }
 
@@ -2076,7 +2405,9 @@ class HomeProvider extends ChangeNotifier {
 
       // Wait until navigator state and context are available
       int attempts = 0;
-      while ((mainNavigatorKey.currentState == null || mainNavigatorKey.currentContext == null) && attempts < 25) {
+      while ((mainNavigatorKey.currentState == null ||
+              mainNavigatorKey.currentContext == null) &&
+          attempts < 25) {
         await Future.delayed(const Duration(milliseconds: 200));
         attempts++;
       }
@@ -2090,15 +2421,22 @@ class HomeProvider extends ChangeNotifier {
       final queryParams = uri.queryParameters;
 
       void popToRoot() {
-        if (mainNavigatorKey.currentState != null) {
-          mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+        final navState = mainNavigatorKey.currentState;
+        if (navState != null) {
+          try {
+            navState.popUntil((route) => route.isFirst);
+          } catch (e) {
+            log("Warning in popToRoot: $e");
+          }
         }
       }
 
       void switchTab(int index) {
         if (index != 2 && mainNavigatorKey.currentContext != null) {
           try {
-            mainNavigatorKey.currentContext!.read<ReelsProviders>().pauseAllReels();
+            mainNavigatorKey.currentContext!
+                .read<ReelsProviders>()
+                .pauseAllReels();
           } catch (_) {}
         }
         selectedIndex = index;
@@ -2138,16 +2476,23 @@ class HomeProvider extends ChangeNotifier {
         try {
           if (mainNavigatorKey.currentContext != null) {
             mainNavigatorKey.currentContext!.read<VideoProvider>().pauseVideo();
-            mainNavigatorKey.currentContext!.read<ReelsProviders>().pauseAllReels();
+            mainNavigatorKey.currentContext!
+                .read<ReelsProviders>()
+                .pauseAllReels();
           }
         } catch (_) {}
 
         final liveData = await fetchLiveTvStream();
         final bool isMl = langCode.trim().toLowerCase() == 'ml';
-        final String fallbackStreamUrl = isMl ? malayalamLiveStreamUrl : teluguLiveStreamUrl;
-        final String streamUrl = (liveData?['stream_url'] ?? fallbackStreamUrl).toString();
-        final String channelName = (liveData?['channel_name'] ?? (isMl ? "BIG TV Malayalam" : "BIG TV")).toString();
-        final String playbackType = (liveData?['playback_type'] ?? "hls").toString();
+        final String fallbackStreamUrl =
+            isMl ? malayalamLiveStreamUrl : teluguLiveStreamUrl;
+        final String streamUrl =
+            (liveData?['stream_url'] ?? fallbackStreamUrl).toString();
+        final String channelName = (liveData?['channel_name'] ??
+                (isMl ? "BIG TV Malayalam" : "BIG TV"))
+            .toString();
+        final String playbackType =
+            (liveData?['playback_type'] ?? "hls").toString();
 
         if (mainNavigatorKey.currentState != null) {
           mainNavigatorKey.currentState!.push(
@@ -2159,7 +2504,8 @@ class HomeProvider extends ChangeNotifier {
                 watchCount: liveData?['watch_count'] is num
                     ? (liveData!['watch_count'] as num).toInt()
                     : int.tryParse(liveData?['watch_count']?.toString() ?? ''),
-                formattedWatchCount: liveData?['formatted_watch_count']?.toString(),
+                formattedWatchCount:
+                    liveData?['formatted_watch_count']?.toString(),
                 watchCountEnabled: liveData?['watch_count_enabled'] == true ||
                     liveData?['watch_count_enabled'] == 1 ||
                     liveData?['watch_count_enabled'] == 'true',
@@ -2242,14 +2588,18 @@ class HomeProvider extends ChangeNotifier {
               }
             }
             navState.push(
-              MaterialPageRoute(builder: (_) => SudokuGameScreen(playerId: userId)),
+              MaterialPageRoute(
+                  builder: (_) => SudokuGameScreen(playerId: userId)),
             );
           } else if (g.contains('patch')) {
-            final isViewOnlyRequested = queryParams['view'] == 'true' || queryParams['solved'] == 'true';
+            final isViewOnlyRequested = queryParams['view'] == 'true' ||
+                queryParams['solved'] == 'true';
             final isPlayRequested = queryParams['play'] == 'true';
             if (isViewOnlyRequested) {
               navState.push(
-                MaterialPageRoute(builder: (_) => PatchGameScreen(playerId: userId, isViewOnly: true)),
+                MaterialPageRoute(
+                    builder: (_) =>
+                        PatchGameScreen(playerId: userId, isViewOnly: true)),
               );
               return;
             }
@@ -2259,7 +2609,8 @@ class HomeProvider extends ChangeNotifier {
                 await dailyProvider.init(gameId: 'patch');
                 if (dailyProvider.isTodayCompleted) {
                   navState.push(
-                    MaterialPageRoute(builder: (_) => PatchDashboardScreen(playerId: userId)),
+                    MaterialPageRoute(
+                        builder: (_) => PatchDashboardScreen(playerId: userId)),
                   );
                   return;
                 }
@@ -2268,14 +2619,16 @@ class HomeProvider extends ChangeNotifier {
               }
             }
             navState.push(
-              MaterialPageRoute(builder: (_) => PatchGameScreen(playerId: userId)),
+              MaterialPageRoute(
+                  builder: (_) => PatchGameScreen(playerId: userId)),
             );
           } else if (g.contains('zip')) {
             if (navContext != null) {
               try {
                 final dailyProvider = navContext.read<DailyPuzzleProvider>();
                 await dailyProvider.init(gameId: 'zip');
-                if (!dailyProvider.isTodayCompleted && dailyProvider.todayLevelDefinition != null) {
+                if (!dailyProvider.isTodayCompleted &&
+                    dailyProvider.todayLevelDefinition != null) {
                   navState.push(
                     MaterialPageRoute(
                       builder: (_) => ZipGameplayScreen(
@@ -2291,7 +2644,8 @@ class HomeProvider extends ChangeNotifier {
               }
             }
             navState.push(
-              MaterialPageRoute(builder: (_) => const ZipLevelSelectionScreen()),
+              MaterialPageRoute(
+                  builder: (_) => const ZipLevelSelectionScreen()),
             );
           } else {
             // General games page -> open GamesBottomSheet or ZipLevelSelectionScreen
@@ -2299,7 +2653,8 @@ class HomeProvider extends ChangeNotifier {
               GamesBottomSheet.show(navContext, false);
             } else {
               navState.push(
-                MaterialPageRoute(builder: (_) => const ZipLevelSelectionScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const ZipLevelSelectionScreen()),
               );
             }
           }
@@ -2327,9 +2682,12 @@ class HomeProvider extends ChangeNotifier {
         popToRoot();
         switchTab(1); // Underlying tab is News (tab 1), NEVER Tab 3 (Settings)
 
-        String? epaperId = queryParams['epaperId'] ?? queryParams['newspaperId'] ?? queryParams['id'];
+        String? epaperId = queryParams['epaperId'] ??
+            queryParams['newspaperId'] ??
+            queryParams['id'];
         if ((epaperId == null || epaperId.isEmpty) &&
-            (uri.pathSegments.contains('epaper') || uri.pathSegments.contains('newspaper'))) {
+            (uri.pathSegments.contains('epaper') ||
+                uri.pathSegments.contains('newspaper'))) {
           final idx = uri.pathSegments.contains('epaper')
               ? uri.pathSegments.indexOf('epaper')
               : uri.pathSegments.indexOf('newspaper');
@@ -2352,8 +2710,12 @@ class HomeProvider extends ChangeNotifier {
               final matched = epaperProvider.allEpapers.firstWhere(
                 (e) {
                   if (e is! Map) return false;
-                  final id = e['_id']?.toString() ?? e['id']?.toString() ?? e['epaperId']?.toString() ?? '';
-                  return id == epaperId || id.toLowerCase() == epaperId!.toLowerCase();
+                  final id = e['_id']?.toString() ??
+                      e['id']?.toString() ??
+                      e['epaperId']?.toString() ??
+                      '';
+                  return id == epaperId ||
+                      id.toLowerCase() == epaperId!.toLowerCase();
                 },
                 orElse: () => null,
               );
@@ -2389,23 +2751,72 @@ class HomeProvider extends ChangeNotifier {
       // https://app.bigtv24x7.com/folknight
       // https://app.bigtv24x7.com/folk
       final bool isEventsLink = path.contains('events') ||
+          path.contains('booking') ||
           path.contains('folknight') ||
           path.contains('folk') ||
-          queryParams.containsKey('eventId');
+          queryParams.containsKey('eventId') ||
+          queryParams.containsKey('eventid');
 
       if (isEventsLink) {
-        log("Routing to Folk Night / Events deep link: $uri");
-        popToRoot();
+        log("Routing to Folk Night / Events deep link: $uri (initial folkNight=$folkNight, eventsEnable=$eventsEnable)");
+        try {
+          await getAppConfig();
+        } catch (e) {
+          log("Error fetching app config on events deep link: $e");
+        }
+
+        if (!folkNight) {
+          log("Folk Night is disabled in config (folkNight=false). Landing directly on home screen.");
+          popToRoot();
+          handleReturnFromNotificationPost(forceRefresh: true);
+          if (Platform.isAndroid) {
+            try {
+              const MethodChannel("com.chotanews/whatsapp")
+                  .invokeMethod("clearInitialIntent");
+            } catch (_) {}
+          }
+          return;
+        }
+
+        isHomeLoading = false;
         switchTab(1);
 
-        final String? targetEventId = queryParams['eventId'] ?? queryParams['id'];
+        // Pre-fetch home posts in the background so when the user taps back, the feed is ready immediately
+        if (getAllPostList.isEmpty && !_isFetchingAllPosts) {
+          getAllPost(isGetAllPost: true);
+        }
 
-        if (mainNavigatorKey.currentState != null) {
-          mainNavigatorKey.currentState!.push(
-            MaterialPageRoute(
-              builder: (context) => FolkNightEventScreen(eventId: targetEventId),
-            ),
-          );
+        final String? targetEventId = queryParams['eventId'] ??
+            queryParams['id'] ??
+            queryParams['eventid'];
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mainNavigatorKey.currentState != null) {
+            if (path.contains('booking')) {
+              mainNavigatorKey.currentState!.push(
+                MaterialPageRoute(
+                  builder: (context) => FolkNightBookingScreen(
+                    eventId:
+                        targetEventId ?? "e4d962de-5393-4541-a792-4c23f1429f9c",
+                  ),
+                ),
+              );
+            } else {
+              mainNavigatorKey.currentState!.push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      FolkNightEventScreen(eventId: targetEventId),
+                ),
+              );
+            }
+          }
+        });
+
+        if (Platform.isAndroid) {
+          try {
+            const MethodChannel("com.chotanews/whatsapp")
+                .invokeMethod("clearInitialIntent");
+          } catch (_) {}
         }
         return;
       }
@@ -2433,8 +2844,10 @@ class HomeProvider extends ChangeNotifier {
             queryParams['show'] ??
             "";
 
-        final String? videoId = queryParams['videoId'] ?? queryParams['video_id'];
-        final String? targetPostId = queryParams['postId'] ?? queryParams['post_id'];
+        final String? videoId =
+            queryParams['videoId'] ?? queryParams['video_id'];
+        final String? targetPostId =
+            queryParams['postId'] ?? queryParams['post_id'];
 
         // Ensure tags are loaded if not yet available
         if (getAllAiTagsList.isEmpty) {
@@ -2450,7 +2863,9 @@ class HomeProvider extends ChangeNotifier {
             ? (matchedTag['slug'] ?? rawShowOrSlug).toString()
             : (rawShowOrSlug.isNotEmpty ? rawShowOrSlug : "DNA");
         final realSlugUpper = realSlug.trim().toUpperCase();
-        if (realSlugUpper == 'NEWS' || realSlugUpper == 'EPAPER' || realSlugUpper == 'NEWSPAPER') {
+        if (realSlugUpper == 'NEWS' ||
+            realSlugUpper == 'EPAPER' ||
+            realSlugUpper == 'NEWSPAPER') {
           mainNavigatorKey.currentState?.push(
             MaterialPageRoute(
               builder: (context) => const EpaperScreen(),
@@ -2459,10 +2874,12 @@ class HomeProvider extends ChangeNotifier {
           return;
         }
         final String displayTitle = matchedTag != null
-            ? (matchedTag['aitagname'] ?? matchedTag['name'] ?? rawShowOrSlug).toString()
+            ? (matchedTag['aitagname'] ?? matchedTag['name'] ?? rawShowOrSlug)
+                .toString()
             : (rawShowOrSlug.isNotEmpty ? rawShowOrSlug : realSlug);
         final String? tagThumbnail = matchedTag != null
-            ? (matchedTag['thumbnailUrl'] ?? matchedTag['thumbnail'])?.toString()
+            ? (matchedTag['thumbnailUrl'] ?? matchedTag['thumbnail'])
+                ?.toString()
             : null;
         final dynamic chosenId = matchedTag != null
             ? (matchedTag['aitagid'] ?? matchedTag['id'] ?? realSlug)
@@ -2487,12 +2904,15 @@ class HomeProvider extends ChangeNotifier {
         if (getAllAiTagsList.isNotEmpty) {
           int tagIndex = getAllAiTagsList.indexWhere((t) {
             if (t is! Map) return false;
-            final s = (t['slug'] ?? t['name'] ?? t['aitagname'] ?? t['id'])?.toString();
+            final s = (t['slug'] ?? t['name'] ?? t['aitagname'] ?? t['id'])
+                ?.toString();
             return s?.toLowerCase() == realSlug.toLowerCase() ||
                 s?.toLowerCase() == displayTitle.toLowerCase() ||
                 (targetPostId != null &&
-                    (t['id']?.toString().toLowerCase() == targetPostId.toLowerCase() ||
-                        t['aitagid']?.toString().toLowerCase() == targetPostId.toLowerCase()));
+                    (t['id']?.toString().toLowerCase() ==
+                            targetPostId.toLowerCase() ||
+                        t['aitagid']?.toString().toLowerCase() ==
+                            targetPostId.toLowerCase()));
           });
           if (tagIndex != -1) {
             aiTagsScrollToCenter(tagIndex);
@@ -2505,26 +2925,37 @@ class HomeProvider extends ChangeNotifier {
           if (videoId != null && videoId.isNotEmpty) {
             vIndex = tagVideosList.indexWhere((v) {
               if (v is! Map) return false;
-              final idStr = (v['id'] ?? v['videoId'] ?? v['_id'] ?? v['video_id'])?.toString();
+              final idStr =
+                  (v['id'] ?? v['videoId'] ?? v['_id'] ?? v['video_id'])
+                      ?.toString();
               return idStr == videoId;
             });
           }
           if (vIndex == -1 && targetPostId != null && targetPostId.isNotEmpty) {
             vIndex = tagVideosList.indexWhere((v) {
               if (v is! Map) return false;
-              final idStr = (v['id'] ?? v['postId'] ?? v['_id'] ?? v['videoId'] ?? v['post_id'])?.toString();
+              final idStr = (v['id'] ??
+                      v['postId'] ??
+                      v['_id'] ??
+                      v['videoId'] ??
+                      v['post_id'])
+                  ?.toString();
               return idStr == targetPostId;
             });
           }
           // Fallback to first video if specific ID wasn't found or if URL pointed to tag show
-          if (vIndex == -1 && (videoId != null || targetPostId != null || rawShowOrSlug.isNotEmpty)) {
+          if (vIndex == -1 &&
+              (videoId != null ||
+                  targetPostId != null ||
+                  rawShowOrSlug.isNotEmpty)) {
             vIndex = 0;
           }
 
           if (vIndex != -1 && mainNavigatorKey.currentState != null) {
             // Pop any existing TagVideoPlayerScreen to prevent duplicate overlapping video screens
             mainNavigatorKey.currentState!.popUntil((route) {
-              return route.isFirst || route.settings.name != 'TagVideoPlayerScreen';
+              return route.isFirst ||
+                  route.settings.name != 'TagVideoPlayerScreen';
             });
 
             mainNavigatorKey.currentState!.push(
@@ -2533,7 +2964,9 @@ class HomeProvider extends ChangeNotifier {
                 builder: (context) => TagVideoPlayerScreen(
                   videos: tagVideosList,
                   initialIndex: vIndex,
-                  tagTitle: currentTagTitle.isNotEmpty ? currentTagTitle : displayTitle,
+                  tagTitle: currentTagTitle.isNotEmpty
+                      ? currentTagTitle
+                      : displayTitle,
                   tagThumbnailUrl: currentTagThumbnailUrl ?? tagThumbnail,
                 ),
               ),
@@ -2562,7 +2995,9 @@ class HomeProvider extends ChangeNotifier {
       // https://app.bigtv24x7.com/reels?postId=...
       // https://app.bigtv24x7.com/reels?id=...
       // https://app.bigtv24x7.com/reels
-      if (path.contains('reels') || path.contains('reel') || path.contains('shorts')) {
+      if (path.contains('reels') ||
+          path.contains('reel') ||
+          path.contains('shorts')) {
         log("Routing to Reels deep link: $uri");
         popToRoot();
 
@@ -2571,7 +3006,8 @@ class HomeProvider extends ChangeNotifier {
             queryParams['postId'] ??
             queryParams['post_id'] ??
             queryParams['id'] ??
-            (uri.pathSegments.length >= 2 && uri.pathSegments.last.toLowerCase() != 'reels'
+            (uri.pathSegments.length >= 2 &&
+                    uri.pathSegments.last.toLowerCase() != 'reels'
                 ? uri.pathSegments.last
                 : null);
 
@@ -2644,7 +3080,8 @@ class HomeProvider extends ChangeNotifier {
           if (matchedIdx != -1) {
             mainNavigatorKey.currentState?.push(
               MaterialPageRoute(
-                builder: (context) => MovieReviewsScreen(initialIndex: matchedIdx),
+                builder: (context) =>
+                    MovieReviewsScreen(initialIndex: matchedIdx),
               ),
             );
           } else {
@@ -2670,10 +3107,12 @@ class HomeProvider extends ChangeNotifier {
           );
         }
 
-        try {
-          const MethodChannel("com.chotanews/whatsapp")
-              .invokeMethod("clearInitialIntent");
-        } catch (_) {}
+        if (Platform.isAndroid) {
+          try {
+            const MethodChannel("com.chotanews/whatsapp")
+                .invokeMethod("clearInitialIntent");
+          } catch (_) {}
+        }
         return;
       }
 
@@ -2753,10 +3192,12 @@ class HomeProvider extends ChangeNotifier {
           );
         }
 
-        try {
-          const MethodChannel("com.chotanews/whatsapp")
-              .invokeMethod("clearInitialIntent");
-        } catch (_) {}
+        if (Platform.isAndroid) {
+          try {
+            const MethodChannel("com.chotanews/whatsapp")
+                .invokeMethod("clearInitialIntent");
+          } catch (_) {}
+        }
         return;
       }
 
@@ -2767,15 +3208,19 @@ class HomeProvider extends ChangeNotifier {
       // https://www.bigtvlive.com/posts/214
       // https://www.bigtvlive.com/posts/214/some-slug
       // https://app.bigtv24x7.com/posts?postId=214
-      String? pId = queryParams['postId'] ??
-          queryParams['post_id'] ??
-          queryParams['articleId'] ??
-          queryParams['article_id'];
-
-      if ((pId == null || pId.isEmpty) && queryParams.containsKey('id')) {
-        final idVal = queryParams['id'];
-        if (idVal != null && idVal.isNotEmpty && !idVal.toLowerCase().startsWith('epaper')) {
-          pId = idVal;
+      String? pId;
+      for (final entry in queryParams.entries) {
+        final keyLower = entry.key.toLowerCase();
+        if (keyLower == 'postid' ||
+            keyLower == 'post_id' ||
+            keyLower == 'articleid' ||
+            keyLower == 'article_id') {
+          pId = entry.value;
+          break;
+        } else if (keyLower == 'id' &&
+            !entry.value.toLowerCase().startsWith('epaper')) {
+          pId = entry.value;
+          break;
         }
       }
 
@@ -2792,7 +3237,10 @@ class HomeProvider extends ChangeNotifier {
       if (pId == null || pId.isEmpty) {
         for (int i = 0; i < uri.pathSegments.length; i++) {
           final seg = uri.pathSegments[i].toLowerCase();
-          if ((seg == 'post' || seg == 'posts' || seg == 'article' || seg == 'individualpage') &&
+          if ((seg == 'post' ||
+                  seg == 'posts' ||
+                  seg == 'article' ||
+                  seg == 'individualpage') &&
               i + 1 < uri.pathSegments.length) {
             final candidate = uri.pathSegments[i + 1];
             if (candidate.isNotEmpty) {
@@ -2804,32 +3252,41 @@ class HomeProvider extends ChangeNotifier {
       }
 
       if (pId != null && pId.isNotEmpty && pId != "0") {
-        log("Routing to Post ID: $pId (isNotification: $isFromNotification)");
+        debugPrint(
+            "Routing to Post ID: $pId (isNotification: $isFromNotification)");
         final targetPostId = pId;
         postId = "0";
         isComeFromLinkOrNotification = true;
         isAiTagDataLoaded = false;
         _selectedTagId = null;
         getAllAiTagsPostList = [];
-        isHomeLoading = true;
+        isHomeLoading = false;
 
-        popToRoot();
-        switchTab(1); // Set bottom nav to Home (Index 1) - NEVER Search (Index 0)
+        switchTab(
+            1); // Set bottom nav to Home (Index 1) - NEVER Search (Index 0)
 
-        // Push IndividualPostView1 so the user directly navigates to the particular post
-        if (mainNavigatorKey.currentState != null) {
-          mainNavigatorKey.currentState!.push(
-            MaterialPageRoute(
-              builder: (context) => IndividualPostView1(
-                postId: targetPostId,
-                isComeFrom: true,
+        // Push IndividualPostView1 on next frame to ensure navigator is unlocked
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mainNavigatorKey.currentState != null) {
+            popToRoot();
+            mainNavigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (context) => IndividualPostView1(
+                  postId: targetPostId,
+                  isComeFrom: true,
+                ),
               ),
-            ),
-          );
-        }
+            );
+          }
+        });
 
         // Fetch post in background to populate getSinglePostList and log analytics event
-        getIndividualPost(targetPostId, isAds: true, isLink: isFromNotification).then((_) {
+        getIndividualPost(targetPostId, isAds: true, isLink: isFromNotification)
+            .then((_) {
+          isHomeLoading = false;
+          notifyListeners();
+        }).catchError((e) {
+          debugPrint("Error fetching individual post in deep link: $e");
           isHomeLoading = false;
           notifyListeners();
         });
@@ -2840,9 +3297,12 @@ class HomeProvider extends ChangeNotifier {
         }
 
         // Tell native Android to clear its launch intent data so it doesn't replay on next open
-        try {
-          const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
-        } catch (_) {}
+        if (Platform.isAndroid) {
+          try {
+            const MethodChannel("com.chotanews/whatsapp")
+                .invokeMethod("clearInitialIntent");
+          } catch (_) {}
+        }
 
         return;
       }
@@ -2874,10 +3334,14 @@ class HomeProvider extends ChangeNotifier {
       final size = box.size;
       final position = box.localToGlobal(Offset.zero);
 
-      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+      final screenWidth = WidgetsBinding
+              .instance.platformDispatcher.views.first.physicalSize.width /
+          WidgetsBinding
+              .instance.platformDispatcher.views.first.devicePixelRatio;
 
       final itemCenter = position.dx + size.width / 2;
-      final targetOffset = aiTagScrollController.offset + itemCenter - screenWidth / 2;
+      final targetOffset =
+          aiTagScrollController.offset + itemCenter - screenWidth / 2;
 
       aiTagScrollController.animateTo(
         targetOffset.clamp(
@@ -2890,7 +3354,8 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> sendAdsDataSend(dynamic postId, dynamic title, dynamic postImage, bool isComeContest, String sourceUrl) async {
+  Future<void> sendAdsDataSend(dynamic postId, dynamic title, dynamic postImage,
+      bool isComeContest, String sourceUrl) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
@@ -2912,11 +3377,14 @@ class HomeProvider extends ChangeNotifier {
         }
         if (mainNavigatorKey.currentContext != null) {
           if (isComeContest) {
-            mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList(mainNavigatorKey.currentContext);
+            mainNavigatorKey.currentContext!
+                .read<AdsContestProvider>()
+                .getContestList(mainNavigatorKey.currentContext);
           }
         }
 
-        CustomToast.showSuccessToast(msg: "Your Successfully Joined The Contest");
+        CustomToast.showSuccessToast(
+            msg: "Your Successfully Joined The Contest");
         EventRepo().addEvent({
           "user_id": userId,
           "post_id": postId,
@@ -2957,7 +3425,8 @@ class HomeProvider extends ChangeNotifier {
         "lang": langCode,
       };
 
-      Response response = await HomeRepo().getMoreFollowTags(queryParams: params);
+      Response response =
+          await HomeRepo().getMoreFollowTags(queryParams: params);
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
         if (data is List) {
@@ -2968,7 +3437,10 @@ class HomeProvider extends ChangeNotifier {
               final type = item['type']?.toString().toLowerCase();
               final subType = item['subType']?.toString().toLowerCase();
               final postType = item['post_type']?.toString().toLowerCase();
-              if (type == 'morefollow' || subType == 'morefollow' || postType == 'morefollow' || item['id'] == -998) {
+              if (type == 'morefollow' ||
+                  subType == 'morefollow' ||
+                  postType == 'morefollow' ||
+                  item['id'] == -998) {
                 item['morefollow'] = data;
               }
             }
@@ -3010,7 +3482,6 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-
   Future<void> getAdsSaveData() async {
     isAdsDataLoading = true;
     getAdsDataList = [];
@@ -3027,7 +3498,8 @@ class HomeProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         getAdsDataList.addAll(response.data);
         log("LogsData ${getAdsDataList.length}");
-        EventRepo().addEvent({"user_id": userId, "isCheck": true}, "check_contest");
+        EventRepo()
+            .addEvent({"user_id": userId, "isCheck": true}, "check_contest");
       }
     } on DioException catch (e, st) {
       log("getAdsSaveData DioException: $e", stackTrace: st);
@@ -3094,25 +3566,36 @@ class HomeProvider extends ChangeNotifier {
 
       log("PDF saved at: $filePath");
 
-      final String title = article['title']?.toString() ?? article['id'].toString();
-      final String id = article['id']?.toString() ?? article['_id']?.toString() ?? '';
-      String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+      final String title =
+          article['title']?.toString() ?? article['id'].toString();
+      final String id =
+          article['id']?.toString() ?? article['_id']?.toString() ?? '';
+      String appLink = Platform.isIOS
+          ? (article['linkURLIos']?.toString() ?? "")
+          : (article['linkURLAndroid']?.toString() ?? "");
       if (appLink.isEmpty) {
         appLink = "https://www.bigtv24x7.com/posts?postId=$id";
       }
       final String shareText = "$title\n$appLink";
-      
+
       try {
         if (Platform.isIOS) {
           final Size size = MediaQuery.of(context).size;
-          await Share.shareXFiles([XFile(filePath)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+          await Share.shareXFiles([XFile(filePath)],
+              text: shareText,
+              sharePositionOrigin:
+                  Rect.fromLTWH(0, 0, size.width, size.height / 2));
         } else {
           const platform = MethodChannel('com.chotanews/whatsapp');
-          await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': shareText});
+          await platform.invokeMethod(
+              'shareToWhatsApp', {'imagePath': filePath, 'text': shareText});
         }
       } catch (e) {
         final Size size = MediaQuery.of(context).size;
-        await Share.shareXFiles([XFile(filePath)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+        await Share.shareXFiles([XFile(filePath)],
+            text: shareText,
+            sharePositionOrigin:
+                Rect.fromLTWH(0, 0, size.width, size.height / 2));
       }
     } catch (e) {
       log("Error generating PDF: $e");
@@ -3122,43 +3605,63 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<void> sendDeviceDetailsApi({required String userId, required String deviceId, required String fcmToken, required String lan}) async {
+
+  Future<void> sendDeviceDetailsApi(
+      {required String userId,
+      required String deviceId,
+      required String fcmToken,
+      required String lan}) async {
     try {
       final deviceInfo = await getDeviceInfoData();
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      
+
       String locationName = preferences.getString("locationNames") ?? "";
       String pincode = preferences.getString("pincode") ?? "";
 
       try {
         LocationPermission permission = await Geolocator.checkPermission();
-        bool hasRequestedLocation = preferences.getBool("hasRequestedLocation") ?? false;
-        
+        bool hasRequestedLocation =
+            preferences.getBool("hasRequestedLocation") ?? false;
+
         if (permission == LocationPermission.denied && !hasRequestedLocation) {
           permission = await Geolocator.requestPermission();
           await preferences.setBool("hasRequestedLocation", true);
         }
 
-        if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
-          Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-          List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        if (permission == LocationPermission.always ||
+            permission == LocationPermission.whileInUse) {
+          Position position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high);
+          List<Placemark> placemarks = await placemarkFromCoordinates(
+              position.latitude, position.longitude);
           if (placemarks.isNotEmpty) {
             Placemark place = placemarks.first;
-            
+
             List<String> addressParts = [];
-            if (place.street?.isNotEmpty == true) addressParts.add(place.street!);
-            if (place.subLocality?.isNotEmpty == true && !addressParts.contains(place.subLocality)) addressParts.add(place.subLocality!);
-            if (place.locality?.isNotEmpty == true && !addressParts.contains(place.locality)) addressParts.add(place.locality!);
-            if (place.administrativeArea?.isNotEmpty == true && !addressParts.contains(place.administrativeArea)) addressParts.add(place.administrativeArea!);
-            if (place.postalCode?.isNotEmpty == true && !addressParts.contains(place.postalCode)) addressParts.add(place.postalCode!);
-            if (place.country?.isNotEmpty == true && !addressParts.contains(place.country)) addressParts.add(place.country!);
+            if (place.street?.isNotEmpty == true)
+              addressParts.add(place.street!);
+            if (place.subLocality?.isNotEmpty == true &&
+                !addressParts.contains(place.subLocality))
+              addressParts.add(place.subLocality!);
+            if (place.locality?.isNotEmpty == true &&
+                !addressParts.contains(place.locality))
+              addressParts.add(place.locality!);
+            if (place.administrativeArea?.isNotEmpty == true &&
+                !addressParts.contains(place.administrativeArea))
+              addressParts.add(place.administrativeArea!);
+            if (place.postalCode?.isNotEmpty == true &&
+                !addressParts.contains(place.postalCode))
+              addressParts.add(place.postalCode!);
+            if (place.country?.isNotEmpty == true &&
+                !addressParts.contains(place.country))
+              addressParts.add(place.country!);
 
             String fullAddress = addressParts.join(", ");
 
             if (fullAddress.isNotEmpty) {
               locationName = fullAddress;
             }
-            
+
             String pin = place.postalCode ?? "";
             if (pin.isNotEmpty) {
               pincode = pin;
@@ -3189,7 +3692,8 @@ class HomeProvider extends ChangeNotifier {
       debugPrint("🚀 [API REQUEST - deviceDetails]");
       debugPrint("📅 Date & Time : ${startTime.toIso8601String()}");
       debugPrint("🌐 Method      : POST");
-      debugPrint("🔗 URL         : ${BaseUrls.newServerBaseUrl}${BaseUrls.deviceDetails}");
+      debugPrint(
+          "🔗 URL         : ${BaseUrls.newServerBaseUrl}${BaseUrls.deviceDetails}");
       debugPrint("📦 Request Body:\n$prettyJson");
       debugPrint("========================================================");
 
@@ -3202,7 +3706,8 @@ class HomeProvider extends ChangeNotifier {
       debugPrint("📅 Date & Time : ${endTime.toIso8601String()}");
       debugPrint("⏱️ Duration    : ${duration}ms");
       debugPrint("📊 Status Code : ${response.statusCode}");
-      debugPrint("📄 Response Data:\n${response.data is Map || response.data is List ? encoder.convert(response.data) : response.data}");
+      debugPrint(
+          "📄 Response Data:\n${response.data is Map || response.data is List ? encoder.convert(response.data) : response.data}");
       debugPrint("========================================================\n");
       log("Device details sent successfully");
     } catch (e) {
@@ -3251,7 +3756,8 @@ class HomeProvider extends ChangeNotifier {
           item['_embedded']['wp:featuredmedia'] != null &&
           (item['_embedded']['wp:featuredmedia'] as List).isNotEmpty) {
         final media = item['_embedded']['wp:featuredmedia'][0];
-        if (media['source_url'] != null && media['source_url'].toString().isNotEmpty) {
+        if (media['source_url'] != null &&
+            media['source_url'].toString().isNotEmpty) {
           return media['source_url'].toString();
         }
       }
@@ -3283,7 +3789,20 @@ class HomeProvider extends ChangeNotifier {
     if (rawDate.isEmpty) return '';
     try {
       final dt = DateTime.parse(rawDate);
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
       return "${dt.day} ${months[dt.month - 1]} ${dt.year}";
     } catch (_) {
       return rawDate.split('T').first;
@@ -3318,7 +3837,8 @@ class HomeProvider extends ChangeNotifier {
           if (item is Map<String, dynamic>) {
             parsed.add({
               'id': item['id'],
-              'title': _cleanWpTitle(item['title']?['rendered']?.toString() ?? ''),
+              'title':
+                  _cleanWpTitle(item['title']?['rendered']?.toString() ?? ''),
               'content': item['content']?['rendered']?.toString() ?? '',
               'excerpt': item['excerpt']?['rendered']?.toString() ?? '',
               'image_url': _extractWpImageUrl(item),
@@ -3343,7 +3863,8 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> loadMoreEditorialPosts() async {
-    if (isEditorialLoading || isEditorialLoadingMore || !hasMoreEditorial) return;
+    if (isEditorialLoading || isEditorialLoadingMore || !hasMoreEditorial)
+      return;
 
     isEditorialLoadingMore = true;
     notifyListeners();
@@ -3364,7 +3885,8 @@ class HomeProvider extends ChangeNotifier {
             if (item is Map<String, dynamic>) {
               parsed.add({
                 'id': item['id'],
-                'title': _cleanWpTitle(item['title']?['rendered']?.toString() ?? ''),
+                'title':
+                    _cleanWpTitle(item['title']?['rendered']?.toString() ?? ''),
                 'content': item['content']?['rendered']?.toString() ?? '',
                 'excerpt': item['excerpt']?['rendered']?.toString() ?? '',
                 'image_url': _extractWpImageUrl(item),

@@ -74,11 +74,11 @@ class _MainScreenCardState extends State<MainScreenCard>
                 child: Container(
                   color: topBarColor,
                   child: Center(
-                    child: (homeProvider.isHomeLoading ||
+                    child: ((homeProvider.isHomeLoading ||
                             homeProvider.hasPendingDeepLink ||
                             homeProvider.isRoutingDeepLink ||
-                            homeProvider.isComeFromLinkOrNotification ||
-                            !homeProvider.isInitialHomeLoaded)
+                            !homeProvider.isInitialHomeLoaded) &&
+                            homeProvider.getAllPostList.isEmpty)
                         ? const HomeShimmer()
                         : Column(
                             children: [

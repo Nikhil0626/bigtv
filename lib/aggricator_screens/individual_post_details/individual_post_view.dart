@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
@@ -20,9 +22,12 @@ import '../video_image_screen/video_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
+import '../../utils/app_no_data.dart';
 import '../../utils/app_toasts.dart';
 import 'package:chotanews/features/home/presentation/widgets/main_screen_byts_view.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
+import 'package:chotanews/main.dart';
 
 class IndividualPostView1 extends StatefulWidget {
   final String postId;
@@ -149,60 +154,101 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   }
 
   bool _isNavigatingBack = false;
+  bool _hasCleanedUp = false;
+  bool _hasHandledFailure = false;
+  bool _hasStartedFetch = false;
+  Timer? _watchdogTimer;
 
-  void _handleBackNavigation() {
-    if (_isNavigatingBack) return;
-    _isNavigatingBack = true;
+  void _onPostApiFailed() {
+    _watchdogTimer?.cancel();
+    if (_isNavigatingBack || !mounted) return;
+    _hasHandledFailure = true;
+
+    try {
+      CustomToast.showErrorToast(
+        msg: "Failed to load post",
+        timeDuration: 2,
+      );
+    } catch (e) {
+      debugPrint("Error showing toast: $e");
+    }
+
+    _handleBackNavigation();
+  }
+
+  void _cleanupAndRestoreHome([HomeProvider? provider]) {
+    _watchdogTimer?.cancel();
+    if (_hasCleanedUp) return;
+    _hasCleanedUp = true;
 
     _stopVideoPlayback();
 
-    try {
-      final homeProvider = context.read<HomeProvider>();
-
-      // Ensure Home screen bottom bar is enabled
-      homeProvider.isBottomEnable = true;
-      homeProvider.isComeFromLinkOrNotification = false;
-
-      // If feed was empty or single-item from link, reload full home news feed
-      if (homeProvider.getAllPostList.length <= 1) {
-        homeProvider.getAllPost(isGetAllPost: true);
-      }
-
+    if (Platform.isAndroid) {
       try {
         const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
       } catch (_) {}
-    } catch (e) {
-      log("Error configuring homeProvider on back navigation: $e");
     }
 
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    } else {
+    try {
+      HomeProvider? hp = provider;
+      if (hp == null && mounted) {
+        try {
+          hp = context.read<HomeProvider>();
+        } catch (_) {}
+      }
+      hp ??= mainNavigatorKey.currentContext?.read<HomeProvider>();
+
+      if (hp != null) {
+        hp.handleReturnFromNotificationPost(forceRefresh: true);
+      }
+    } catch (e) {
+      log("Error during _cleanupAndRestoreHome: $e");
+    }
+  }
+
+  void _handleBackNavigation() {
+    _watchdogTimer?.cancel();
+    if (_isNavigatingBack) return;
+    _isNavigatingBack = true;
+
+    HomeProvider? hp;
+    try {
+      hp = context.read<HomeProvider>();
+    } catch (_) {}
+
+    _cleanupAndRestoreHome(hp);
+
+    final nav = Navigator.of(context);
+    final mainNav = mainNavigatorKey.currentState;
+
+    try {
+      if (nav.canPop()) {
+        nav.pop();
+      } else if (mainNav != null && mainNav.canPop()) {
+        mainNav.pop();
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeView()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint("Error popping from IndividualPostView1: $e");
+      _isNavigatingBack = false;
       try {
-        final homeProvider = context.read<HomeProvider>();
-        homeProvider.onItemTapped(1);
-        if (homeProvider.homePageController.hasClients) {
-          homeProvider.homePageController.jumpToPage(1);
-        }
+        mainNavigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeView()),
+          (route) => false,
+        );
       } catch (_) {}
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeView()),
-        (route) => false,
-      );
     }
   }
 
   @override
   void dispose() {
-    _stopVideoPlayback();
-    try {
-      final homeProvider = context.read<HomeProvider>();
-      homeProvider.isComeFromLinkOrNotification = false;
-      try {
-        const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
-      } catch (_) {}
-    } catch (_) {}
+    _watchdogTimer?.cancel();
+    _cleanupAndRestoreHome();
     super.dispose();
   }
 
@@ -211,12 +257,41 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
     log("is come from lin----k ${widget.postId}");
     super.initState();
     getWebData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    // 4-second watchdog timer: If article never loads, fail gracefully back to Home
+    _watchdogTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted && !_hasHandledFailure && !_isNavigatingBack) {
+        final home = context.read<HomeProvider>();
+        final requestedId = widget.postId.trim();
+        final currentLoadedId = (home.getSinglePostList['id'] ??
+                home.getSinglePostList['postId'] ??
+                home.getSinglePostList['post_id'] ??
+                home.getSinglePostList['_id'])
+            ?.toString()
+            .trim();
+        if (home.getSinglePostList.isEmpty || currentLoadedId != requestedId) {
+          debugPrint("Watchdog timed out waiting for post $requestedId - falling back to Home");
+          _onPostApiFailed();
+        }
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      _hasStartedFetch = true;
       final home = context.read<HomeProvider>();
-      if (home.getSinglePostList.isEmpty ||
-          home.getSinglePostList['id']?.toString() != widget.postId.toString()) {
-        home.getIndividualPost(widget.postId, isAds: true);
+      final requestedId = widget.postId.trim();
+      final currentLoadedId = (home.getSinglePostList['id'] ??
+              home.getSinglePostList['postId'] ??
+              home.getSinglePostList['post_id'] ??
+              home.getSinglePostList['_id'])
+          ?.toString()
+          .trim();
+      if (home.getSinglePostList.isEmpty || currentLoadedId != requestedId) {
+        final success = await home.getIndividualPost(widget.postId, isAds: true);
+        if (!success && mounted && !_hasHandledFailure) {
+          _onPostApiFailed();
+        }
       }
     });
   }
@@ -224,15 +299,39 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+      final currentPostId = widget.postId.trim();
+      final singleId = (homeProvider.getSinglePostList['id'] ??
+              homeProvider.getSinglePostList['postId'] ??
+              homeProvider.getSinglePostList['post_id'] ??
+              homeProvider.getSinglePostList['_id'])
+          ?.toString()
+          .trim();
       final matchesRequestedPost = homeProvider.getSinglePostList.isNotEmpty &&
-          homeProvider.getSinglePostList['id']?.toString() ==
-              widget.postId.toString();
+          (singleId == currentPostId || singleId == null || currentPostId.isEmpty);
       final articleFromProvider = matchesRequestedPost
           ? Map<String, dynamic>.from(homeProvider.getSinglePostList)
           : <String, dynamic>{};
       final article = articleFromProvider.isNotEmpty
           ? articleFromProvider
           : (widget.initialArticle ?? <String, dynamic>{});
+
+      if (article.isNotEmpty) {
+        _watchdogTimer?.cancel();
+      }
+
+      if (!_hasHandledFailure &&
+          !_isNavigatingBack &&
+          (homeProvider.isPostError ||
+              (_hasStartedFetch &&
+                  !homeProvider.isPostLoading &&
+                  article.isEmpty))) {
+        _hasHandledFailure = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _onPostApiFailed();
+          }
+        });
+      }
 
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
@@ -241,10 +340,9 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
           statusBarBrightness: Brightness.dark,
         ),
         child: PopScope(
-          canPop: false,
+          canPop: true,
           onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
-            _handleBackNavigation();
+            _cleanupAndRestoreHome();
           },
           child: Scaffold(
             backgroundColor: _getPostBackgroundColor(article, context),
@@ -255,120 +353,109 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                   height: MediaQuery.of(context).padding.top,
                 ),
                 Expanded(
-                  child: article.isEmpty
-                      ? const AppLoadingScreen()
-                      : SizedBox(
+                  child: Stack(
+                    children: [
+                      article.isEmpty
+                          ? const AppLoadingScreen()
+                          : SizedBox(
                               height: double.infinity,
                               width: double.infinity,
                               child: Screenshot(
-                      controller: adsScreenshotController,
-                      child: article['type'].toString() == "WebUrl"
-                          ? Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: InAppWebViewScreen(
-                                webUrl: context.read<HomeProvider>().webUrl.toString(),
-                                title: '',
-                              ),
-                            )
-                          : (article['type'] == "Image" && article['subType'] == "ImageAd")
-                              ? InkWell(
-                                  onTap: () async {
-                                    SharedPreferences sp = await SharedPreferences.getInstance();
-                                    bool isLogin = sp.getString("loginType") != "login" ? true : false;
-                                    if (isLogin) {
-                                      CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
-                                    } else {
-                                      if (article['postUrl'] != "" && article['postUrl'] != null) {
-                                        _stopVideoPlayback();
-                                        Navigator.pop(context);
-                                        context.read<HomeProvider>().sendAdsDataSend(
-                                            article['id'], article['title'], article['image_url'], false, article['postUrl']);
-                                      }
-                                    }
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      (article['image_url'] is List)
-                                          ? (article['image_url'].length == 1
-                                              ? Image.network(
-                                                  article['image_url'][0] ?? "",
-                                                  width: MediaQuery.of(context).size.width,
-                                                  height: MediaQuery.of(context).size.height,
-                                                  fit: BoxFit.fill,
-                                                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                                                    "assets/images/bigtv_default_post.png",
-                                                    width: MediaQuery.of(context).size.width,
-                                                    height: MediaQuery.of(context).size.height,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                )
-                                              : ImagePostSlider(
-                                                  imageUrl: article['image_url'],
-                                                ))
-                                          : Image.network(
-                                              article['image_url'] ?? "",
-                                              width: MediaQuery.of(context).size.width,
-                                              height: MediaQuery.of(context).size.height,
-                                              fit: BoxFit.fill,
-                                              errorBuilder: (context, error, stackTrace) => Image.asset(
-                                                "assets/images/bigtv_default_post.png",
-                                                width: MediaQuery.of(context).size.width,
-                                                height: MediaQuery.of(context).size.height,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                      Positioned(
-                                        top: 12,
-                                        left: 14,
-                                        child: InkWell(
-                                          onTap: _handleBackNavigation,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(7),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            height: 40,
-                                            width: 40,
-                                            child: const Icon(
-                                              Icons.arrow_back,
-                                              color: Colors.black,
-                                              size: 20,
-                                            ),
-                                          ),
+                                controller: adsScreenshotController,
+                                child: article['type'].toString() == "WebUrl"
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: InAppWebViewScreen(
+                                          webUrl: context.read<HomeProvider>().webUrl.toString(),
+                                          title: '',
                                         ),
                                       )
-                                    ],
+                                    : (article['type'] == "Image" && article['subType'] == "ImageAd")
+                                        ? InkWell(
+                                            onTap: () async {
+                                              SharedPreferences sp = await SharedPreferences.getInstance();
+                                              bool isLogin = sp.getString("loginType") != "login" ? true : false;
+                                              if (isLogin) {
+                                                CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
+                                              } else {
+                                                if (article['postUrl'] != "" && article['postUrl'] != null) {
+                                                  _stopVideoPlayback();
+                                                  Navigator.pop(context);
+                                                  context.read<HomeProvider>().sendAdsDataSend(
+                                                      article['id'], article['title'], article['image_url'], false, article['postUrl']);
+                                                }
+                                              }
+                                            },
+                                            child: (article['image_url'] is List)
+                                                ? (article['image_url'].length == 1
+                                                    ? Image.network(
+                                                        article['image_url'][0] ?? "",
+                                                        width: MediaQuery.of(context).size.width,
+                                                        height: MediaQuery.of(context).size.height,
+                                                        fit: BoxFit.fill,
+                                                        errorBuilder: (context, error, stackTrace) => Image.asset(
+                                                          "assets/images/bigtv_default_post.png",
+                                                          width: MediaQuery.of(context).size.width,
+                                                          height: MediaQuery.of(context).size.height,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                    : ImagePostSlider(
+                                                        imageUrl: article['image_url'],
+                                                      ))
+                                                : Image.network(
+                                                    article['image_url'] ?? "",
+                                                    width: MediaQuery.of(context).size.width,
+                                                    height: MediaQuery.of(context).size.height,
+                                                    fit: BoxFit.fill,
+                                                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                                                      "assets/images/bigtv_default_post.png",
+                                                      width: MediaQuery.of(context).size.width,
+                                                      height: MediaQuery.of(context).size.height,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                          )
+                                        : MainScreenBytView(
+                                            article: Map<String, dynamic>.from(article),
+                                            isMainScreen: true,
+                                          ),
+                              ),
+                            ),
+                      // Top-level, high-priority back button overlay accessible across all post states
+                      Positioned(
+                        top: 8,
+                        left: 10,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: _handleBackNavigation,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(24),
+                              onTap: _handleBackNavigation,
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.6),
+                                    shape: BoxShape.circle,
                                   ),
-                                )
-                              : Stack(
-                                  children: [
-                                    MainScreenBytView(
-                                      article: Map<String, dynamic>.from(article),
-                                      isMainScreen: true,
-                                    ),
-                                    Positioned(
-                                      top: 12,
-                                      left: 14,
-                                      child: InkWell(
-                                        onTap: _handleBackNavigation,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(alpha: 0.5),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.arrow_back,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  child: const Icon(
+                                    Icons.arrow_back,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
                                 ),
-                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -559,6 +646,35 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   }
 
   Future<void> launchURL(Uri uri) async {
+    final String urlStr = uri.toString().toLowerCase();
+    final bool isEventsLink = urlStr.contains('events') ||
+        urlStr.contains('folknight') ||
+        urlStr.contains('folk') ||
+        uri.queryParameters.containsKey('eventId');
+
+    if (isEventsLink && mounted) {
+      final homeProvider = context.read<HomeProvider>();
+      if (!homeProvider.folkNight) {
+        log("Events link tapped in post but folkNight config is false. Not opening link: $uri");
+        return;
+      }
+    }
+
+    if (urlStr.contains('bigtv24x7.com') ||
+        urlStr.contains('bigtvlive.com') ||
+        urlStr.contains('livebigtv') ||
+        urlStr.contains('videotag') ||
+        urlStr.contains('folknight') ||
+        urlStr.contains('epaper') ||
+        urlStr.contains('events') ||
+        urlStr.contains('postid=') ||
+        urlStr.contains('/posts/')) {
+      if (mounted) {
+        context.read<HomeProvider>().routeDeepLink(uri);
+        return;
+      }
+    }
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {

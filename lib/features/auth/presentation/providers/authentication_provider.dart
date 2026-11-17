@@ -754,7 +754,7 @@ class AuthenticationProvider extends ChangeNotifier {
           final hp = context.read<HomeProvider>();
           hp.selectedIndex = 1;
           hp.onItemTapped(1);
-          if (hp.getAllPostList.isEmpty) {
+          if (hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
             hp.getAllPost(isGetAllPost: true);
           }
         } catch (_) {}
@@ -771,7 +771,7 @@ class AuthenticationProvider extends ChangeNotifier {
           final hp = context.read<HomeProvider>();
           hp.selectedIndex = 1;
           hp.onItemTapped(1);
-          if (hp.getAllPostList.isEmpty) {
+          if (hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
             hp.getAllPost(isGetAllPost: true);
           }
         } catch (_) {}
