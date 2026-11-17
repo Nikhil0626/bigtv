@@ -512,7 +512,9 @@ class HomeProvider extends ChangeNotifier {
     Map<String, dynamic> body = {"user_id": userId, "isBigTv": "true"};
     try {
       Response? response = await HomeRepo().getSinglePost(body, postId);
+      debugPrint("getSinglePost URL: ${response?.requestOptions.uri}");
       debugPrint("getSinglePost response statusCode: ${response?.statusCode}");
+      debugPrint("getSinglePost response: ${response?.data}");
       if (response != null && response.statusCode == 200 && response.data != null) {
         dynamic resData = response.data;
         if (resData is String) {

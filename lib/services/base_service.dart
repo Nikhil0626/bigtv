@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../utils/app_enums.dart';
 import 'base_urls.dart';
@@ -20,14 +21,21 @@ class BaseService {
   void _initializeInterceptors() {
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-
+        debugPrint('--> ${options.method.toUpperCase()} ${options.uri}');
         return handler.next(options); // Continue with the request
       },
       onResponse: (Response response, ResponseInterceptorHandler handler) {
+        debugPrint('Response[${response.statusCode}] => PATH: ${response.requestOptions.uri}');
+        debugPrint('Response body: ${response.data}');
         log('Response[${response.statusCode}] => PATH: ${response.requestOptions.uri}');
         return handler.next(response); // Continue with the response
       },
       onError: (DioException e, ErrorInterceptorHandler handler) {
+        debugPrint('Error[${e.response?.statusCode}] => PATH: ${e.requestOptions.uri}');
+        debugPrint('Error message: ${e.message}');
+        if (e.response?.data != null) {
+          debugPrint('Error response: ${e.response?.data}');
+        }
         log('hello siva ${e.toString()}');
         log('hello siva111 ${handler.toString()}');
         log('Error[${e.response?.statusCode}] => PATH: ${e.requestOptions.uri}');

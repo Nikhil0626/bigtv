@@ -3,6 +3,7 @@ import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 
 class HomeRepo extends BaseService{
@@ -17,13 +18,17 @@ class HomeRepo extends BaseService{
       );
       if (res is Response) {
         response = res;
+        debugPrint("getSinglePost (Dev) URL: ${response.requestOptions.uri}");
+        debugPrint("getSinglePost (Dev) response [${response.statusCode}]: ${response.data}");
         if (response.statusCode == 200 &&
             response.data != null &&
             response.data['status'] == 'success') {
           return response;
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("getSinglePost (Dev) error: $e");
+    }
 
     // Fallback to production if post is not found on dev
     try {
@@ -34,12 +39,16 @@ class HomeRepo extends BaseService{
         queryParameters: body,
       );
       if (prodRes is Response) {
+        debugPrint("getSinglePost (Prod Fallback) URL: ${prodRes.requestOptions.uri}");
+        debugPrint("getSinglePost (Prod Fallback) response [${prodRes.statusCode}]: ${prodRes.data}");
         if (prodRes.statusCode == 200 && prodRes.data != null) {
           return prodRes;
         }
         response ??= prodRes;
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("getSinglePost (Prod Fallback) error: $e");
+    }
     return response;
   }
 
