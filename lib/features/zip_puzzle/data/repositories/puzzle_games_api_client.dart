@@ -87,7 +87,7 @@ class PuzzleGamesApiClient {
       final query = date != null && date.isNotEmpty ? '?date=$date' : '';
       final res = await _client
           .get(Uri.parse('$baseUrl/games/$normalizedId/today$query'), headers: _headers)
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -215,7 +215,7 @@ class PuzzleGamesApiClient {
             headers: _headers,
             body: jsonEncode(body),
           )
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -264,7 +264,7 @@ class PuzzleGamesApiClient {
             ),
             headers: _headers,
           )
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -334,7 +334,7 @@ class PuzzleGamesApiClient {
             Uri.parse('$baseUrl/users/$playerId/games/$normalizedId/streak'),
             headers: _headers,
           )
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -397,7 +397,7 @@ class PuzzleGamesApiClient {
             headers: _headers,
             body: jsonEncode({'reason': reason ?? 'Missed game gap'}),
           )
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -431,7 +431,7 @@ class PuzzleGamesApiClient {
             Uri.parse('$baseUrl/users/$playerId/games'),
             headers: _headers,
           )
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body) as Map<String, dynamic>;

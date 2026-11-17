@@ -215,8 +215,14 @@ class _DistrictViewState extends State<DistrictView> {
         final int selectedCount = authProvider.selectedLocations.length;
         final int totalItems = useFallbacks ? fallbacks.length : locations.length;
 
-        return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            authProvider.updateLoginStatus(NewAppLoginStatus.category);
+          },
+          child: Scaffold(
+            backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
           body: Stack(
             children: [
               // Background top right wave design
@@ -651,8 +657,9 @@ class _DistrictViewState extends State<DistrictView> {
               ),
             ],
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 }

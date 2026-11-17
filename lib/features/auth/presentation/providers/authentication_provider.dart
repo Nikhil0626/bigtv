@@ -7,6 +7,7 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 
 import 'package:chotanews/features/auth/data/repositories/authentication_repo.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
@@ -33,6 +34,7 @@ class AuthenticationProvider extends ChangeNotifier {
   final TextEditingController otpController = TextEditingController();
   bool isLoginLoading = false;
   bool isBlockedUser = true;
+  bool isGuest = false;
   bool isVerifyLoading = false;
   String? errorMessage;
   bool isButtonEnabled = false;
@@ -86,6 +88,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   void updateLoginStatus(NewAppLoginStatus status) {
     newAppLoginStatus = status;
+    saveLoginState();
     notifyListeners();
   }
 
@@ -123,6 +126,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future sendOtp(BuildContext context) async {
+    isGuest = false;
     isLoginLoading = true;
     notifyListeners();
     log("ButtonClicked __${phoneController.text}");
@@ -168,6 +172,7 @@ class AuthenticationProvider extends ChangeNotifier {
   Future verifyOtp(
     context,
   ) async {
+    isGuest = false;
     errorMessage = '';
     isVerifyLoading = true;
     isButtonEnabled = false;
@@ -220,6 +225,9 @@ class AuthenticationProvider extends ChangeNotifier {
         phoneController.text = "";
         try {
           Provider.of<ReelsProviders>(context, listen: false).loadCachedLikedReels();
+        } catch (_) {}
+        try {
+          Provider.of<ProfileProvider>(context, listen: false).getProfile(showLoading: false);
         } catch (_) {}
         notifyListeners();
       }
@@ -671,6 +679,10 @@ class AuthenticationProvider extends ChangeNotifier {
   Future<NewAppLoginStatus> getLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? status = prefs.getString('loginState');
+    String? loginType = prefs.getString('loginType');
+    if (loginType == 'skip') {
+      isGuest = true;
+    }
 
     if (status != null) {
       return NewAppLoginStatus.values.firstWhere((e) => e.toString() == status, orElse: () => NewAppLoginStatus.none);
@@ -681,6 +693,7 @@ class AuthenticationProvider extends ChangeNotifier {
   void continueAsGuest(
     BuildContext context,
   ) async {
+    isGuest = true;
     final canPop = Navigator.canPop(context);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginType", "skip");
@@ -709,6 +722,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   void setLogOutStatus(context, bool isLogout) async {
+    isGuest = false;
     newAppLoginStatus = isLogout ? NewAppLoginStatus.skip : NewAppLoginStatus.login;
     AnalyticsService.instance.track(AnalyticsEventName.logout);
     AnalyticsService.instance.setUser(null);

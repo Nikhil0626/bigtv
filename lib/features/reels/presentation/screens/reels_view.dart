@@ -8,6 +8,7 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/features/reels/data/models/reels_model.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/features/reels/presentation/widgets/reels_screen_preview.dart';
+import 'package:chotanews/services/reel_share_helper.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -65,7 +66,7 @@ class ReelsScreenState extends State<ReelsScreen> {
                   color: Colors.black,
                   child: const AppNoData(textColor: Colors.white),
                 )
-              : ReelPreviewScreen(initialIndex: 0);
+              : ReelPreviewScreen(initialIndex: reelsProvider.targetReelIndex);
     });
   }
 }
@@ -278,9 +279,10 @@ class _EachReelCardState extends State<EachReelCard> {
                                   final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
                                   final String title = widget.reel.title.trim();
-                                  final String videoUrl = widget.reel.videoUrl.trim();
-                                  final String fallbackUrl = "https://www.bigtv24x7.com/posts?postId=${widget.reel.id}";
-                                  final String shareLink = videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
+                                  final String shareLink =
+                                      ReelShareHelper.getReelShareUrl(
+                                    widget.reel.id,
+                                  );
                                   final String shareText = title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
 
                                   // Share immediately so there is zero UI delay

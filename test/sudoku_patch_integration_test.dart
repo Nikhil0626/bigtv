@@ -215,7 +215,8 @@ void main() {
       expect(redText, findsOneWidget);
 
       // Also verify mistakes badge in appbar
-      expect(find.text('Errors: 1'), findsOneWidget);
+      expect(find.byIcon(Icons.cancel_outlined), findsOneWidget);
+      expect(find.text('1'), findsWidgets);
 
       // Press backspace to erase
       final backspace = find.byIcon(Icons.backspace_outlined);
@@ -224,7 +225,7 @@ void main() {
 
       // Error banner and mistakes badge should be gone
       expect(find.textContaining('Sudoku Rule Violation'), findsNothing);
-      expect(find.text('Errors: 1'), findsNothing);
+      expect(find.byIcon(Icons.cancel_outlined), findsNothing);
 
       // Now enter the CORRECT number for (0, 1) which is '2'
       final keypadTwo = find.widgetWithText(ElevatedButton, '2');

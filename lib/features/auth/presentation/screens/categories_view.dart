@@ -129,8 +129,14 @@ class _CategoriesViewState extends State<CategoriesView> {
         final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackCategoriesMl : _fallbackCategories;
         final int selectedCount = authProvider.selectedCategories.length;
 
-        return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            authProvider.updateLoginStatus(NewAppLoginStatus.language);
+          },
+          child: Scaffold(
+            backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
           body: Stack(
             children: [
               // Background top right wave design
@@ -482,8 +488,9 @@ class _CategoriesViewState extends State<CategoriesView> {
               ),
             ],
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 }

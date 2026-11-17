@@ -385,18 +385,12 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
         ? game.elapsedMilliseconds
         : (widget.initialElapsedMs ?? 30000);
 
-    ProfileProvider? profileProvider;
+    // Sync locally to unified and individual game keys WITHOUT hitting backend profile API!
     try {
-      if (mounted) {
-        profileProvider = context.read<ProfileProvider>();
-      }
-    } catch (_) {}
-
-    try {
-      GameProfileManager.saveUnifiedProfile(
+      await GameProfileManager.saveUnifiedProfile(
         name: displayName,
         photoUrl: photoUrl,
-        profileProvider: profileProvider,
+        updateBackend: false,
       );
     } catch (_) {}
 

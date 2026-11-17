@@ -22,22 +22,31 @@ class PuzzleApiService {
     final query = playerId != null && playerId.isNotEmpty ? '?playerId=$playerId' : '';
     final url = '$baseUrl/games/$gameSlug/today$query';
 
-    try {
-      final response = await http
-          .get(Uri.parse(url), headers: {'Accept': '*/*'})
-          .timeout(const Duration(seconds: 4));
+    // Attempt up to 2 times with a generous 12-second timeout before falling back
+    for (int attempt = 1; attempt <= 2; attempt++) {
+      try {
+        final response = await http
+            .get(Uri.parse(url), headers: {'Accept': '*/*'})
+            .timeout(const Duration(seconds: 12));
 
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        if (json is Map<String, dynamic> && json['data'] != null) {
-          return Map<String, dynamic>.from(json['data']);
+        if (response.statusCode == 200) {
+          final json = jsonDecode(response.body);
+          if (json is Map<String, dynamic> && json['data'] != null) {
+            return Map<String, dynamic>.from(json['data']);
+          }
+          return json;
+        } else {
+          debugPrint('PuzzleApiService.getTodayGame HTTP ${response.statusCode} (attempt $attempt)');
         }
-        return json;
+      } catch (e) {
+        debugPrint('PuzzleApiService.getTodayGame error on attempt $attempt: $e');
+        if (attempt < 2) {
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
       }
-    } catch (e) {
-      debugPrint('PuzzleApiService.getTodayGame error: $e, using local fallback');
     }
 
+    debugPrint('PuzzleApiService.getTodayGame using local fallback for $gameSlug');
     // High quality offline fallback data matching the schema
     return _getFallbackTodayGame(gameSlug);
   }
@@ -72,7 +81,7 @@ class PuzzleApiService {
             headers: {'Content-Type': 'application/json', 'Accept': '*/*'},
             body: jsonEncode(bodyMap),
           )
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final json = jsonDecode(response.body);
@@ -107,7 +116,7 @@ class PuzzleApiService {
     try {
       final response = await http
           .get(Uri.parse(url), headers: {'Accept': '*/*'})
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);

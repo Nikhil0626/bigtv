@@ -25,6 +25,7 @@ import 'package:chotanews/features/reels/data/repositories/reels_repository.dart
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/features/reels/presentation/screens/reels_view.dart';
 import 'package:chotanews/features/reels/presentation/widgets/reels_screen_preview.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 
 class _FakeVideoPlayerController extends ValueNotifier<VideoPlayerValue>
@@ -851,7 +852,7 @@ void main() {
             matching: find.byType(FittedBox),
           ),
         );
-        expect(fittedBox.fit, equals(BoxFit.cover));
+        expect(fittedBox.fit, equals(BoxFit.fill));
       },
     );
 
@@ -922,6 +923,117 @@ void main() {
         );
       },
     );
+
+    group('Reels Deep Linking and Target Index Tests', () {
+      ReelsModel createTestReel({required String id, String title = 'Test Reel'}) {
+        return ReelsModel(
+          id: id,
+          videoUrl: 'https://example.com/video.mp4',
+          thumbnailUrl: 'https://example.com/thumb.jpg',
+          title: title,
+          publisher: 'Test Publisher',
+          publisherImage: 'https://example.com/pub.jpg',
+          likes: 10,
+          shares: 2,
+          duration: '0:30',
+          createdAt: '2026-01-01',
+          postName: 'Post',
+          reportedBy: 'Reporter',
+          links: const [],
+          content: 'Content',
+          isBookmarked: 0,
+        );
+      }
+
+      test('ReelsProviders setTargetReelId finds index in existing reels list', () {
+        final provider = ReelsProviders();
+        provider.getAllReelsList = [
+          createTestReel(id: 'reel_1', title: 'Reel 1'),
+          createTestReel(id: 'reel_2', title: 'Reel 2'),
+          createTestReel(id: 'reel_3', title: 'Reel 3'),
+        ];
+
+        provider.setTargetReelId('reel_2');
+        expect(provider.targetReelIndex, equals(1));
+        expect(provider.pendingTargetReelId, equals('reel_2'));
+
+        provider.setTargetIndex(2);
+        expect(provider.targetReelIndex, equals(2));
+      });
+
+      test('ReelsProviders setTargetReelId remembers pending id when list is empty', () {
+        final provider = ReelsProviders();
+        provider.getAllReelsList = [];
+
+        provider.setTargetReelId('reel_target_99');
+        expect(provider.pendingTargetReelId, equals('reel_target_99'));
+        expect(provider.targetReelIndex, equals(0));
+      });
+
+      testWidgets(
+        'HomeProvider routeDeepLink routes app.bigtv24x7.com/reels to tab 2 and sets targetReelId',
+        (tester) async {
+          final homeProvider = HomeProvider()..isHomeScreen = true;
+          final reelsProvider = ReelsProviders();
+          reelsProvider.getAllReelsList = [
+            createTestReel(id: 'first', title: 'First Reel'),
+            createTestReel(id: '64b522b7-6efe-4e99-ba75-52078ba4b54f', title: 'Target Reel'),
+          ];
+
+          await tester.pumpWidget(
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+                ChangeNotifierProvider<ReelsProviders>.value(value: reelsProvider),
+              ],
+              child: MaterialApp(
+                navigatorKey: mainNavigatorKey,
+                home: const Scaffold(body: Text('Home')),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          await homeProvider.routeDeepLink(
+            Uri.parse('https://app.bigtv24x7.com/reels?reelId=64b522b7-6efe-4e99-ba75-52078ba4b54f'),
+          );
+          await tester.pump();
+
+          expect(homeProvider.selectedIndex, equals(2));
+          expect(reelsProvider.pendingTargetReelId, equals('64b522b7-6efe-4e99-ba75-52078ba4b54f'));
+          expect(reelsProvider.targetReelIndex, equals(1));
+        },
+      );
+
+      testWidgets(
+        'HomeProvider routeDeepLink routes app.bigtv24x7.com/reels without reelId to tab 2',
+        (tester) async {
+          final homeProvider = HomeProvider()..isHomeScreen = true;
+          final reelsProvider = ReelsProviders();
+
+          await tester.pumpWidget(
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+                ChangeNotifierProvider<ReelsProviders>.value(value: reelsProvider),
+              ],
+              child: MaterialApp(
+                navigatorKey: mainNavigatorKey,
+                home: const Scaffold(body: Text('Home')),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          await homeProvider.routeDeepLink(
+            Uri.parse('https://app.bigtv24x7.com/reels'),
+          );
+          await tester.pump();
+
+          expect(homeProvider.selectedIndex, equals(2));
+        },
+      );
+    });
   });
 }
 

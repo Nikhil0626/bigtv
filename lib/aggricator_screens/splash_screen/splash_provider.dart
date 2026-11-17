@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,8 +39,10 @@ class SplashProvider extends ChangeNotifier {
       try {
         context.read<HomeProvider>().getAppConfig();
         await context.read<HomeProvider>().loadLanguage();
+        // While opening the app, hit the profile API, get the data and store locally
+        context.read<ProfileProvider>().getProfile(showLoading: false);
       } catch (e) {
-        debugPrint("Error loading app config: $e");
+        debugPrint("Error loading app config / profile: $e");
       }
       if (context.mounted) {
         context.read<AuthenticationProvider>().isPageNavigation(context);
