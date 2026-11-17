@@ -163,7 +163,10 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
   @override
   Widget build(BuildContext context) {
     final homeProvider = context.watch<HomeProvider>();
-    if (!homeProvider.folkNight || homeProvider.langCode == 'ml') {
+    if (!homeProvider.folkNight ||
+        homeProvider.isFolkNightDismissed ||
+        homeProvider.langCode == 'ml' ||
+        homeProvider.selectedIndex != 1) {
       return const SizedBox.shrink();
     }
 
@@ -172,123 +175,165 @@ class _FolkNightFloatingButtonState extends State<FolkNightFloatingButton>
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColorTokens.primaryRed.withValues(alpha: 0.45),
-                  blurRadius: _pulseAnimation.value,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: const Color(0xFFFFB300).withValues(alpha: 0.35),
-                  blurRadius: _pulseAnimation.value * 0.8,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(30.r),
-              child: InkWell(
-                onTap: () => _handleTap(context),
-                borderRadius: BorderRadius.circular(30.r),
-                child: Ink(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFE50914),
-                        Color(0xFFD32F2F),
-                        Color(0xFFFF6F00),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColorTokens.primaryRed.withValues(alpha: 0.45),
+                      blurRadius: _pulseAnimation.value,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
                     ),
+                    BoxShadow(
+                      color: const Color(0xFFFFB300).withValues(alpha: 0.35),
+                      blurRadius: _pulseAnimation.value * 0.8,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(30.r),
+                  child: InkWell(
+                    onTap: () => _handleTap(context),
                     borderRadius: BorderRadius.circular(30.r),
-                    border: Border.all(
-                      color: const Color(0xFFFFD54F).withValues(alpha: 0.8),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(4.w),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+                    child: Ink(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFE50914),
+                            Color(0xFFD32F2F),
+                            Color(0xFFFF6F00),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: Icon(
-                          Icons.confirmation_number_rounded,
-                          color: AppColorTokens.primaryRed,
-                          size: 14.sp,
+                        borderRadius: BorderRadius.circular(30.r),
+                        border: Border.all(
+                          color: const Color(0xFFFFD54F).withValues(alpha: 0.8),
+                          width: 1.2,
                         ),
                       ),
-                      SizedBox(width: 8.w),
-                      Column(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.confirmation_number_rounded,
+                              color: AppColorTokens.primaryRed,
+                              size: 14.sp,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Column(
                             mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Folk Night",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 0.3,
-                                  shadows: const [
-                                    Shadow(
-                                      color: Colors.black45,
-                                      blurRadius: 2,
-                                      offset: Offset(0, 1),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Folk Night",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 0.3,
+                                      shadows: const [
+                                        Shadow(
+                                          color: Colors.black45,
+                                          blurRadius: 2,
+                                          offset: Offset(0, 1),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 4.w),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4.w,
-                                  vertical: 1.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFEB3B),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Text(
-                                  "LIVE",
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.w900,
                                   ),
+                                  SizedBox(width: 4.w),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4.w,
+                                      vertical: 1.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFEB3B),
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                    child: Text(
+                                      "LIVE",
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 8.sp,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                "Book Tickets",
+                                style: TextStyle(
+                                  color: const Color(0xFFFFE082),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 9.sp,
                                 ),
                               ),
                             ],
                           ),
-                          Text(
-                            "Book Tickets",
-                            style: TextStyle(
-                              color: const Color(0xFFFFE082),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 9.sp,
-                            ),
-                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+              Positioned(
+                top: -6.h,
+                right: -3.w,
+                child: GestureDetector(
+                  key: const Key('folk_night_close_button'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    context.read<HomeProvider>().dismissFolkNight();
+                  },
+                  child: Container(
+                    width: 20.w,
+                    height: 20.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 1.2,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black45,
+                          blurRadius: 3,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 12.sp,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

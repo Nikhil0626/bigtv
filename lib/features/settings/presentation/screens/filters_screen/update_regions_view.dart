@@ -147,10 +147,6 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
 
     return Consumer<AuthenticationProvider>(
       builder: (_, authProvider, __) {
-        if (authProvider.isLocationLoading && authProvider.getAllLocationList.isEmpty) {
-          return const Center(child: AppLoadingScreen());
-        }
-
         final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
         final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackLocationsMl : _fallbackLocations;
         final List<LocationModel> locations = authProvider.getAllLocationList;

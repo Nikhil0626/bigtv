@@ -91,48 +91,53 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
 
   Future<void> fetchEventData() async {
     try {
-      final response = await Dio().get('https://api.pravasamedia.com/api/v1/events?city=Hyderabad&type=Concert&status=UPCOMING&page=1&limit=10');
+      Response response;
+      try {
+        response = await Dio().get('https://api.pravasamedia.com/api/v1/events/$eventId');
+      } catch (_) {
+        response = await Dio().get('https://api.pravasamedia.com/api/v1/events?city=Hyderabad&type=Concert&page=1&limit=10');
+      }
       if (response.statusCode == 200 && response.data['success'] == true) {
-        final List data = response.data['data'];
-        if (data.isNotEmpty) {
-          final event = data.first;
-          if (mounted) {
-            setState(() {
-              eventId = event['id'] ?? eventId;
-              name = event['name'] ?? name;
-              description = event['description'] ?? description;
-              postUrl = event['postUrl']?.toString() ?? postUrl;
-              
-              if (event['images'] != null && event['images'].isNotEmpty) {
-                images = List<String>.from(event['images']);
-              }
+        final dynamic raw = response.data['data'];
+        final Map<String, dynamic>? event = raw is List
+            ? (raw.isNotEmpty ? Map<String, dynamic>.from(raw.first as Map) : null)
+            : (raw is Map ? Map<String, dynamic>.from(raw) : null);
+        if (event != null && mounted) {
+          setState(() {
+            eventId = event['id'] ?? eventId;
+            name = event['name'] ?? name;
+            description = event['description'] ?? description;
+            postUrl = event['postUrl']?.toString() ?? postUrl;
+            
+            if (event['images'] != null && event['images'].isNotEmpty) {
+              images = List<String>.from(event['images']);
+            }
 
-              String dStr = "";
-              if (event['date'] != null) {
-                try {
-                  DateTime dt = DateTime.parse(event['date']);
-                  dStr = DateFormat('EEE, d MMM').format(dt);
-                } catch (e) {
-                  // ignore
-                }
+            String dStr = "";
+            if (event['date'] != null) {
+              try {
+                DateTime dt = DateTime.parse(event['date']);
+                dStr = DateFormat('EEE, d MMM').format(dt);
+              } catch (e) {
+                // ignore
               }
-              if (event['time'] != null) {
-                dStr += " • ${event['time']}";
-              }
-              if (dStr.isNotEmpty) {
-                dateStr = dStr;
-              }
+            }
+            if (event['time'] != null) {
+              dStr += " • ${event['time']}";
+            }
+            if (dStr.isNotEmpty) {
+              dateStr = dStr;
+            }
 
-              String locStr = "";
-              if (event['location'] != null) {
-                locStr = event['location'];
-              }
-              if (locStr.isNotEmpty) {
-                location = locStr;
-              }
-            });
-            _startAutoScroll();
-          }
+            String locStr = "";
+            if (event['location'] != null) {
+              locStr = event['location'];
+            }
+            if (locStr.isNotEmpty) {
+              location = locStr;
+            }
+          });
+          _startAutoScroll();
         }
       }
     } catch (e) {

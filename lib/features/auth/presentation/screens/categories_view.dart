@@ -116,13 +116,6 @@ class _CategoriesViewState extends State<CategoriesView> {
 
     return Consumer<AuthenticationProvider>(
       builder: (context, authProvider, __) {
-        if (authProvider.isCatLoading && authProvider.getAllCategoryList.isEmpty) {
-          return const Scaffold(
-            backgroundColor: Color(0xFFFBFBFC),
-            body: Center(child: AppLoadingScreen()),
-          );
-        }
-
         final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
         final List<CategoryModel> categories = authProvider.getAllCategoryList;
         final bool useFallbacks = categories.isEmpty;

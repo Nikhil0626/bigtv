@@ -167,7 +167,24 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
+  bool isFolkNightDismissed = false;
+
+  void dismissFolkNight() {
+    isFolkNightDismissed = true;
+    notifyListeners();
+  }
+
+  void resetFolkNightDismissed() {
+    if (isFolkNightDismissed) {
+      isFolkNightDismissed = false;
+      notifyListeners();
+    }
+  }
+
   void onItemTapped(int index) {
+    if (selectedIndex != index || index == 1) {
+      isFolkNightDismissed = false;
+    }
     selectedIndex = index;
     notifyListeners();
   }
@@ -593,6 +610,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+    isFolkNightDismissed = false;
     final bool isPagination = postIds != "0";
     final bool isRefreshingFeed = isReload && !isPagination;
     final List previousPosts = isRefreshingFeed ? List.from(getAllPostList) : const [];
@@ -1262,6 +1280,7 @@ class HomeProvider extends ChangeNotifier {
   int currentIndex = 0;
 
   Future<void> getAllPostsByAiId(dynamic postId) async {
+    isFolkNightDismissed = false;
     final bool isRefreshingFeed = isReload;
     final List previousPosts = isRefreshingFeed ? List.from(getAllPostList) : const [];
 

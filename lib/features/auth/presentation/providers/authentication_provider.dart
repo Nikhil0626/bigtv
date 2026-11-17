@@ -259,34 +259,51 @@ class AuthenticationProvider extends ChangeNotifier {
   List<LanguageModel> getAllLanguageList = [];
 
   Future getAllLanguages() async {
-    isLanguageLoading = true;
-    notifyListeners();
+    // 1. Instantly restore from cache if available so UI has zero delay
+    if (getAllLanguageList.isEmpty) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final cached = prefs.getString('cached_languages_json');
+        if (cached != null && cached.isNotEmpty) {
+          final decoded = jsonDecode(cached);
+          if (decoded is List && decoded.isNotEmpty) {
+            getAllLanguageList = decoded
+                .map((e) => LanguageModel.fromJson(Map<String, dynamic>.from(e as Map)))
+                .toList();
+            notifyListeners();
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (getAllLanguageList.isEmpty) {
+      isLanguageLoading = true;
+      notifyListeners();
+    }
+
     try {
-      print("Fetching languages...");
       Response response = await AuthenticationRepo().getAllLanguages(<String, dynamic>{
         "skip": 0,
         "limit": 100,
       });
-      print("Languages response status: ${response.statusCode}");
-      print("Languages response data type: ${response.data.runtimeType}");
-      print("Languages response data: ${response.data}");
-      
+
       if (response.statusCode == 200) {
         var responseData = response.data;
         if (responseData is String) {
           try {
             responseData = jsonDecode(responseData);
-          } catch (e) {
-            print("Languages decode error: $e");
-          }
+          } catch (_) {}
         }
-        
+
         List data = responseData is List ? responseData : (responseData['data'] ?? []);
-        print("Languages list length: ${data.length}");
-        getAllLanguageList = data.map((e) => LanguageModel.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+        if (data.isNotEmpty) {
+          getAllLanguageList = data.map((e) => LanguageModel.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('cached_languages_json', jsonEncode(data));
+        }
       }
-    } catch (e, st) {
-      print("Error getAllLanguages --- ${e.toString()} --- ${st.toString()}");
+    } catch (e) {
+      debugPrint("Error getAllLanguages: $e");
     } finally {
       isLanguageLoading = false;
       notifyListeners();
@@ -354,12 +371,43 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
   }
   Future getAllCategories() async {
-    isCatLoading = true;
-    selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
+
+    // 1. Instantly restore cached categories for zero delay
+    if (getAllCategoryList.isEmpty) {
+      try {
+        final cached = preferences.getString("cached_categories_json_$langCode");
+        if (cached != null && cached.isNotEmpty) {
+          final decoded = jsonDecode(cached);
+          if (decoded is List && decoded.isNotEmpty) {
+            getAllCategoryList = decoded.map((e) {
+              if (e['categoryNameTranslations'] != null && e['categoryNameTranslations'][langCode] != null) {
+                e['categoryName'] = e['categoryNameTranslations'][langCode];
+              }
+              return CategoryModel.fromJson(Map<String, dynamic>.from(e as Map));
+            }).toList();
+            if (selectedCategories.isEmpty) {
+              selectedCategories = getAllCategoryList
+                  .where((item) => item.isFollowed == true)
+                  .map((item) => item.categoryName.toString())
+                  .toList();
+              if (selectedCategories.isEmpty && getAllCategoryList.isNotEmpty) {
+                selectedCategories = getAllCategoryList.map((item) => item.categoryName.toString()).take(3).toList();
+              }
+            }
+            notifyListeners();
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (getAllCategoryList.isEmpty) {
+      isCatLoading = true;
+      notifyListeners();
+    }
 
     Map<String, dynamic> body = {
       "lang": langCode,
@@ -386,14 +434,20 @@ class AuthenticationProvider extends ChangeNotifier {
                 if (e['categoryNameTranslations'] != null && e['categoryNameTranslations'][langCode] != null) {
                   e['categoryName'] = e['categoryNameTranslations'][langCode];
                 }
-                return CategoryModel.fromJson(e);
+                return CategoryModel.fromJson(Map<String, dynamic>.from(e as Map));
               }
             )
             .toList();
 
-        selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
-        if (selectedCategories.isEmpty && getAllCategoryList.isNotEmpty) {
-          selectedCategories = getAllCategoryList.map((item) => item.categoryName.toString()).take(3).toList();
+        if (data.isNotEmpty) {
+          await preferences.setString("cached_categories_json_$langCode", jsonEncode(data));
+        }
+
+        if (selectedCategories.isEmpty) {
+          selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
+          if (selectedCategories.isEmpty && getAllCategoryList.isNotEmpty) {
+            selectedCategories = getAllCategoryList.map((item) => item.categoryName.toString()).take(3).toList();
+          }
         }
         if (getAllCategoryList.isNotEmpty) {
           log(getAllCategoryList.first.categoryName.toString());
@@ -475,11 +529,77 @@ class AuthenticationProvider extends ChangeNotifier {
   Map<int, String>? states;
 
   Future getAllLocations() async {
-    isLocationLoading = true;
-    selectedLocations = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     String? deviceId = preferences.getString("deviceId");
+
+    // 1. Instantly restore from cache or fallbacks so UI has zero delay
+    if (getAllLocationList.isEmpty) {
+      try {
+        final cached = preferences.getString("cached_locations_json_$langCode");
+        if (cached != null && cached.isNotEmpty) {
+          final decoded = jsonDecode(cached);
+          if (decoded is List && decoded.isNotEmpty) {
+            getAllLocationList = decoded.map((e) {
+              if (e['locationNameTranslations'] != null && e['locationNameTranslations'][langCode] != null) {
+                e['locationName'] = e['locationNameTranslations'][langCode];
+                e['stateName'] = e['locationNameTranslations'][langCode];
+              } else if (e['stateNameTranslations'] != null && e['stateNameTranslations'][langCode] != null) {
+                e['stateName'] = e['stateNameTranslations'][langCode];
+                e['locationName'] = e['stateNameTranslations'][langCode];
+              }
+              return LocationModel.fromJson(Map<String, dynamic>.from(e as Map));
+            }).toList();
+            states = {
+              for (var d in decoded)
+                (d['locationId'] ?? d['stateId'] ?? 0) as int:
+                    (d['locationName'] ?? d['stateName'] ?? '').toString()
+            };
+          }
+        }
+      } catch (_) {}
+
+      // If still empty, seed with standard 3 states immediately
+      if (getAllLocationList.isEmpty) {
+        final isMalayalam = langCode == 'ml';
+        final isEnglish = langCode == 'en';
+        getAllLocationList = [
+          LocationModel(
+            stateId: 19,
+            stateName: isEnglish ? 'Telangana' : 'తెలంగాణ',
+            englishName: 'Telangana',
+            isFollowed: !isMalayalam,
+          ),
+          LocationModel(
+            stateId: 21,
+            stateName: isEnglish ? 'Andhra Pradesh' : 'ఆంధ్రప్రదేశ్',
+            englishName: 'Andhra Pradesh',
+            isFollowed: false,
+          ),
+          LocationModel(
+            stateId: 82,
+            stateName: isMalayalam ? 'കേരളം' : (isEnglish ? 'Kerala' : 'కేరళ'),
+            englishName: 'Kerala',
+            isFollowed: isMalayalam,
+          ),
+        ];
+        states = {
+          19: isEnglish ? 'Telangana' : 'తెలంగాణ',
+          21: isEnglish ? 'Andhra Pradesh' : 'ఆంధ్రప్రదేశ్',
+          82: isMalayalam ? 'കേരളം' : (isEnglish ? 'Kerala' : 'కేరళ'),
+        };
+      }
+
+      if (selectedLocations.isEmpty) {
+        selectedLocations = [langCode == 'ml' ? 'കേരളം' : (langCode == 'en' ? 'Telangana' : 'తెలంగాణ')];
+      }
+      notifyListeners();
+    }
+
+    if (getAllLocationList.isEmpty) {
+      isLocationLoading = true;
+      notifyListeners();
+    }
     
     Map<String, dynamic> body = {
       "lang": langCode,
@@ -510,14 +630,20 @@ class AuthenticationProvider extends ChangeNotifier {
             )
             .toList();
 
+        if (data.isNotEmpty) {
+          await preferences.setString("cached_locations_json_$langCode", jsonEncode(data));
+        }
+
         states = {for (var d in data) (d['locationId'] ?? d['stateId']): (d['locationName'] ?? d['stateName'])};
 
-        selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.stateName.toString()).toSet().toList();
         if (selectedLocations.isEmpty) {
-          if (getAllLocationList.isNotEmpty) {
-            selectedLocations = [getAllLocationList.first.stateName.toString()];
-          } else {
-            selectedLocations = [langCode == 'ml' ? 'കേരളം' : 'తెలంగాణ'];
+          selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.stateName.toString()).toSet().toList();
+          if (selectedLocations.isEmpty) {
+            if (getAllLocationList.isNotEmpty) {
+              selectedLocations = [getAllLocationList.first.stateName.toString()];
+            } else {
+              selectedLocations = [langCode == 'ml' ? 'കേരളം' : 'తెలంగాణ'];
+            }
           }
         }
         if (getAllLocationList.isNotEmpty) {

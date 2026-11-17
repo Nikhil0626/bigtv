@@ -66,52 +66,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
     return Consumer<AuthenticationProvider>(
       builder: (context, provider, child) {
-        if (provider.isLanguageLoading && provider.getAllLanguageList.isEmpty) {
-          return PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-              _handleBack(context, provider);
-            },
-            child: Scaffold(
-              backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: Padding(
-                  padding: EdgeInsets.all(8.w),
-                  child: InkWell(
-                    onTap: () => _handleBack(context, provider),
-                    borderRadius: BorderRadius.circular(20.r),
-                    child: Container(
-                      padding: EdgeInsets.all(7.5.w),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E2026) : Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.35)
-                                : Colors.black.withValues(alpha: 0.06),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 15.sp,
-                        color: isDark ? Colors.white : const Color(0xFF181A20),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              body: const Center(child: AppLoadingScreen()),
-            ),
-          );
-        }
-
         final List<LanguageModel> languages = provider.getAllLanguageList;
         final bool useFallbacks = languages.isEmpty;
 
