@@ -18,16 +18,14 @@ import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/in_app_web_view.dart';
+import '../loading_screen/home_shimmer.dart';
 import '../video_image_screen/video_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
-import '../../utils/app_loading_screen.dart';
-import '../../utils/app_no_data.dart';
 import '../../utils/app_toasts.dart';
 import 'package:chotanews/features/home/presentation/widgets/main_screen_byts_view.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
-import 'package:chotanews/main.dart';
 
 class IndividualPostView1 extends StatefulWidget {
   final String postId;
@@ -258,8 +256,8 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
     super.initState();
     getWebData();
 
-    // 4-second watchdog timer: If article never loads, fail gracefully back to Home
-    _watchdogTimer = Timer(const Duration(seconds: 4), () {
+    // 10-second watchdog timer: If article never loads, fail gracefully back to Home
+    _watchdogTimer = Timer(const Duration(seconds: 10), () {
       if (mounted && !_hasHandledFailure && !_isNavigatingBack) {
         final home = context.read<HomeProvider>();
         final requestedId = widget.postId.trim();
@@ -356,7 +354,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                   child: Stack(
                     children: [
                       article.isEmpty
-                          ? const AppLoadingScreen()
+                          ? const HomeShimmer()
                           : SizedBox(
                               height: double.infinity,
                               width: double.infinity,
