@@ -201,13 +201,6 @@ class _DistrictViewState extends State<DistrictView> {
 
     return Consumer<AuthenticationProvider>(
       builder: (context, authProvider, __) {
-        if (authProvider.isLocationLoading && authProvider.getAllLocationList.isEmpty) {
-          return const Scaffold(
-            backgroundColor: Color(0xFFFBFBFC),
-            body: Center(child: AppLoadingScreen()),
-          );
-        }
-
         final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
         final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackLocationsMl : _fallbackLocations;
         final List<LocationModel> locations = authProvider.getAllLocationList;

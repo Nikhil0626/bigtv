@@ -230,7 +230,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                   child: HomeBottomNavigationBar(homeProvider: homeProvider),
                 ),
               ),
-              if (homeProvider.langCode != 'ml')
+              if (homeProvider.langCode != 'ml' && homeProvider.selectedIndex == 1)
                 Positioned(
                   bottom: (!homeProvider.isCurrentArticleGrid &&
                           !homeProvider.isCurrentArticleShowAlert &&
@@ -242,7 +242,9 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                   right: 16.0,
                   child: Visibility(
                     visible: homeProvider.folkNight &&
+                        !homeProvider.isFolkNightDismissed &&
                         homeProvider.langCode != 'ml' &&
+                        homeProvider.selectedIndex == 1 &&
                         !homeProvider.isCurrentArticleGrid &&
                         !homeProvider.isCurrentArticleShowAlert &&
                         !homeProvider.isCurrentArticleBulletin &&

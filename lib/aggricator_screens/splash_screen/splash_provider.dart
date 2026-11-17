@@ -41,6 +41,10 @@ class SplashProvider extends ChangeNotifier {
         await context.read<HomeProvider>().loadLanguage();
         // While opening the app, hit the profile API, get the data and store locally
         context.read<ProfileProvider>().getProfile(showLoading: false);
+        // Pre-fetch languages and locations/states in background so they are ready instantly
+        final authProvider = context.read<AuthenticationProvider>();
+        authProvider.getAllLanguages();
+        authProvider.getAllLocations();
       } catch (e) {
         debugPrint("Error loading app config / profile: $e");
       }

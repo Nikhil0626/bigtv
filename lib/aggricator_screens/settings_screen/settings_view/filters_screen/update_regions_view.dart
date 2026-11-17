@@ -124,10 +124,6 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
 
     return Consumer<AuthenticationProvider>(
       builder: (_, authProvider, __) {
-        if (authProvider.isLocationLoading && authProvider.getAllLocationList.isEmpty) {
-          return const Center(child: AppLoadingScreen());
-        }
-
         final List<LocationModel> locations = authProvider.getAllLocationList;
         final bool useFallbacks = locations.isEmpty &&
             (authProvider.states == null || authProvider.states!.isEmpty);
