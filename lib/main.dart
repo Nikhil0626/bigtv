@@ -14,7 +14,6 @@ import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/register_provider.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
-
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -47,7 +46,7 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
@@ -87,7 +86,9 @@ Future<void> main() async {
 
     final deviceId = await AnalyticsService.getStableDeviceId();
     final userIdStr = await getUserid();
-    final userId = (userIdStr != null && userIdStr.isNotEmpty) ? int.tryParse(userIdStr) : null;
+    final userId = (userIdStr != null && userIdStr.isNotEmpty)
+        ? int.tryParse(userIdStr)
+        : null;
     if (userId != null && userId > 0) {
       GlobalVariables().userId = userId.toString();
     }
@@ -132,7 +133,8 @@ Future<void> main() async {
         }
       }
     }
-    await prefs.setString('analytics_last_open_date', DateTime.now().toIso8601String());
+    await prefs.setString(
+        'analytics_last_open_date', DateTime.now().toIso8601String());
 
     final todayStr = DateTime.now().toUtc().toIso8601String().substring(0, 10);
     final lastDaily = prefs.getString('analytics_last_daily_activity');
@@ -192,7 +194,8 @@ void _initBackgroundServices() async {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("Foreground FCM message received: ${message.data}");
-      AnalyticsService.instance.track(AnalyticsEventName.notificationReceived, properties: {
+      AnalyticsService.instance
+          .track(AnalyticsEventName.notificationReceived, properties: {
         'notification_id': message.messageId,
         'campaign_id': message.data['campaign_id'],
         'notification_type': message.data['type'] ?? 'general',
@@ -202,13 +205,15 @@ void _initBackgroundServices() async {
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint("Notification opened app: ${message.data}");
-      AnalyticsService.instance.track(AnalyticsEventName.notificationOpen, properties: {
+      AnalyticsService.instance
+          .track(AnalyticsEventName.notificationOpen, properties: {
         'notification_id': message.messageId,
         'campaign_id': message.data['campaign_id'],
         'destination': message.data['destination'] ?? 'home',
       });
       if (message.data['campaign_id'] != null) {
-        AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.campaignEntry, properties: {
           'campaign_id': message.data['campaign_id'],
           'source': 'push_notification',
         });
@@ -216,16 +221,20 @@ void _initBackgroundServices() async {
       _handleBackgroundNotification(message.data);
     });
 
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
       if (message != null) {
         debugPrint("Initial FCM message on launch: ${message.data}");
-        AnalyticsService.instance.track(AnalyticsEventName.notificationOpen, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.notificationOpen, properties: {
           'notification_id': message.messageId,
           'campaign_id': message.data['campaign_id'],
           'destination': message.data['destination'] ?? 'home',
         });
         if (message.data['campaign_id'] != null) {
-          AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+          AnalyticsService.instance
+              .track(AnalyticsEventName.campaignEntry, properties: {
             'campaign_id': message.data['campaign_id'],
             'source': 'push_notification',
           });
@@ -256,15 +265,20 @@ void _initBackgroundServices() async {
           if (Platform.isAndroid) {
             try {
               const channel = MethodChannel("com.chotanews/whatsapp");
-              final details = await channel.invokeMethod<Map<dynamic, dynamic>>("getLaunchIntentDetails");
+              final details = await channel.invokeMethod<Map<dynamic, dynamic>>(
+                  "getLaunchIntentDetails");
               if (details != null) {
                 final String? action = details["action"]?.toString();
                 final String? data = details["data"]?.toString();
                 final bool isLauncher = details["isLauncher"] == true;
                 final bool isFromHistory = details["isFromHistory"] == true;
 
-                if (isLauncher || isFromHistory || data == null || action != "android.intent.action.VIEW") {
-                  debugPrint("AppLinks initial link ignored: launch was from launcher/history (action=$action, data=$data)");
+                if (isLauncher ||
+                    isFromHistory ||
+                    data == null ||
+                    action != "android.intent.action.VIEW") {
+                  debugPrint(
+                      "AppLinks initial link ignored: launch was from launcher/history (action=$action, data=$data)");
                   try {
                     await channel.invokeMethod("clearInitialIntent");
                   } catch (_) {}
@@ -277,7 +291,8 @@ void _initBackgroundServices() async {
           }
 
           if (consumedInitialLinkInProcess == uriStr) {
-            debugPrint("AppLinks initial link already consumed in current process, ignoring duplicate: $uri");
+            debugPrint(
+                "AppLinks initial link already consumed in current process, ignoring duplicate: $uri");
             return;
           }
           debugPrint("AppLinks initial link accepted: $uri");
@@ -324,16 +339,25 @@ void _handleForegroundNotification(RemoteMessage message) {
       payload['message'] ??
       payload['body'];
 
-  if (content != null && content.isNotEmpty && (content.contains('<') && content.contains('>'))) {
+  if (content != null &&
+      content.isNotEmpty &&
+      (content.contains('<') && content.contains('>'))) {
     showHtmlNotificationDialog(
       content: content,
       title: payload['title']?.toString(),
-      imageUrl: payload['image']?.toString() ?? payload['imageUrl']?.toString() ?? payload['image_url']?.toString(),
-      ctaUrl: payload['deepLink'] ?? payload['deeplink'] ?? payload['url'] ?? payload['link'],
+      imageUrl: payload['image']?.toString() ??
+          payload['imageUrl']?.toString() ??
+          payload['image_url']?.toString(),
+      ctaUrl: payload['deepLink'] ??
+          payload['deeplink'] ??
+          payload['url'] ??
+          payload['link'],
       rawPayload: payload,
     );
   } else if (mainNavigatorKey.currentContext != null) {
-    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(payload);
+    mainNavigatorKey.currentContext!
+        .read<HomeProvider>()
+        .handleNotificationTap(payload);
   }
 }
 
@@ -346,9 +370,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Map<String, dynamic>? pendingPushPayload;
 String? pendingDeepLink;
 
-void _handleBackgroundNotification(Map<String, dynamic>? payload, {String? deepLink}) {
+void _handleBackgroundNotification(Map<String, dynamic>? payload,
+    {String? deepLink}) {
   if (mainNavigatorKey.currentContext != null) {
-    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(payload, deepLink: deepLink);
+    mainNavigatorKey.currentContext!
+        .read<HomeProvider>()
+        .handleNotificationTap(payload, deepLink: deepLink);
   } else {
     pendingPushPayload = payload ?? {};
     pendingDeepLink = deepLink;
@@ -358,7 +385,9 @@ void _handleBackgroundNotification(Map<String, dynamic>? payload, {String? deepL
 void _handleBackgroundDeepLink(Uri uri) {
   if (mainNavigatorKey.currentContext != null) {
     try {
-      mainNavigatorKey.currentContext!.read<HomeProvider>().handleIncomingDeepLink(uri);
+      mainNavigatorKey.currentContext!
+          .read<HomeProvider>()
+          .handleIncomingDeepLink(uri);
       return;
     } catch (e) {
       debugPrint("Error handling incoming deep link in HomeProvider: $e");
@@ -403,6 +432,14 @@ class _MyAppState extends State<MyApp> {
               themeMode: themeProvider.themeMode,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.noScaling,
+                  ),
+                  child: child ?? const SizedBox.shrink(),
+                );
+              },
               routes: {
                 '/': (context) => SplashScreen(),
                 '/settings': (context) => SettingsView(),

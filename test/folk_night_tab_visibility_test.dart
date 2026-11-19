@@ -1,10 +1,21 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/features/events/presentation/widgets/folk_night_floating_button.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/services/content_share_dispatcher.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
+
+class _TestHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (cert, host, port) => true;
+  }
+}
 
 class _MockConfigHomeProvider extends HomeProvider {
   bool getAppConfigCalled = false;
@@ -27,6 +38,7 @@ class _MockConfigHomeProvider extends HomeProvider {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = _TestHttpOverrides();
 
   Widget createWidget(HomeProvider homeProvider) {
     return ScreenUtilInit(
@@ -235,6 +247,52 @@ void main() {
       expect(homeProvider.getAppConfigCalled, isTrue);
       expect(homeProvider.folkNight, isTrue);
       expect(homeProvider.selectedIndex, 1);
+    });
+
+    testWidgets('Folk Night share button triggers ContentShareDispatcher with event details', (tester) async {
+      String? capturedShareText;
+      String? capturedSubject;
+
+      ContentShareDispatcher.debugShareOverride = ({
+        required String shareText,
+        required String subject,
+        required bool isWhatsAppOnly,
+        String? imagePath,
+      }) async {
+        capturedShareText = shareText;
+        capturedSubject = subject;
+      };
+
+      addTearDown(() {
+        ContentShareDispatcher.debugShareOverride = null;
+      });
+
+      final homeProvider = _MockConfigHomeProvider();
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(360, 690),
+          minTextAdapt: true,
+          builder: (context, _) => ChangeNotifierProvider<HomeProvider>.value(
+            value: homeProvider,
+            child: const MaterialApp(
+              home: FolkNightEventScreen(initialLoading: false, autoFetch: false),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final shareBtn = find.byKey(const Key('folk_night_share_button'));
+      expect(shareBtn, findsOneWidget);
+
+      await tester.tap(shareBtn);
+      await tester.pump();
+
+      expect(capturedShareText, isNotNull);
+      expect(capturedShareText, contains('Folk Night'));
+      expect(capturedShareText, contains('https://app.bigtv24x7.com/events'));
+      expect(capturedSubject, contains('Folk Night'));
     });
   });
 }

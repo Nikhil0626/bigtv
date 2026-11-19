@@ -37,14 +37,21 @@ class SplashProvider extends ChangeNotifier {
     await Future.delayed(Duration(milliseconds: showGif ? 1500 : 1000));
     if (context.mounted) {
       try {
-        context.read<HomeProvider>().getAppConfig();
-        await context.read<HomeProvider>().loadLanguage();
-        // While opening the app, hit the profile API, get the data and store locally
-        context.read<ProfileProvider>().getProfile(showLoading: false);
-        // Pre-fetch languages and locations/states in background so they are ready instantly
-        final authProvider = context.read<AuthenticationProvider>();
-        authProvider.getAllLanguages();
-        authProvider.getAllLocations();
+        final home = context.read<HomeProvider>();
+        final bool isDeepLink = home.hasPendingDeepLink ||
+            home.isComeFromLinkOrNotification ||
+            home.isRoutingDeepLink;
+
+        if (!isDeepLink) {
+          home.getAppConfig();
+          // While opening the app normally, hit the profile API, get the data and store locally
+          context.read<ProfileProvider>().getProfile(showLoading: false);
+          // Pre-fetch languages and locations/states in background so they are ready instantly
+          final authProvider = context.read<AuthenticationProvider>();
+          authProvider.getAllLanguages();
+          authProvider.getAllLocations();
+        }
+        await home.loadLanguage();
       } catch (e) {
         debugPrint("Error loading app config / profile: $e");
       }

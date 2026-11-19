@@ -8,6 +8,7 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/features/home/presentation/screens/search_discover_screen.dart';
 import 'package:chotanews/features/notifications/data/models/app_notification_model.dart';
 import 'package:chotanews/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:chotanews/aggricator_screens/loading_screen/home_shimmer.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -164,7 +165,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(AppLoadingScreen), findsOneWidget);
+    expect(find.byType(HomeShimmer), findsOneWidget);
     expect(find.text('Previous Cached Post Title'), findsNothing);
 
     completer.complete();
@@ -252,7 +253,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(IndividualPostView1),
-        matching: find.byType(AppLoadingScreen),
+        matching: find.byType(HomeShimmer),
       ),
       findsOneWidget,
     );

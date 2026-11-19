@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_enums.dart';
@@ -20,10 +22,19 @@ class HomeRepo extends BaseService{
         response = res;
         debugPrint("getSinglePost (Dev) URL: ${response.requestOptions.uri}");
         debugPrint("getSinglePost (Dev) response [${response.statusCode}]: ${response.data}");
-        if (response.statusCode == 200 &&
-            response.data != null &&
-            response.data['status'] == 'success') {
-          return response;
+        if (response.statusCode == 200 && response.data != null) {
+          dynamic data = response.data;
+          if (data is String) {
+            try {
+              data = json.decode(data);
+            } catch (_) {}
+          }
+          if (data is Map &&
+              (data['status'] == 'success' ||
+                  data['data'] != null ||
+                  data['title'] != null)) {
+            return response;
+          }
         }
       }
     } catch (e) {

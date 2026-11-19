@@ -351,7 +351,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
         ),
       );
 
-      await Share.shareXFiles([XFile(targetPath)], text: "Ticket for $eventName");
+      final Size size = MediaQuery.of(context).size;
+      final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
+      await Share.shareXFiles(
+        [XFile(targetPath)],
+        text: "Ticket for $eventName",
+        sharePositionOrigin: shareOrigin,
+      );
     } catch (e, st) {
       debugPrint("Error downloading ticket PDF: $e\n$st");
       if (mounted) {

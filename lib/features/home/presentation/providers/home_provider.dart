@@ -3101,13 +3101,11 @@ class HomeProvider extends ChangeNotifier {
               isAds: true,
               isLink: isFromNotification,
             ).then((_) {
-              if (getAllPostList.isEmpty) {
-                getAllPost(isGetAllPost: true);
-              }
+              isHomeLoading = false;
+              notifyListeners();
             }).catchError((_) {
-              if (getAllPostList.isEmpty) {
-                getAllPost(isGetAllPost: true);
-              }
+              isHomeLoading = false;
+              notifyListeners();
             });
           }
         } else {
@@ -3194,13 +3192,11 @@ class HomeProvider extends ChangeNotifier {
               isAds: true,
               isLink: isFromNotification,
             ).then((_) {
-              if (getAllPostList.isEmpty) {
-                getAllPost(isGetAllPost: true);
-              }
+              isHomeLoading = false;
+              notifyListeners();
             }).catchError((_) {
-              if (getAllPostList.isEmpty) {
-                getAllPost(isGetAllPost: true);
-              }
+              isHomeLoading = false;
+              notifyListeners();
             });
           }
         } else {
@@ -3299,22 +3295,15 @@ class HomeProvider extends ChangeNotifier {
           }
         });
 
-        // Fetch post with top network priority; defer getAllPost until it completes
+        // Fetch post with top network priority; defer getAllPost until user returns to Home
         getIndividualPost(targetPostId, isAds: true, isLink: isFromNotification)
             .then((_) {
           isHomeLoading = false;
           notifyListeners();
-          // Populate home feed in background while user reads article
-          if (getAllPostList.isEmpty) {
-            getAllPost(isGetAllPost: true);
-          }
         }).catchError((e) {
           debugPrint("Error fetching individual post in deep link: $e");
           isHomeLoading = false;
           notifyListeners();
-          if (getAllPostList.isEmpty) {
-            getAllPost(isGetAllPost: true);
-          }
         });
 
         // Tell native Android to clear its launch intent data so it doesn't replay on next open

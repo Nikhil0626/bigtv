@@ -754,7 +754,10 @@ class AuthenticationProvider extends ChangeNotifier {
           final hp = context.read<HomeProvider>();
           hp.selectedIndex = 1;
           hp.onItemTapped(1);
-          if (hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
+          final bool hasPendingLink = hp.hasPendingDeepLink ||
+              hp.isComeFromLinkOrNotification ||
+              hp.isRoutingDeepLink;
+          if (!hasPendingLink && hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
             hp.getAllPost(isGetAllPost: true);
           }
         } catch (_) {}
@@ -771,7 +774,10 @@ class AuthenticationProvider extends ChangeNotifier {
           final hp = context.read<HomeProvider>();
           hp.selectedIndex = 1;
           hp.onItemTapped(1);
-          if (hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
+          final bool hasPendingLink = hp.hasPendingDeepLink ||
+              hp.isComeFromLinkOrNotification ||
+              hp.isRoutingDeepLink;
+          if (!hasPendingLink && hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
             hp.getAllPost(isGetAllPost: true);
           }
         } catch (_) {}

@@ -513,7 +513,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                 style: homeScreenFontStyle(
                   color: _bodyTextColor(context),
                   fontWeight: FontWeight.w600,
-                  fontSize: 16.sp,
+                  fontSize: 16,
                 ),
               ),
             ),
@@ -529,24 +529,24 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   Text(
                     "● ",
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 14,
                       color: _bodyTextColor(context),
                       height: 1,
                     ),
                   ),
-                  width(width: 5.sp),
+                  width(width: 5),
                   Expanded(
                     child: TranslatedText(
                       item.toString(),
                       translate: homeProvider.isEnglishMode,
                       strutStyle: StrutStyle(
-                        fontSize: 16.sp,
+                        fontSize: 16,
                         height: 1,
                       ),
                       style: homeScreenFontStyle(
                         color: _bodyTextColor(context),
                         fontWeight: FontWeight.w600,
-                        fontSize: 16.sp,
+                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -594,12 +594,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           contentText,
           textAlign: TextAlign.start,
           translate: homeProvider.isEnglishMode,
-          englishFontSize: 14.sp,
+          englishFontSize: 14,
           overflow: TextOverflow.ellipsis,
           style: homeScreenFontStyle(
             color: _bodyTextColor(context),
             fontWeight: FontWeight.w600,
-            fontSize: 17.sp,
+            fontSize: 17,
           ),
         ),
       ),
@@ -1043,9 +1043,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                   Container(
                                                                   height: MediaQuery.of(context).orientation == Orientation.landscape 
                                                                       ? double.infinity
-                                                                      : (_is50PercentPost(widget.article)
+                                                                      : ((_is50PercentPost(widget.article)
                                                                           ? MediaQuery.of(context).size.height * .50
-                                                                          : MediaQuery.of(context).size.height * .33),
+                                                                          : MediaQuery.of(context).size.height * .33) - 6),
                                                                   child: widget.article['type'] ==
                                                                               "Video" &&
                                                                           widget.article['video_platform'] ==
@@ -1061,9 +1061,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           ? SizedBox(
                                                                               height: MediaQuery.of(context).orientation == Orientation.landscape
                                                                                   ? double.infinity
-                                                                                  : (_is50PercentPost(widget.article)
+                                                                                  : ((_is50PercentPost(widget.article)
                                                                                       ? MediaQuery.of(context).size.height * .50
-                                                                                      : MediaQuery.of(context).size.height * .33),
+                                                                                      : MediaQuery.of(context).size.height * .33) - 6),
                                                                               width: MediaQuery.of(context).size.width,
                                                                               child: VideoPreview(
                                                                                 imageUrl: _getImageUrl(widget.article['image_url']),
@@ -1084,10 +1084,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 );
                                                                               },
                                                                               child: SizedBox(
-                                                                                height: MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .35),
+                                                                                height: (MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .35)) - 6,
                                                                                 child: CachedNetworkImage(
                                                                                   imageUrl: _getImageUrl(widget.article['image_url']),
-                                                                                  height: MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .4),
+                                                                                  height: (MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .4)) - 6,
                                                                                   width: MediaQuery.of(context).size.width,
                                                                                   fit: BoxFit.fill,
                                                                                   placeholder: (context, url) => Container(
@@ -1095,7 +1095,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                   ),
                                                                                   errorWidget: (context, url, error) => Image.asset(
                                                                                     "assets/images/bigtv_default_post.png",
-                                                                                    height: MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .4),
+                                                                                    height: (MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .4)) - 6,
                                                                                     width: MediaQuery.of(context).size.width,
                                                                                     fit: BoxFit.cover,
                                                                                   ),

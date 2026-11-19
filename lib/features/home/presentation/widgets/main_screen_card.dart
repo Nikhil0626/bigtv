@@ -27,9 +27,15 @@ class _MainScreenCardState extends State<MainScreenCard>
   @override
   void initState() {
     super.initState();
-    context.read<HomeProvider>().getAllAiTags();
-    if (context.read<HomeProvider>().getAllPostList.isEmpty) {
-      context.read<HomeProvider>().getAllPost();
+    final hp = context.read<HomeProvider>();
+    final bool hasPendingLink = hp.hasPendingDeepLink ||
+        hp.isComeFromLinkOrNotification ||
+        hp.isRoutingDeepLink;
+    if (!hasPendingLink) {
+      hp.getAllAiTags();
+      if (hp.getAllPostList.isEmpty && !hp.isFetchingAllPosts) {
+        hp.getAllPost();
+      }
     }
     // Pre-download translation models in background
     TranslationService().init();

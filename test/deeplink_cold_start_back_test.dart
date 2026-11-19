@@ -8,6 +8,7 @@ import 'package:chotanews/features/events/presentation/screens/folk_night_event_
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
+import 'package:chotanews/services/register_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -117,7 +118,7 @@ void main() {
 
     // Push FolkNightEventScreen
     mainNavigatorKey.currentState!.push(
-      MaterialPageRoute(builder: (_) => const FolkNightEventScreen()),
+      MaterialPageRoute(builder: (_) => const FolkNightEventScreen(autoFetch: false, initialLoading: false)),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -291,7 +292,7 @@ void main() {
     await tester.pump();
 
     mainNavigatorKey.currentState!.push(
-      MaterialPageRoute(builder: (_) => const FolkNightEventScreen()),
+      MaterialPageRoute(builder: (_) => const FolkNightEventScreen(autoFetch: false, initialLoading: false)),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -308,5 +309,53 @@ void main() {
     // allpost API must have been hit
     expect(homeProvider.getAllPostCalled, isTrue);
     expect(homeProvider.isGetAllPostFlag, isTrue);
+  });
+
+  testWidgets(
+      'Scenario 5: When cold start has pending deep link, isPageNavigation bypasses getAllPost to prioritize individual post',
+      (tester) async {
+    final homeProvider = _FakeHomeProvider();
+    homeProvider.isComeFromLinkOrNotification = true;
+    homeProvider.getAllPostList = [];
+    homeProvider.getAllPostCalled = false;
+
+    final authProvider = AuthenticationProvider();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ...AppProviders.all.where((p) => p is! ChangeNotifierProvider<HomeProvider>),
+          ChangeNotifierProvider<HomeProvider>.value(value: homeProvider),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(360, 690),
+          builder: (context, child) => MaterialApp(
+            navigatorKey: mainNavigatorKey,
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: ElevatedButton(
+                  onPressed: () => authProvider.isPageNavigation(context),
+                  child: const Text('Navigate'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Set loginState to home
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('loginState', 'NewAppLoginStatus.home');
+
+    // Trigger isPageNavigation
+    await tester.tap(find.text('Navigate'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Verify getAllPost was BYPASSED
+    expect(homeProvider.getAllPostCalled, isFalse);
+    expect(homeProvider.selectedIndex, 1);
   });
 }

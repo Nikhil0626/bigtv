@@ -46,28 +46,30 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
 
     homeProvider?.isHomeScreen = true;
+    final bool hasPendingLink = homeProvider?.hasPendingDeepLink == true ||
+        homeProvider?.isComeFromLinkOrNotification == true ||
+        homeProvider?.isRoutingDeepLink == true;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      AppUpdateService.checkForUpdate(context);
-      requestNotificationPermission();
-      homeProvider?.getMobileNumber();
-      homeProvider?.loadLanguage();
-      // While opening the app, hit the profile API, get the data and store locally
-      try {
-        Provider.of<ProfileProvider>(context, listen: false).getProfile(showLoading: false);
-      } catch (e) {
-        debugPrint("Error fetching profile on app open: $e");
+      if (!hasPendingLink) {
+        AppUpdateService.checkForUpdate(context);
+        requestNotificationPermission();
+        homeProvider?.getMobileNumber();
+        try {
+          Provider.of<ProfileProvider>(context, listen: false).getProfile(showLoading: false);
+        } catch (e) {
+          debugPrint("Error fetching profile on app open: $e");
+        }
+        _sendDeviceDetails();
+        _checkAndShowFirstOpenEpaperPopup();
       }
-      _sendDeviceDetails();
-      _checkAndShowFirstOpenEpaperPopup();
+      homeProvider?.loadLanguage();
       homeProvider?.processPendingDeepLink();
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
     homeProvider?.selectedIndex = 1;
     homeProvider?.homePageController = PageController(initialPage: 1);
-    final bool hasPendingLink = homeProvider?.hasPendingDeepLink == true ||
-        homeProvider?.isComeFromLinkOrNotification == true ||
-        homeProvider?.isRoutingDeepLink == true;
 
     if (!hasPendingLink &&
         (homeProvider?.getAllPostList.isEmpty == true ||
@@ -90,7 +92,8 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     if (_isCheckingEpaperPopup) return;
     _isCheckingEpaperPopup = true;
     try {
-      if (homeProvider?.hasPendingDeepLink == true || homeProvider?.isRoutingDeepLink == true) {
+      if (homeProvider?.hasPendingDeepLink == true ||
+          homeProvider?.isRoutingDeepLink == true) {
         return;
       }
       final bool shouldShow = await shouldShowEpaperFirstOpenDialog();
@@ -176,15 +179,18 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: systemStatusBarColor,
-            statusBarIconBrightness: isSystemDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness: isSystemDark ? Brightness.dark : Brightness.light,
+            statusBarIconBrightness:
+                isSystemDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness:
+                isSystemDark ? Brightness.dark : Brightness.light,
           ),
           child: PopScope(
             canPop: false,
             onPopInvokedWithResult: (didPop, result) async {
               if (didPop) return;
               final now = DateTime.now();
-              if (lastBackPressed == null || now.difference(lastBackPressed!) > Duration(seconds: 2)) {
+              if (lastBackPressed == null ||
+                  now.difference(lastBackPressed!) > Duration(seconds: 2)) {
                 lastBackPressed = now;
                 CustomToast.showInfoToast(msg: "Swipe again to exit");
                 return;
@@ -194,79 +200,88 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
             child: Scaffold(
               backgroundColor: isReelsTab ? Colors.black : systemStatusBarColor,
               extendBody: true,
-              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.endFloat,
               floatingActionButton: null,
               body: Stack(
                 children: [
                   PageView(
                     controller: homeProvider.homePageController,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (index) {
-                  homeProvider.onItemTapped(index);
-                  pauseActiveMedia(context, pauseReels: index != 2);
-                },
-                children: [
-                  // Index 0: Search
-                  SearchDiscoverScreen(
-                    onGoToHome: () {
-                      homeProvider.onItemTapped(1);
-                      homeProvider.homePageController.jumpToPage(1);
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (index) {
+                      homeProvider.onItemTapped(index);
+                      pauseActiveMedia(context, pauseReels: index != 2);
                     },
+                    children: [
+                      // Index 0: Search
+                      SearchDiscoverScreen(
+                        onGoToHome: () {
+                          homeProvider.onItemTapped(1);
+                          homeProvider.homePageController.jumpToPage(1);
+                        },
+                      ),
+                      // Index 1: Home
+                      Screenshot(
+                        controller: screenshotController,
+                        child: const MainScreenCard(),
+                      ),
+                      // Index 2: Bigtv daily (Reels)
+                      const ReelsScreen(),
+                      // Index 3: Marrini (Settings)
+                      const KeepAlivePage(
+                          keepAlive: true, child: SettingsView()),
+                    ],
                   ),
-                  // Index 1: Home
-                  Screenshot(
-                    controller: screenshotController,
-                    child: const MainScreenCard(),
-                  ),
-                  // Index 2: Bigtv daily (Reels)
-                  const ReelsScreen(),
-                  // Index 3: Marrini (Settings)
-                  const KeepAlivePage(keepAlive: true, child: SettingsView()),
-                ],
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Visibility(
-                  visible: !homeProvider.isCurrentArticleGrid &&
-                      !homeProvider.isCurrentArticleShowAlert &&
-                      !homeProvider.isCurrentArticleBulletin &&
-                      homeProvider.isBottomEnable &&
-                      MediaQuery.of(context).orientation != Orientation.landscape,
-                  child: HomeBottomNavigationBar(homeProvider: homeProvider),
-                ),
-              ),
-              if (homeProvider.langCode != 'ml' && homeProvider.selectedIndex == 1)
-                Positioned(
-                  bottom: (!homeProvider.isCurrentArticleGrid &&
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Visibility(
+                      visible: !homeProvider.isCurrentArticleGrid &&
                           !homeProvider.isCurrentArticleShowAlert &&
                           !homeProvider.isCurrentArticleBulletin &&
                           homeProvider.isBottomEnable &&
-                          MediaQuery.of(context).orientation != Orientation.landscape)
-                      ? (50.0 + MediaQuery.of(context).padding.bottom + 12.0)
-                      : (MediaQuery.of(context).padding.bottom + 16.0),
-                  right: 16.0,
-                  child: Visibility(
-                    visible: homeProvider.folkNight &&
-                        !homeProvider.isFolkNightDismissed &&
-                        homeProvider.langCode != 'ml' &&
-                        homeProvider.selectedIndex == 1 &&
-                        !homeProvider.isCurrentArticleGrid &&
-                        !homeProvider.isCurrentArticleShowAlert &&
-                        !homeProvider.isCurrentArticleBulletin &&
-                        MediaQuery.of(context).orientation != Orientation.landscape,
-                    child: const FolkNightFloatingButton(),
+                          MediaQuery.of(context).orientation !=
+                              Orientation.landscape,
+                      child:
+                          HomeBottomNavigationBar(homeProvider: homeProvider),
+                    ),
                   ),
-                ),
-              ],
+                  if (homeProvider.langCode != 'ml' &&
+                      homeProvider.selectedIndex == 1)
+                    Positioned(
+                      bottom: (!homeProvider.isCurrentArticleGrid &&
+                              !homeProvider.isCurrentArticleShowAlert &&
+                              !homeProvider.isCurrentArticleBulletin &&
+                              homeProvider.isBottomEnable &&
+                              MediaQuery.of(context).orientation !=
+                                  Orientation.landscape)
+                          ? (50.0 +
+                              MediaQuery.of(context).padding.bottom +
+                              12.0)
+                          : (MediaQuery.of(context).padding.bottom + 16.0),
+                      right: 16.0,
+                      child: Visibility(
+                        visible: homeProvider.folkNight &&
+                            !homeProvider.isFolkNightDismissed &&
+                            homeProvider.langCode != 'ml' &&
+                            homeProvider.selectedIndex == 1 &&
+                            !homeProvider.isCurrentArticleGrid &&
+                            !homeProvider.isCurrentArticleShowAlert &&
+                            !homeProvider.isCurrentArticleBulletin &&
+                            MediaQuery.of(context).orientation !=
+                                Orientation.landscape,
+                        child: const FolkNightFloatingButton(),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 }
 
 /// Bottom navigation bar shared by [HomeView] that pauses active video and
@@ -355,12 +370,15 @@ class HomeBottomNavigationBar extends StatelessWidget {
       onTap: () {
         _HomeViewState.pauseActiveMedia(context, pauseReels: index != 2);
         final itemNames = ['search', 'news', 'reels', 'more'];
-        final itemName = index < itemNames.length ? itemNames[index] : index.toString();
-        AnalyticsService.instance.track(AnalyticsEventName.bottomNavClick, properties: {
+        final itemName =
+            index < itemNames.length ? itemNames[index] : index.toString();
+        AnalyticsService.instance
+            .track(AnalyticsEventName.bottomNavClick, properties: {
           'item_name': itemName,
           'destination': itemName,
         });
-        AnalyticsService.instance.track(AnalyticsEventName.navigationClick, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.navigationClick, properties: {
           'type': 'bottom_nav',
           'destination': itemName,
         });
@@ -372,17 +390,33 @@ class HomeBottomNavigationBar extends StatelessWidget {
         homeProvider.pageChange(isValue: true);
 
         if (index == 0) {
-          EventRepo().addEvent({"aiTagName": "search", "aiTagId": "-2", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          EventRepo().addEvent({
+            "aiTagName": "search",
+            "aiTagId": "-2",
+            "createAt": DateTime.now().toString()
+          }, "ai_tag_click");
         } else if (index == 1) {
           homeProvider.aiTagDataLoaded(false);
           homeProvider.setSelectedTagId(0);
           homeProvider.resetToFirstPost();
           homeProvider.getAllPost();
-          EventRepo().addEvent({"aiTagName": "news", "aiTagId": "-1", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          EventRepo().addEvent({
+            "aiTagName": "news",
+            "aiTagId": "-1",
+            "createAt": DateTime.now().toString()
+          }, "ai_tag_click");
         } else if (index == 2) {
-          EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          EventRepo().addEvent({
+            "aiTagName": "reels",
+            "aiTagId": "-3",
+            "createAt": DateTime.now().toString()
+          }, "ai_tag_click");
         } else if (index == 3) {
-          EventRepo().addEvent({"aiTagName": "more", "aiTagId": "-5", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          EventRepo().addEvent({
+            "aiTagName": "more",
+            "aiTagId": "-5",
+            "createAt": DateTime.now().toString()
+          }, "ai_tag_click");
         }
       },
       child: Container(
@@ -392,10 +426,12 @@ class HomeBottomNavigationBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: isSelected ? const EdgeInsets.only(top: 2) : EdgeInsets.zero,
+              padding:
+                  isSelected ? const EdgeInsets.only(top: 2) : EdgeInsets.zero,
               decoration: isSelected
                   ? BoxDecoration(
-                      border: Border(top: BorderSide(color: itemColor, width: 2)),
+                      border:
+                          Border(top: BorderSide(color: itemColor, width: 2)),
                     )
                   : null,
               child: iconPath != null
@@ -437,7 +473,8 @@ class HomeBottomNavigationBar extends StatelessWidget {
       key: const Key('bottom_nav_live_tv'),
       behavior: HitTestBehavior.opaque,
       onTap: () async {
-        AnalyticsService.instance.track(AnalyticsEventName.bottomNavClick, properties: {
+        AnalyticsService.instance
+            .track(AnalyticsEventName.bottomNavClick, properties: {
           'item_name': 'live_tv',
           'destination': 'live_tv',
         });
@@ -457,7 +494,8 @@ class HomeBottomNavigationBar extends StatelessWidget {
                 watchCount: liveData['watch_count'] is num
                     ? (liveData['watch_count'] as num).toInt()
                     : int.tryParse(liveData['watch_count']?.toString() ?? ''),
-                formattedWatchCount: liveData['formatted_watch_count']?.toString(),
+                formattedWatchCount:
+                    liveData['formatted_watch_count']?.toString(),
                 watchCountEnabled: liveData['watch_count_enabled'] == true ||
                     liveData['watch_count_enabled'] == 1 ||
                     liveData['watch_count_enabled'] == 'true',
@@ -505,4 +543,3 @@ class HomeBottomNavigationBar extends StatelessWidget {
     );
   }
 }
-

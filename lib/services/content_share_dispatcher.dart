@@ -81,6 +81,16 @@ class ContentShareDispatcher {
     final Size size = MediaQuery.of(context).size;
     final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
+    if (debugShareOverride != null) {
+      await debugShareOverride!(
+        shareText: shareText,
+        subject: subject,
+        isWhatsAppOnly: isWhatsAppOnly,
+        imagePath: null,
+      );
+      return;
+    }
+
     Uint8List? imageBytes;
     if (screenshotController != null && debugShareOverride == null) {
       try {
