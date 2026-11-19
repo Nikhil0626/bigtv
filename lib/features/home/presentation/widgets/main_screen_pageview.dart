@@ -165,6 +165,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                   child: homeProvider.getAllPostList.isEmpty
                       ? Center(
                           child: (homeProvider.isHomeLoading ||
+                                  homeProvider.isReload ||
                                   homeProvider.hasPendingDeepLink ||
                                   homeProvider.isRoutingDeepLink ||
                                   !homeProvider.isInitialHomeLoaded)

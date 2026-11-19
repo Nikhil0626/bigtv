@@ -656,7 +656,7 @@ class HomeProvider extends ChangeNotifier {
   bool isMoreFollowLoading = false;
 
   Future<void> loadMorePosts() async {
-    if (isLoadingMore || !hasMorePosts || isAiTagDataLoaded) return;
+    if (isLoadingMore || !hasMorePosts || isAiTagDataLoaded || _isFetchingAllPosts || isReload) return;
 
     String? targetPostId = allPostLastId;
     if (targetPostId == null || targetPostId == "0") {
@@ -697,6 +697,10 @@ class HomeProvider extends ChangeNotifier {
 
     if (!isPagination && _isFetchingAllPosts && !isRefreshingFeed) {
       log("getAllPost: fetch already in-flight, skipping duplicate call");
+      return;
+    }
+    if (isPagination && (_isFetchingAllPosts || isReload)) {
+      log("getAllPost: refresh already in-flight, skipping pagination");
       return;
     }
     if (!isPagination) {
@@ -821,13 +825,6 @@ class HomeProvider extends ChangeNotifier {
           hasMorePosts = false;
           log("No more posts returned from API for postId: $postIds");
         }
-      } else if (isRefreshingFeed) {
-        getAllPostList = [];
-        homePostsList = [];
-        dynamicMovieReviews = [];
-        dynamicPolls = [];
-        _currentPageIndex = 0;
-        isBookMark = [];
       }
 
       // Extract homepost items from response and prepend them to the feed (only on initial load)
@@ -898,6 +895,15 @@ class HomeProvider extends ChangeNotifier {
               e['id'] != null &&
               homePostIds.contains(e['id'].toString()));
         }
+      }
+
+      if (isRefreshingFeed) {
+        getAllPostList = [];
+        homePostsList = [];
+        dynamicMovieReviews = [];
+        dynamicPolls = [];
+        _currentPageIndex = 0;
+        isBookMark = [];
       }
 
       getAllPostList.addAll(data);

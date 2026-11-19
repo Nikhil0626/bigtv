@@ -513,7 +513,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                 style: homeScreenFontStyle(
                   color: _bodyTextColor(context),
                   fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontSize: 16.sp,
                 ),
               ),
             ),
@@ -529,7 +529,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   Text(
                     "● ",
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       color: _bodyTextColor(context),
                       height: 1,
                     ),
@@ -540,13 +540,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                       item.toString(),
                       translate: homeProvider.isEnglishMode,
                       strutStyle: StrutStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         height: 1,
                       ),
                       style: homeScreenFontStyle(
                         color: _bodyTextColor(context),
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                       ),
                     ),
                   ),
@@ -594,12 +594,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           contentText,
           textAlign: TextAlign.start,
           translate: homeProvider.isEnglishMode,
-          englishFontSize: 14,
+          englishFontSize: 16.sp,
           overflow: TextOverflow.ellipsis,
           style: homeScreenFontStyle(
             color: _bodyTextColor(context),
             fontWeight: FontWeight.w600,
-            fontSize: 17,
+            fontSize: 16.sp,
           ),
         ),
       ),
@@ -1344,7 +1344,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           style: homeScreenFontStyle(
             color: _bodyTextColor(context, article),
             fontWeight: FontWeight.w600,
-            fontSize: 17.sp,
+            fontSize: 16.sp,
           )));
       return "";
     });
