@@ -14,6 +14,7 @@ import 'package:chotanews/features/home/presentation/widgets/live_eye_animation_
 import 'package:chotanews/services/app_wakelock_manager.dart';
 import 'package:chotanews/services/live_tv_share_helper.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 
 class LiveTvScreen extends StatefulWidget {
   final String streamUrl;
@@ -40,6 +41,7 @@ class LiveTvScreen extends StatefulWidget {
 class _LiveTvScreenState extends State<LiveTvScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   VideoPlayerController? _controller;
+  bool _isDisposed = false;
   bool _isInitialized = false;
   bool _hasError = false;
   String _errorMessage = "";
@@ -64,6 +66,11 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        HomeView.pauseActiveMedia(context);
+      }
+    });
     _watchCount = widget.watchCount;
     _formattedWatchCount = widget.formattedWatchCount;
     _watchCountEnabled = widget.watchCountEnabled ?? true;
@@ -89,6 +96,7 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   }
 
   Future<void> _initializePlayer() async {
+    if (_isDisposed) return;
     setState(() {
       _hasError = false;
       _isInitialized = false;
@@ -107,8 +115,16 @@ class _LiveTvScreenState extends State<LiveTvScreen>
         uri,
         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false),
       );
+      _controller = controller;
 
       await controller.initialize();
+      if (!mounted || _isDisposed) {
+        await controller.dispose();
+        if (_controller == controller) {
+          _controller = null;
+        }
+        return;
+      }
       controller.setLooping(true);
       await controller.play();
       AppWakelockManager.enable('live_tv');
@@ -118,9 +134,8 @@ class _LiveTvScreenState extends State<LiveTvScreen>
         'stream_type': widget.playbackType ?? 'hls',
       });
 
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         setState(() {
-          _controller = controller;
           _isInitialized = true;
         });
         _startHideControlsTimer();
@@ -131,7 +146,7 @@ class _LiveTvScreenState extends State<LiveTvScreen>
         'channel_id': widget.channelName,
         'error_code': e.toString(),
       });
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         setState(() {
           _hasError = true;
           _errorMessage = "Failed to load Live TV stream. Please check your internet connection.";
@@ -215,6 +230,7 @@ class _LiveTvScreenState extends State<LiveTvScreen>
 
   @override
   void dispose() {
+    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     AppWakelockManager.disable('live_tv');
     if (_playStartTime != null) {
@@ -227,7 +243,11 @@ class _LiveTvScreenState extends State<LiveTvScreen>
     _watchCountTimer?.cancel();
     _waveController.dispose();
     _hideControlsTimer?.cancel();
+    try {
+      _controller?.pause();
+    } catch (_) {}
     _controller?.dispose();
+    _controller = null;
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -358,9 +378,17 @@ class _LiveTvScreenState extends State<LiveTvScreen>
       },
       child: Scaffold(
         backgroundColor: isLandscapeMode ? Colors.black : const Color(0xFF0F0F12),
+        bottomNavigationBar: !isLandscapeMode
+            ? Consumer<HomeProvider>(
+                builder: (context, homeProvider, _) => HomeBottomNavigationBar(
+                  homeProvider: homeProvider,
+                  isLiveTvActive: true,
+                ),
+              )
+            : null,
         body: SafeArea(
           top: !isLandscapeMode,
-          bottom: !isLandscapeMode,
+          bottom: false,
           left: false,
           right: false,
           child: Stack(

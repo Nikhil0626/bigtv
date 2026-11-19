@@ -90,6 +90,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
         return GestureDetector(
           onTap: () {
             // Toggle play/pause on tap
+            homeProvider.cancelLiveTvLoading();
             videoProvider.togglePlayPause();
           },
           onVerticalDragUpdate: (details) {

@@ -27,6 +27,9 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
   @override
   void initState() {
     super.initState();
+    try {
+      context.read<HomeProvider>().cancelLiveTvLoading();
+    } catch (_) {}
     ytController = YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId(widget.reelData['reel_video_code'] ?? "") ?? widget.reelData['reel_video_code'] ?? "",
       flags: const YoutubePlayerFlags(

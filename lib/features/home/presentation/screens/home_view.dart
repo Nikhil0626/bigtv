@@ -26,9 +26,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/features/home/presentation/widgets/epaper_first_open_dialog.dart';
+import 'package:chotanews/services/app_wakelock_manager.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  static void pauseActiveMedia(
+    BuildContext context, {
+    bool pauseReels = true,
+  }) {
+    try {
+      context.read<VideoProvider>().pauseVideo();
+    } catch (_) {}
+    if (pauseReels) {
+      try {
+        context.read<ReelsProviders>().pauseAllReels();
+      } catch (_) {}
+    }
+    try {
+      final hp = context.read<HomeProvider>();
+      if (hp.isPlaying) {
+        hp.isPlayingYoutube(false);
+      }
+      try {
+        hp.controller.pause();
+      } catch (_) {}
+    } catch (_) {}
+    try {
+      AppWakelockManager.disable('full_standard_video');
+      AppWakelockManager.disable('reels');
+    } catch (_) {}
+  }
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -68,8 +96,10 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
-    homeProvider?.selectedIndex = 1;
-    homeProvider?.homePageController = PageController(initialPage: 1);
+    final bool isPendingReel = homeProvider?.isPendingReel == true;
+    final int initialTabIndex = isPendingReel ? 2 : 1;
+    homeProvider?.selectedIndex = initialTabIndex;
+    homeProvider?.homePageController = PageController(initialPage: initialTabIndex);
 
     if (!hasPendingLink &&
         (homeProvider?.getAllPostList.isEmpty == true ||
@@ -150,14 +180,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     BuildContext context, {
     bool pauseReels = true,
   }) {
-    try {
-      context.read<VideoProvider>().pauseVideo();
-    } catch (_) {}
-    if (pauseReels) {
-      try {
-        context.read<ReelsProviders>().pauseAllReels();
-      } catch (_) {}
-    }
+    HomeView.pauseActiveMedia(context, pauseReels: pauseReels);
   }
 
   @override
@@ -188,6 +211,10 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
             canPop: false,
             onPopInvokedWithResult: (didPop, result) async {
               if (didPop) return;
+              if (homeProvider.selectedIndex != 1) {
+                homeProvider.switchTab(1);
+                return;
+              }
               final now = DateTime.now();
               if (lastBackPressed == null ||
                   now.difference(lastBackPressed!) > Duration(seconds: 2)) {
@@ -288,8 +315,13 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
 /// reels playback whenever the user switches tabs or launches Live TV.
 class HomeBottomNavigationBar extends StatelessWidget {
   final HomeProvider homeProvider;
+  final bool isLiveTvActive;
 
-  const HomeBottomNavigationBar({super.key, required this.homeProvider});
+  const HomeBottomNavigationBar({
+    super.key,
+    required this.homeProvider,
+    this.isLiveTvActive = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +392,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
     required String labelMl,
     required String labelTe,
   }) {
-    bool isSelected = homeProvider.selectedIndex == index;
+    bool isSelected = !isLiveTvActive && homeProvider.selectedIndex == index;
     String label = homeProvider.langCode == 'ml' ? labelMl : labelTe;
     Color itemColor = context.colors.onPrimary;
 
@@ -368,6 +400,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
       key: Key('bottom_nav_tab_$index'),
       behavior: HitTestBehavior.opaque,
       onTap: () {
+        homeProvider.cancelLiveTvLoading();
         _HomeViewState.pauseActiveMedia(context, pauseReels: index != 2);
         final itemNames = ['search', 'news', 'reels', 'more'];
         final itemName =
@@ -388,6 +421,10 @@ class HomeBottomNavigationBar extends StatelessWidget {
         }
         homeProvider.onItemTapped(index);
         homeProvider.pageChange(isValue: true);
+
+        if (isLiveTvActive && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
 
         if (index == 0) {
           EventRepo().addEvent({
@@ -468,22 +505,30 @@ class HomeBottomNavigationBar extends StatelessWidget {
   Widget _buildLiveTvNavItem(BuildContext context, HomeProvider homeProvider) {
     String label = homeProvider.langCode == 'ml' ? 'ലൈവ് ടിവി' : 'లైవ్ టీవీ';
     Color itemColor = context.colors.onPrimary;
+    bool isSelected = isLiveTvActive;
 
     return GestureDetector(
       key: const Key('bottom_nav_live_tv'),
       behavior: HitTestBehavior.opaque,
       onTap: () async {
+        if (isLiveTvActive) return;
+        if (homeProvider.isLiveTvLoading) return;
         AnalyticsService.instance
             .track(AnalyticsEventName.bottomNavClick, properties: {
           'item_name': 'live_tv',
           'destination': 'live_tv',
         });
-        _HomeViewState.pauseActiveMedia(context);
+        HomeView.pauseActiveMedia(context);
+        final int currentRequestId = homeProvider.startLiveTvRequest();
         final liveData = await homeProvider.fetchLiveTvStream();
         if (!context.mounted) return;
+        if (homeProvider.liveTvRequestId != currentRequestId) return;
+        if (ModalRoute.of(context)?.isCurrent != true) return;
+
         if (liveData != null &&
             liveData['stream_url'] != null &&
             liveData['stream_url'].toString().isNotEmpty) {
+          HomeView.pauseActiveMedia(context);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -510,20 +555,30 @@ class HomeBottomNavigationBar extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            homeProvider.isLiveTvLoading
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
+            Container(
+              padding:
+                  isSelected ? const EdgeInsets.only(top: 2) : EdgeInsets.zero,
+              decoration: isSelected
+                  ? BoxDecoration(
+                      border:
+                          Border(top: BorderSide(color: itemColor, width: 2)),
+                    )
+                  : null,
+              child: homeProvider.isLiveTvLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: itemColor,
+                      ),
+                    )
+                  : Icon(
+                      Icons.live_tv_rounded,
                       color: itemColor,
+                      size: 20,
                     ),
-                  )
-                : Icon(
-                    Icons.live_tv_rounded,
-                    color: itemColor,
-                    size: 20,
-                  ),
+            ),
             const SizedBox(height: 2),
             FittedBox(
               fit: BoxFit.scaleDown,

@@ -254,6 +254,9 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   void initState() {
     log("is come from lin----k ${widget.postId}");
     super.initState();
+    try {
+      context.read<HomeProvider>().cancelLiveTvLoading();
+    } catch (_) {}
     getWebData();
 
     // 10-second watchdog timer: If article never loads, fail gracefully back to Home

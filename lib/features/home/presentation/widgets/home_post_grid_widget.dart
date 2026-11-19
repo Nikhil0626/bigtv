@@ -33,6 +33,9 @@ class HomePostGridWidget extends StatelessWidget {
 
   void _openPost(BuildContext context, dynamic post) {
     if (post == null || post['id'] == null) return;
+    try {
+      context.read<HomeProvider>().cancelLiveTvLoading();
+    } catch (_) {}
     final Map<String, dynamic> articleMap = post is Map<String, dynamic>
         ? post
         : Map<String, dynamic>.from(post as Map);

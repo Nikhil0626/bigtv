@@ -183,6 +183,7 @@ class VideoPreviewPage extends State<VideoPreview> {
                   width: 58,
                 ),
                 onPressed: () {
+                  homeProvider.cancelLiveTvLoading();
                   homeProvider.isPlayingYoutube(true);
                 },
               ),

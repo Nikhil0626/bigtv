@@ -955,6 +955,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           "ImageAd")
                                                   ? InkWell(
                                                       onTap: () async {
+                                                        context.read<HomeProvider>().cancelLiveTvLoading();
                                                         if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
                                                           final url = widget.article['postUrl'].toString();
                                                           Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: url, title: "")));
@@ -1073,6 +1074,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             )
                                                                           : InkWell(
                                                                               onTap: () {
+                                                                                context.read<HomeProvider>().cancelLiveTvLoading();
                                                                                 Navigator.push(
                                                                                   context,
                                                                                   MaterialPageRoute(

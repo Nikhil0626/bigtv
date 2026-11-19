@@ -752,8 +752,9 @@ class AuthenticationProvider extends ChangeNotifier {
       case NewAppLoginStatus.skip:
         try {
           final hp = context.read<HomeProvider>();
-          hp.selectedIndex = 1;
-          hp.onItemTapped(1);
+          final int defaultTab = hp.isPendingReel ? 2 : 1;
+          hp.selectedIndex = defaultTab;
+          hp.onItemTapped(defaultTab);
           final bool hasPendingLink = hp.hasPendingDeepLink ||
               hp.isComeFromLinkOrNotification ||
               hp.isRoutingDeepLink;
@@ -772,8 +773,9 @@ class AuthenticationProvider extends ChangeNotifier {
       case NewAppLoginStatus.home:
         try {
           final hp = context.read<HomeProvider>();
-          hp.selectedIndex = 1;
-          hp.onItemTapped(1);
+          final int defaultTab = hp.isPendingReel ? 2 : 1;
+          hp.selectedIndex = defaultTab;
+          hp.onItemTapped(defaultTab);
           final bool hasPendingLink = hp.hasPendingDeepLink ||
               hp.isComeFromLinkOrNotification ||
               hp.isRoutingDeepLink;

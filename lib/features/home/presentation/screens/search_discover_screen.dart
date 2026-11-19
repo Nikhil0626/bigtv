@@ -8,6 +8,7 @@ import 'package:chotanews/features/bookmarks/presentation/screens/bookmarks_scre
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/editorial_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/games_bottom_sheet.dart';
 import 'package:chotanews/features/home/presentation/widgets/lottie_3d_icon.dart';
@@ -183,6 +184,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     }
 
     if (targetPostId != null && targetPostId.isNotEmpty && targetPostId != "0") {
+      context.read<HomeProvider>().cancelLiveTvLoading();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -796,11 +798,17 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
           child: InkWell(
             borderRadius: BorderRadius.circular(20.r),
             onTap: () async {
+              if (homeProvider.isLiveTvLoading) return;
+              HomeView.pauseActiveMedia(context);
+              final int currentRequestId = homeProvider.startLiveTvRequest();
               final liveData = await homeProvider.fetchLiveTvStream();
               if (!context.mounted) return;
+              if (homeProvider.liveTvRequestId != currentRequestId) return;
+              if (ModalRoute.of(context)?.isCurrent != true) return;
               if (liveData != null &&
                   liveData['stream_url'] != null &&
                   liveData['stream_url'].toString().isNotEmpty) {
+                HomeView.pauseActiveMedia(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1282,11 +1290,17 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
         child: InkWell(
           borderRadius: BorderRadius.circular(18.r),
           onTap: () async {
+            if (homeProvider.isLiveTvLoading) return;
+            HomeView.pauseActiveMedia(context);
+            final int currentRequestId = homeProvider.startLiveTvRequest();
             final liveData = await homeProvider.fetchLiveTvStream();
             if (!context.mounted) return;
+            if (homeProvider.liveTvRequestId != currentRequestId) return;
+            if (ModalRoute.of(context)?.isCurrent != true) return;
             if (liveData != null &&
                 liveData['stream_url'] != null &&
                 liveData['stream_url'].toString().isNotEmpty) {
+              HomeView.pauseActiveMedia(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(

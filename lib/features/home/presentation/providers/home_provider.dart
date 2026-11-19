@@ -185,6 +185,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   void onItemTapped(int index) {
+    cancelLiveTvLoading();
     if (selectedIndex != index || index == 1) {
       isFolkNightDismissed = false;
     }
@@ -218,6 +219,20 @@ class HomeProvider extends ChangeNotifier {
   bool liveTvCountEnable = true;
   bool reelsEnable = true;
   bool isLiveTvLoading = false;
+  int _liveTvRequestId = 0;
+  int get liveTvRequestId => _liveTvRequestId;
+
+  int startLiveTvRequest() {
+    return ++_liveTvRequestId;
+  }
+
+  void cancelLiveTvLoading() {
+    _liveTvRequestId++;
+    if (isLiveTvLoading) {
+      isLiveTvLoading = false;
+      notifyListeners();
+    }
+  }
 
   Map<String, dynamic>? currentLiveTvData;
   int? liveTvWatchCount;
@@ -489,6 +504,7 @@ class HomeProvider extends ChangeNotifier {
 
   Future<bool> getIndividualPost(dynamic postId,
       {bool isAds = false, bool isLink = false}) async {
+    cancelLiveTvLoading();
     final requestedIdStr = postId?.toString().trim() ?? "";
     if (isPostLoading && _fetchingPostId == requestedIdStr && requestedIdStr.isNotEmpty) {
       debugPrint("getIndividualPost: already fetching $requestedIdStr, skipping duplicate");
@@ -2278,6 +2294,33 @@ class HomeProvider extends ChangeNotifier {
       pendingDeepLinkUri != null ||
       (pendingDeepLink != null && pendingDeepLink!.isNotEmpty) ||
       pendingPushPayload != null;
+
+  bool get isPendingReel =>
+      (pendingDeepLink != null &&
+          (pendingDeepLink!.contains('reel') ||
+              pendingDeepLink!.contains('shorts'))) ||
+      (pendingDeepLinkUri != null &&
+          (pendingDeepLinkUri!.path.contains('reel') ||
+              pendingDeepLinkUri!.path.contains('shorts')));
+
+  void switchTab(int index) {
+    if (index != 2 && mainNavigatorKey.currentContext != null) {
+      try {
+        mainNavigatorKey.currentContext!
+            .read<ReelsProviders>()
+            .pauseAllReels();
+      } catch (_) {}
+    }
+    selectedIndex = index;
+    if (homePageController.hasClients) {
+      try {
+        homePageController.jumpToPage(index);
+      } catch (e) {
+        log("Error jumping to tab $index: $e");
+      }
+    }
+    onItemTapped(index);
+  }
   bool get isRoutingDeepLink => _isRoutingDeepLink;
 
   String? _lastIncomingDeepLinkStr;
@@ -2320,7 +2363,20 @@ class HomeProvider extends ChangeNotifier {
       pendingDeepLinkUri = uri;
       pendingDeepLink = uri.toString();
       isComeFromLinkOrNotification = true;
-      isHomeLoading = true;
+      final lowerPath = uri.path.toLowerCase();
+      final cleanPath = lowerPath.replaceAll('/', '').trim();
+      final bool isSpecialLink = lowerPath.contains('reel') ||
+          lowerPath.contains('reels') ||
+          lowerPath.contains('shorts') ||
+          cleanPath == 'live' ||
+          cleanPath == 'livetv' ||
+          cleanPath == 'live-tv' ||
+          cleanPath == 'live_tv' ||
+          lowerPath.contains('live-stream') ||
+          lowerPath.contains('livestream');
+      if (!isSpecialLink) {
+        isHomeLoading = true;
+      }
       notifyListeners();
 
       // Watchdog: Ensure isHomeLoading is never permanently stuck if HomeView mount or routing delays
@@ -2434,24 +2490,6 @@ class HomeProvider extends ChangeNotifier {
         }
       }
 
-      void switchTab(int index) {
-        if (index != 2 && mainNavigatorKey.currentContext != null) {
-          try {
-            mainNavigatorKey.currentContext!
-                .read<ReelsProviders>()
-                .pauseAllReels();
-          } catch (_) {}
-        }
-        selectedIndex = index;
-        if (homePageController.hasClients) {
-          try {
-            homePageController.jumpToPage(index);
-          } catch (e) {
-            log("Error jumping to tab $index: $e");
-          }
-        }
-        onItemTapped(index);
-      }
 
       // 0. LIVE TV DEEP LINK
       // Handles:
@@ -2473,8 +2511,24 @@ class HomeProvider extends ChangeNotifier {
           !queryParams.containsKey('showname');
 
       if (isLiveTvLink) {
-        log("Routing to Live TV deep link: $uri");
+        log("Routing to Live TV deep link: $uri (initial liveTvVideosEnable=$liveTvVideosEnable)");
+
+        // 1. Immediately call Config API on Live TV deep link
+        try {
+          await getAppConfig();
+        } catch (e) {
+          log("Error fetching app config on Live TV deep link: $e");
+        }
+
         popToRoot();
+        isHomeLoading = false;
+        isComeFromLinkOrNotification = false;
+        switchTab(1); // Set underlying tab to Home (Tab 1)
+
+        // Pre-fetch home posts in the background so when user returns, feed is ready immediately
+        if (getAllPostList.isEmpty && !_isFetchingAllPosts) {
+          getAllPost(isGetAllPost: true);
+        }
 
         try {
           if (mainNavigatorKey.currentContext != null) {
@@ -2483,6 +2537,12 @@ class HomeProvider extends ChangeNotifier {
                 .read<ReelsProviders>()
                 .pauseAllReels();
           }
+          if (isPlaying) {
+            isPlayingYoutube(false);
+          }
+          try {
+            controller.pause();
+          } catch (_) {}
         } catch (_) {}
 
         final liveData = await fetchLiveTvStream();
@@ -2497,24 +2557,37 @@ class HomeProvider extends ChangeNotifier {
         final String playbackType =
             (liveData?['playback_type'] ?? "hls").toString();
 
-        if (mainNavigatorKey.currentState != null) {
-          mainNavigatorKey.currentState!.push(
-            MaterialPageRoute(
-              builder: (context) => LiveTvScreen(
-                streamUrl: streamUrl,
-                channelName: channelName,
-                playbackType: playbackType,
-                watchCount: liveData?['watch_count'] is num
-                    ? (liveData!['watch_count'] as num).toInt()
-                    : int.tryParse(liveData?['watch_count']?.toString() ?? ''),
-                formattedWatchCount:
-                    liveData?['formatted_watch_count']?.toString(),
-                watchCountEnabled: liveData?['watch_count_enabled'] == true ||
-                    liveData?['watch_count_enabled'] == 1 ||
-                    liveData?['watch_count_enabled'] == 'true',
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mainNavigatorKey.currentState != null) {
+            popToRoot();
+            mainNavigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (context) => LiveTvScreen(
+                  streamUrl: streamUrl,
+                  channelName: channelName,
+                  playbackType: playbackType,
+                  watchCount: liveData?['watch_count'] is num
+                      ? (liveData!['watch_count'] as num).toInt()
+                      : int.tryParse(liveData?['watch_count']?.toString() ?? ''),
+                  formattedWatchCount:
+                      liveData?['formatted_watch_count']?.toString(),
+                  watchCountEnabled: liveData?['watch_count_enabled'] == true ||
+                      liveData?['watch_count_enabled'] == 1 ||
+                      liveData?['watch_count_enabled'] == 'true',
+                ),
               ),
-            ),
-          );
+            ).then((_) {
+              log("Returned from LiveTvScreen: ensuring home feed is active");
+              handleReturnFromNotificationPost(forceRefresh: false);
+            });
+          }
+        });
+
+        if (Platform.isAndroid) {
+          try {
+            const MethodChannel("com.chotanews/whatsapp")
+                .invokeMethod("clearInitialIntent");
+          } catch (_) {}
         }
         return;
       }
@@ -3001,8 +3074,37 @@ class HomeProvider extends ChangeNotifier {
       if (path.contains('reels') ||
           path.contains('reel') ||
           path.contains('shorts')) {
-        log("Routing to Reels deep link: $uri");
+        log("Routing to Reels deep link: $uri (initial reelsEnable=$reelsEnable)");
+
+        // 1. Immediately call Config API (same as Folk Night flow)
+        try {
+          await getAppConfig();
+        } catch (e) {
+          log("Error fetching app config on reels deep link: $e");
+        }
+
+        // 2. Check if reels is enabled in config
+        if (!reelsEnable) {
+          log("Reels is disabled in config (reelsEnable=false). Landing directly on home screen.");
+          popToRoot();
+          handleReturnFromNotificationPost(forceRefresh: true);
+          if (Platform.isAndroid) {
+            try {
+              const MethodChannel("com.chotanews/whatsapp")
+                  .invokeMethod("clearInitialIntent");
+            } catch (_) {}
+          }
+          return;
+        }
+
         popToRoot();
+        isHomeLoading = false;
+        isComeFromLinkOrNotification = false;
+
+        // 3. Pre-fetch home posts in the background so when user returns, feed is ready immediately (same as Folk Night flow)
+        if (getAllPostList.isEmpty && !_isFetchingAllPosts) {
+          getAllPost(isGetAllPost: true);
+        }
 
         final String? targetReelId = queryParams['reelId'] ??
             queryParams['reel_id'] ??
@@ -3014,19 +3116,45 @@ class HomeProvider extends ChangeNotifier {
                 ? uri.pathSegments.last
                 : null);
 
-        if (mainNavigatorKey.currentContext != null &&
-            targetReelId != null &&
-            targetReelId.isNotEmpty) {
+        // 4. Set target ID and fetch reels post in ReelsProviders
+        if (mainNavigatorKey.currentContext != null) {
           try {
             final reelsProvider =
                 mainNavigatorKey.currentContext!.read<ReelsProviders>();
-            reelsProvider.setTargetReelId(targetReelId);
+            if (targetReelId != null && targetReelId.isNotEmpty) {
+              reelsProvider.setTargetReelId(targetReelId);
+            }
+            reelsProvider.getAllReels().then((_) {
+              isHomeLoading = false;
+              notifyListeners();
+            }).catchError((e) {
+              log("Error fetching reels for deep link: $e");
+              isHomeLoading = false;
+              notifyListeners();
+            });
           } catch (e) {
             log("Error setting targetReelId in ReelsProviders: $e");
           }
         }
 
+        // 5. Navigate to Reels section (Tab 2)
         switchTab(2);
+
+        // Ensure PageView transitions to Tab 2 safely on next frame if hasClients was false during cold start
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (homePageController.hasClients && selectedIndex == 2) {
+            try {
+              homePageController.jumpToPage(2);
+            } catch (_) {}
+          }
+        });
+
+        if (Platform.isAndroid) {
+          try {
+            const MethodChannel("com.chotanews/whatsapp")
+                .invokeMethod("clearInitialIntent");
+          } catch (_) {}
+        }
         return;
       }
 
@@ -3095,7 +3223,9 @@ class HomeProvider extends ChangeNotifier {
                   isComeFrom: true,
                 ),
               ),
-            );
+            ).then((_) {
+              handleReturnFromNotificationPost(forceRefresh: true);
+            });
             getIndividualPost(
               targetReviewId,
               isAds: true,
@@ -3186,7 +3316,9 @@ class HomeProvider extends ChangeNotifier {
                   isComeFrom: true,
                 ),
               ),
-            );
+            ).then((_) {
+              handleReturnFromNotificationPost(forceRefresh: true);
+            });
             getIndividualPost(
               targetPollId,
               isAds: true,
@@ -3277,10 +3409,17 @@ class HomeProvider extends ChangeNotifier {
         getAllAiTagsPostList = [];
         isHomeLoading = false;
 
+        // 1. Immediately call Config API on news post deep link
+        try {
+          await getAppConfig();
+        } catch (e) {
+          log("Error fetching app config on post deep link: $e");
+        }
+
         switchTab(
             1); // Set bottom nav to Home (Index 1) - NEVER Search (Index 0)
 
-        // Push IndividualPostView1 on next frame to ensure navigator is unlocked
+        // 2. Push IndividualPostView1 on next frame to ensure navigator is unlocked
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mainNavigatorKey.currentState != null) {
             popToRoot();
@@ -3291,7 +3430,11 @@ class HomeProvider extends ChangeNotifier {
                   isComeFrom: true,
                 ),
               ),
-            );
+            ).then((_) {
+              // 3. When user returns / goes back, call allposts API
+              log("Returned from IndividualPostView1: calling allposts API");
+              handleReturnFromNotificationPost(forceRefresh: true);
+            });
           }
         });
 
